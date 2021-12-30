@@ -1,0 +1,34 @@
+{
+  "name": "w-optimization",
+  "version": "1.0.0",
+  "description": "A tool for optimization algorithm.",
+  "main": "dist/w-optimization.umd.js",
+  "dependencies": {
+    "lodash": "^4.17.21",
+    "wsemi": "^1.6.36"
+  },
+  "devDependencies": {
+    "w-package-tools": "^1.0.59"
+  },
+  "scripts": {
+    "test": "mocha --parallel --timeout 60000 --experimental-modules --es-module-specifier-resolution=node",
+    "deploy": "gh-pages -d docs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yuda-lyu/w-optimization.git"
+  },
+  "keywords": [
+    "package",
+    "tool",
+    "optimization",
+    "nodejs",
+    "browser"
+  ],
+  "author": "yuda-lyu(semisphere)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/yuda-lyu/w-optimization/issues"
+  },
+  "homepage": "https://github.com/yuda-lyu/w-optimization#readme"
+}
