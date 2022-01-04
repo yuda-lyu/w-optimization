@@ -9,4 +9,4 @@ function fun(X) {
 let r = nelderMead(fun, [-3.5, 3.5])
 console.log(r)
 
-//node --experimental-modules --es-module-specifier-resolution=node g.nelderMead.mjs
+//node --experimental-modules --es-module-specifier-resolution=node g1.nelderMead.mjs
