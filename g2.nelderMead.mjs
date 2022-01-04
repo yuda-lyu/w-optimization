@@ -112,12 +112,12 @@ ps = _.map(ps, (v) => {
 })
 // console.log(ps)
 
-function fun(X) {
+function fun(params) {
     //Vs=166.92*ln(x+35)-455.84
     //a=166.02, b=35, c=-455.84
-    let a = X[0]
-    let b = X[1]
-    let c = X[2]
+    let a = params[0]
+    let b = params[1]
+    let c = params[2]
     let fitness = 0
     _.each(ps, (v) => {
         let d = Math.max(v.Depth + b, 0.001)
@@ -128,11 +128,15 @@ function fun(X) {
         fitness += Math.abs(dy)
     })
     // fitness = Math.sqrt(fitness)
-    // console.log('X', X, 'fitness', fitness)
+    // console.log('x', x, 'fitness', fitness)
     return fitness
 }
 
 let r = nelderMead(fun, [0, 0, 0]) //初始值影響很大, 用0,0,0比較是曲線, 否則很容易找到高係數而近直線之回歸線
 console.log(r)
+// => {
+//   y: 2721.5171233189885,
+//   x: [ 79.53435702208205, 7.513992195041164, -24.347213564670433 ]
+// }
 
 //node --experimental-modules --es-module-specifier-resolution=node g2.nelderMead.mjs

@@ -20,20 +20,20 @@ function sortOrder(a, b) {
 
 // 下山單純形法
 // fork: https://github.com/benfred/fmin/blob/master/src/nelderMead.js
-function nelderMead(fun, x0, opt = {}) {
+function nelderMead(fun, params, opt = {}) {
 
     //check fun
     if (!isfun(fun)) {
         throw new Error('invalid fun')
     }
 
-    //check x0
-    if (!isearr(x0)) {
-        throw new Error('x0 is not an effective array')
+    //check params
+    if (!isearr(params)) {
+        throw new Error('params is not an effective array')
     }
 
     //n
-    let n = size(x0)
+    let n = size(params)
 
     //maxIterations
     let maxIterations = get(opt, 'maxIterations')
@@ -100,11 +100,11 @@ function nelderMead(fun, x0, opt = {}) {
 
     //simplex
     let simplex = new Array(n + 1)
-    simplex[0] = x0
-    simplex[0].y = fun(x0)
+    simplex[0] = params
+    simplex[0].y = fun(params)
     simplex[0].id = 0
     for (let i = 0; i < n; ++i) {
-        let point = x0.slice()
+        let point = params.slice()
         point[i] = point[i] ? point[i] * nonZeroDelta : zeroDelta
         simplex[i + 1] = point
         simplex[i + 1].y = fun(point)
@@ -120,10 +120,10 @@ function nelderMead(fun, x0, opt = {}) {
     }
 
     let maxDiff
-    let centroid = x0.slice()
-    let reflected = x0.slice()
-    let contracted = x0.slice()
-    let expanded = x0.slice()
+    let centroid = params.slice()
+    let reflected = params.slice()
+    let contracted = params.slice()
+    let expanded = params.slice()
     for (let iteration = 0; iteration < maxIterations; ++iteration) {
 
         //sort
