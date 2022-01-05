@@ -1,16 +1,17 @@
 import nelderMead from './src/nelderMead.mjs'
 
 function fun(params) {
-    let x = params[0]
-    let y = params[1]
-    return Math.sin(y) * x + Math.sin(x) * y + x * x + y * y
+    let x = params[0] / 180 * Math.PI
+    return Math.sin(x)
 }
 
-let r = nelderMead(fun, [-3.5, 3.5])
-console.log(r)
-// => {
-//   y: 5.786322126017525e-19,
-//   x: [ 0.000007191110664735547, -0.00000719035057196422 ]
-// }
+console.log(nelderMead(fun, [0]))
+// => { y: -1, x: [ -90.0000000000001 ] }
+
+console.log(nelderMead(fun, [87]))
+// => { y: -1, x: [ -90.00000057220495 ] }
+
+console.log(nelderMead(fun, [90]))
+// => { y: -1, x: [ 270 ] }
 
 //node --experimental-modules --es-module-specifier-resolution=node g1.nelderMead.mjs
