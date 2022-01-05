@@ -1,6 +1,6 @@
 {
   "name": "w-optimization",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A tool for optimization algorithm.",
   "main": "dist/w-optimization.umd.js",
   "dependencies": {

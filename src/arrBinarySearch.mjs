@@ -1,9 +1,11 @@
+import get from 'lodash/get'
 import size from 'lodash/size'
 import map from 'lodash/map'
 import filter from 'lodash/filter'
 import sortBy from 'lodash/sortBy'
 import isearr from 'wsemi/src/isearr'
 import isnum from 'wsemi/src/isnum'
+import isbol from 'wsemi/src/isbol'
 import cdbl from 'wsemi/src/cdbl'
 
 
@@ -14,6 +16,8 @@ import cdbl from 'wsemi/src/cdbl'
  * @memberOf w-optimization
  * @param {Array} arr 輸入既有數據陣列
  * @param {Number} x 輸入尋找數字
+ * @param {Object} [opt={}] 輸入設定物件，預設{}
+ * @param {Boolean} [opt.sorted=false] 輸入陣列arr是否已經排序，若陣列已排序可加快速度，預設為false
  * @returns {Object} 回傳求解後結果物件，含鍵值x,y，x為求解後變數組，y為最優適應函數值
  * @example
  *
@@ -26,11 +30,17 @@ import cdbl from 'wsemi/src/cdbl'
  * // => null
  *
  */
-function arrBinarySearch(arr, x) {
+function arrBinarySearch(arr, x, opt = {}) {
 
     //check
     if (!isearr(arr)) {
         return null
+    }
+
+    //sorted
+    let sorted = get(opt, 'sorted')
+    if (!isbol(sorted)) {
+        sorted = false
     }
 
     //filter
@@ -45,8 +55,10 @@ function arrBinarySearch(arr, x) {
     })
 
     //sortBy
-    arr = sortBy(arr, 'v')
-    // console.log('arr', arr)
+    if (!sorted) {
+        arr = sortBy(arr, 'v')
+        // console.log('arr', arr)
+    }
 
     //search
     let iStart = 0

@@ -21,7 +21,7 @@ function sortOrder(a, b) {
 /**
  * 下山單純形法
  *
- * Depend on: {@link https://github.com/benfred/fmin/blob/master/src/nelderMead.js nelderMead.js}
+ * Fork: {@link https://github.com/benfred/fmin/blob/master/src/nelderMead.js nelderMead.js}
  *
  * Unit Test: {@link https://github.com/yuda-lyu/w-optimization/blob/master/test/nelderMead.test.js Github}
  * @memberOf w-optimization
