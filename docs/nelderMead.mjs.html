@@ -1,4 +1,48 @@
-import get from 'lodash/get'
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>nelderMead.mjs - Documentation</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="w-optimization.html">w-optimization</a><ul class='methods'><li data-type='method'><a href="w-optimization.html#.arrBinarySearch">arrBinarySearch</a></li><li data-type='method'><a href="w-optimization.html#.arrBinarySearchClosest">arrBinarySearchClosest</a></li><li data-type='method'><a href="w-optimization.html#.nelderMead">nelderMead</a></li></ul></li></ul>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">nelderMead.mjs</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import get from 'lodash/get'
 import size from 'lodash/size'
 import isnum from 'wsemi/src/isnum.mjs'
 import isfun from 'wsemi/src/isfun.mjs'
@@ -7,7 +51,7 @@ import cdbl from 'wsemi/src/cdbl.mjs'
 
 
 function weightedSum(ret, w1, v1, w2, v2) {
-    for (let j = 0; j < ret.length; ++j) {
+    for (let j = 0; j &lt; ret.length; ++j) {
         ret[j] = w1 * v1[j] + w2 * v2[j]
     }
 }
@@ -136,7 +180,7 @@ function nelderMead(fun, params, opt = {}) {
     simplex[0] = params
     simplex[0].y = fun(params)
     simplex[0].id = 0
-    for (let i = 0; i < n; ++i) {
+    for (let i = 0; i &lt; n; ++i) {
         let point = params.slice()
         point[i] = point[i] ? point[i] * nonZeroDelta : zeroDelta
         simplex[i + 1] = point
@@ -146,7 +190,7 @@ function nelderMead(fun, params, opt = {}) {
 
     //updateSimplex
     let updateSimplex = (value) => {
-        for (let i = 0; i < value.length; i++) {
+        for (let i = 0; i &lt; value.length; i++) {
             simplex[n][i] = value[i]
         }
         simplex[n].y = value.y
@@ -157,7 +201,7 @@ function nelderMead(fun, params, opt = {}) {
     let reflected = params.slice()
     let contracted = params.slice()
     let expanded = params.slice()
-    for (let iteration = 0; iteration < maxIterations; ++iteration) {
+    for (let iteration = 0; iteration &lt; maxIterations; ++iteration) {
 
         //sort
         simplex.sort(sortOrder)
@@ -188,20 +232,20 @@ function nelderMead(fun, params, opt = {}) {
 
         //maxDiff
         maxDiff = 0
-        for (let i = 0; i < n; ++i) {
+        for (let i = 0; i &lt; n; ++i) {
             maxDiff = Math.max(maxDiff, Math.abs(simplex[0][i] - simplex[1][i]))
         }
 
         //check
-        if ((Math.abs(simplex[0].y - simplex[n].y) < minErrorDelta) &&
-            (maxDiff < minTolerance)) {
+        if ((Math.abs(simplex[0].y - simplex[n].y) &lt; minErrorDelta) &amp;&amp;
+            (maxDiff &lt; minTolerance)) {
             break
         }
 
         // compute the centroid of all but the worst point in the simplex
-        for (let i = 0; i < n; ++i) {
+        for (let i = 0; i &lt; n; ++i) {
             centroid[i] = 0
-            for (let j = 0; j < n; ++j) {
+            for (let j = 0; j &lt; n; ++j) {
                 centroid[i] += simplex[j][i]
             }
             centroid[i] /= n
@@ -213,10 +257,10 @@ function nelderMead(fun, params, opt = {}) {
         reflected.y = fun(reflected)
 
         // if the reflected point is the best seen, then possibly expand
-        if (reflected.y < simplex[0].y) {
+        if (reflected.y &lt; simplex[0].y) {
             weightedSum(expanded, 1 + chi, centroid, -chi, worst)
             expanded.y = fun(expanded)
-            if (expanded.y < reflected.y) {
+            if (expanded.y &lt; reflected.y) {
                 updateSimplex(expanded)
             }
             else {
@@ -233,7 +277,7 @@ function nelderMead(fun, params, opt = {}) {
                 //inside contraction
                 weightedSum(contracted, 1 + psi, centroid, -psi, worst)
                 contracted.y = fun(contracted)
-                if (contracted.y < worst.y) {
+                if (contracted.y &lt; worst.y) {
                     updateSimplex(contracted)
                 }
                 else {
@@ -246,7 +290,7 @@ function nelderMead(fun, params, opt = {}) {
                 //outside contraction
                 weightedSum(contracted, 1 - psi * rho, centroid, psi * rho, worst)
                 contracted.y = fun(contracted)
-                if (contracted.y < reflected.y) {
+                if (contracted.y &lt; reflected.y) {
                     updateSimplex(contracted)
                 }
                 else {
@@ -264,7 +308,7 @@ function nelderMead(fun, params, opt = {}) {
                 }
 
                 //reduction
-                for (let i = 1; i < simplex.length; ++i) {
+                for (let i = 1; i &lt; simplex.length; ++i) {
                     weightedSum(simplex[i], 1 - sigma, simplex[0], sigma, simplex[i])
                     simplex[i].y = fun(simplex[i])
                 }
@@ -282,7 +326,7 @@ function nelderMead(fun, params, opt = {}) {
     //x
     let x = []
     let xs = simplex[0]
-    for (let i = 0; i < n; i++) {
+    for (let i = 0; i &lt; n; i++) {
         // console.log(i, n, xs[i])
         x.push(xs[i])
     }
@@ -295,3 +339,28 @@ function nelderMead(fun, params, opt = {}) {
 
 
 export default nelderMead
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a> on Wed Jan 05 2022 15:57:09 GMT+0800 (台北標準時間) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+
+
+</body>
+</html>
