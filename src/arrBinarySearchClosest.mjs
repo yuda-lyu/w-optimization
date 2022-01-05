@@ -14,7 +14,7 @@ import cdbl from 'wsemi/src/cdbl'
  *
  * Unit Test: {@link https://github.com/yuda-lyu/w-optimization/blob/master/test/arrBinarySearchClosest.test.js Github}
  * @memberOf w-optimization
- * @param {Array} arr 輸入既有數據陣列
+ * @param {Array} arr 輸入數據陣列
  * @param {Number} x 輸入尋找數字
  * @param {Object} [opt={}] 輸入設定物件，預設{}
  * @param {Boolean} [opt.sorted=false] 輸入陣列arr是否已經排序，若陣列已排序可加快速度，預設為false

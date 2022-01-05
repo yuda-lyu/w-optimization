@@ -11,10 +11,10 @@ import cdbl from 'wsemi/src/cdbl.mjs'
  *
  * Unit Test: {@link https://github.com/yuda-lyu/w-optimization/blob/master/test/goldenSection.test.js Github}
  * @memberOf w-optimization
- * @param {Function} fun 輸入適應函數，將傳入變數param，需回傳適應函數值，以求解最小值所在起訖範圍為目標
+ * @param {Function} fun 輸入適應函數，將傳入變數x，需回傳適應函數值，以求解最小值所在起訖範圍為目標
  * @param {Number} x 輸入初始值數字
  * @param {Object} [opt={}] 輸入設定物件，預設{}
- * @param {Number} [opt.delta=0.1] 輸入最小步長數字，預設0.1
+ * @param {Number} [opt.delta=0.1] 輸入步長數字，預設0.1
  * @param {Number} [opt.min=-1e20] 輸入搜尋範圍最小值數字，預設-1e20
  * @param {Number} [opt.max=1e20] 輸入搜尋範圍最大值數字，預設1e20
  * @returns {Object} 回傳物件，含鍵值x,y，x為求解後變數組，y為最優適應函數值

@@ -29,14 +29,14 @@ function sortOrder(a, b) {
  * @param {Array} params 輸入初始變數組，若適應函數fun需輸入3參數，則就需輸入[a,b,c]陣列作為初始值
  * @param {Object} [opt={}] 輸入設定物件，預設{}
  * @param {Number} [opt.maxIterations=null] 輸入最大迭代次數整數，若無則預設為變數組長度*200
- * @param {Number} [opt.zeroDelta=0.001] 輸入最小步長數字，預設0.001
+ * @param {Number} [opt.zeroDelta=0.001] 輸入步長數字，預設0.001
  * @param {Number} [opt.minErrorDelta=1e-6] 輸入最小誤差步長數字，預設1e-6
  * @param {Number} [opt.minTolerance=1e-5] 輸入最小收斂門檻值數字，預設1e-5
  * @param {Number} [opt.rho=1] 輸入上輪第1節點權重數字，預設1
  * @param {Number} [opt.chi=2] 輸入上輪第2節點權重數字，預設2
  * @param {Number} [opt.psi=-0.5] 輸入下輪第1節點權重數字，預設-0.5
  * @param {Number} [opt.sigma=0.5] 輸入下輪第2節點權重數字，預設0.5
- * @returns {Object} 回傳物件，含鍵值x,y，x為求解後變數組，y為最優適應函數值
+ * @returns {Object} 回傳求解後結果物件，含鍵值x,y，x為求解後變數組，y為最優適應函數值
  * @example
  *
  * function fun(params) {

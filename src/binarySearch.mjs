@@ -9,10 +9,12 @@ import cdbl from 'wsemi/src/cdbl'
  *
  * Unit Test: {@link https://github.com/yuda-lyu/w-optimization/blob/master/test/binarySearch.test.js Github}
  * @memberOf w-optimization
- * @param {Array} arr 輸入既有數據陣列
- * @param {Number} x 輸入尋找數字
+ * @param {Function} fun 輸入適應函數，將傳入變數組params，需回傳適應函數值，以求解最小值為目標
+ * @param {Number} xMin 輸入初始搜尋範圍最小值數字
+ * @param {Number} xMax 輸入初始搜尋範圍最大值數字
+ * @param {Number} delta 輸入步長數字
  * @param {Object} [opt={}] 輸入設定物件，預設{}
- * @param {Boolean} [opt.sorted=false] 輸入陣列arr是否已經排序，若陣列已排序可加快速度，預設為false
+ * @param {Number} [opt.maxIterations=100] 輸入最大搜尋次數整數，預設100
  * @returns {Object} 回傳求解後結果物件，含鍵值x,y，x為求解後變數組，y為最優適應函數值
  * @example
  *
@@ -57,14 +59,28 @@ function binarySearch(fun, xMin, xMax, opt = {}) {
     }
     dx = cdbl(dx)
 
+    //maxIterations
+    let maxIterations = get(opt, 'maxIterations')
+    if (!isnum(maxIterations)) {
+        maxIterations = 100
+    }
+    maxIterations = cdbl(maxIterations)
+
     //fL, fU, fC
     let fL = fun(xMin)
     let fU = fun(xMax)
     let xMid = (xMin + xMax) / 2
     let fC = fun(xMid)
+    let iIterations = 0
     let r = null
     while (true) {
         // console.log('fL', fL, 'fC', fC, 'fU', fU)
+        iIterations++
+
+        //check
+        if (iIterations > maxIterations) {
+            return null
+        }
 
         //check fL已為最小值
         if (fL <= fU && fL <= fC) {
