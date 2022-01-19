@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import w from 'wsemi'
-import nelderMead from './src/nelderMead.mjs'
+import limitBFGS from './src/limitBFGS.mjs'
 
 
 // DH-03
@@ -143,13 +143,12 @@ async function test() {
         return fitness
     }
 
-    console.log(await nelderMead(fun, [0, 0, 0])) //初始值影響很大, 用0,0,0比較是曲線, 否則很容易找到高係數而近直線之回歸線
+    console.log(await limitBFGS(fun, [0, 0, 0])) //初始值影響很大, 用0,0,0比較是曲線, 否則很容易找到高係數而近直線之回歸線
     // => {
-    //   count: 326,
-    //   y: 1782.0083185373996,
-    //   x: [ 79.27689137899918, 4.16685541895392, -19.853651133415656 ]
+    //   count: 456,
+    //   y: 1751.1084355652242,
+    //   x: [ 69.97749207270087, 1.7645648933943308, 20.576202133399857 ]
     // }
-
 }
 
 test()
@@ -157,4 +156,4 @@ test()
         console.log(err)
     })
 
-//node --experimental-modules --es-module-specifier-resolution=node g3.nelderMead.mjs
+//node --experimental-modules --es-module-specifier-resolution=node g3.limitBFGS.mjs

@@ -1,11 +1,12 @@
 {
   "name": "w-optimization",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A tool for optimization algorithm.",
   "main": "dist/w-optimization.umd.js",
   "dependencies": {
     "lodash": "^4.17.21",
-    "wsemi": "^1.6.36"
+    "minimize-golden-section-1d": "1.0.3",
+    "wsemi": "^1.6.37"
   },
   "devDependencies": {
     "w-package-tools": "^1.0.59"

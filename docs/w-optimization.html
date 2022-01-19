@@ -27,7 +27,7 @@
 
 <nav >
     
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="w-optimization.html">w-optimization</a><ul class='methods'><li data-type='method'><a href="w-optimization.html#.arrBinarySearch">arrBinarySearch</a></li><li data-type='method'><a href="w-optimization.html#.arrBinarySearchClosest">arrBinarySearchClosest</a></li><li data-type='method'><a href="w-optimization.html#.binarySearch">binarySearch</a></li><li data-type='method'><a href="w-optimization.html#.goldenSection">goldenSection</a></li><li data-type='method'><a href="w-optimization.html#.nelderMead">nelderMead</a></li></ul></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="w-optimization.html">w-optimization</a><ul class='methods'><li data-type='method'><a href="w-optimization.html#.arrBinarySearch">arrBinarySearch</a></li><li data-type='method'><a href="w-optimization.html#.arrBinarySearchClosest">arrBinarySearchClosest</a></li><li data-type='method'><a href="w-optimization.html#.binarySearch">binarySearch</a></li><li data-type='method'><a href="w-optimization.html#.goldenSection">goldenSection</a></li><li data-type='method'><a href="w-optimization.html#.goldenSectionLiberate">goldenSectionLiberate</a></li><li data-type='method'><a href="w-optimization.html#.limitBFGS">limitBFGS</a></li><li data-type='method'><a href="w-optimization.html#.nelderMead">nelderMead</a></li><li data-type='method'><a href="w-optimization.html#.setpBracket">setpBracket</a></li></ul></li></ul>
 </nav>
 
 <div id="main">
@@ -291,7 +291,7 @@
                 </td>
             
 
-            <td class="description last"><p>輸入既有數據陣列</p></td>
+            <td class="description last"><p>輸入數據陣列</p></td>
         </tr>
 
     
@@ -614,7 +614,7 @@
                 </td>
             
 
-            <td class="description last"><p>輸入既有數據陣列</p></td>
+            <td class="description last"><p>輸入數據陣列</p></td>
         </tr>
 
     
@@ -809,7 +809,7 @@
 
     
 
-    <h4 class="name" id=".binarySearch"><span class="type-signature">(static) </span>binarySearch<span class="signature">(arr, x, opt<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Object}</span></h4>
+    <h4 class="name" id=".binarySearch"><span class="type-signature">(static) </span>binarySearch<span class="signature">(fun, xMin, xMax, delta, opt<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Object}</span></h4>
 
     
 
@@ -821,7 +821,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="binarySearch.mjs.html">binarySearch.mjs</a>, <a href="binarySearch.mjs.html#line34">line 34</a>
+        <a href="binarySearch.mjs.html">binarySearch.mjs</a>, <a href="binarySearch.mjs.html#line36">line 36</a>
     </li></ul></dd>
     
 
@@ -909,13 +909,13 @@
 
         <tr>
             
-                <td class="name"><code>arr</code></td>
+                <td class="name"><code>fun</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Array</span>
+<span class="param-type">function</span>
 
 
             
@@ -937,14 +937,14 @@
                 </td>
             
 
-            <td class="description last"><p>輸入既有數據陣列</p></td>
+            <td class="description last"><p>輸入適應函數，將傳入變數組params，需回傳適應函數值，以求解最小值為目標</p></td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>x</code></td>
+                <td class="name"><code>xMin</code></td>
             
 
             <td class="type">
@@ -972,7 +972,77 @@
                 </td>
             
 
-            <td class="description last"><p>輸入尋找數字</p></td>
+            <td class="description last"><p>輸入初始搜尋範圍最小值數字</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>xMax</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入初始搜尋範圍最大值數字</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>delta</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入步長數字</p></td>
         </tr>
 
     
@@ -1041,13 +1111,13 @@
 
         <tr>
             
-                <td class="name"><code>sorted</code></td>
+                <td class="name"><code>maxIterations</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Boolean</span>
+<span class="param-type">Number</span>
 
 
             
@@ -1068,12 +1138,12 @@
             
                 <td class="default">
                 
-                    <code>false</code>
+                    <code>100</code>
                 
                 </td>
             
 
-            <td class="description last"><p>輸入陣列arr是否已經排序，若陣列已排序可加快速度，預設為false</p></td>
+            <td class="description last"><p>輸入最大搜尋次數整數，預設100</p></td>
         </tr>
 
     
@@ -1132,7 +1202,7 @@
 
     
 
-    <h4 class="name" id=".goldenSection"><span class="type-signature">(static) </span>goldenSection<span class="signature">(fun, x, opt<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Object}</span></h4>
+    <h4 class="name" id=".goldenSection"><span class="type-signature">(async, static) </span>goldenSection<span class="signature">(fun, xL, xU, opt<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
 
     
 
@@ -1144,7 +1214,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="goldenSection.mjs.html">goldenSection.mjs</a>, <a href="goldenSection.mjs.html#line38">line 38</a>
+        <a href="goldenSection.mjs.html">goldenSection.mjs</a>, <a href="goldenSection.mjs.html#line43">line 43</a>
     </li></ul></dd>
     
 
@@ -1184,8 +1254,8 @@
 
 
 <div class="description usertext">
-    <p>黃金比例搜尋法，求解最小值所在起訖範圍</p>
-<p>Fork: <a href="https://github.com/scijs/minimize-golden-section-1d/blob/master/src/bracket-minimum.js">bracket-minimum.js</a></p>
+    <p>黃金比例搜尋法(1維)，求解最小值所在</p>
+<p>Fork: <a href="https://github.com/scijs/minimize-golden-section-1d/blob/master/src/golden-section-minimize.js">golden-section-minimize.js</a></p>
 <p>Unit Test: <a href="https://github.com/yuda-lyu/w-optimization/blob/master/test/goldenSection.test.js">Github</a></p>
 </div>
 
@@ -1199,19 +1269,22 @@
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>function fun(x) {
-    let x = x / 180 * Math.PI
-    return Math.sin(x)
+    <pre class="prettyprint"><code>async function test() {
+
+    function fun(param) {
+        let x = param / 180 * Math.PI
+        return Math.sin(x)
+    }
+
+    console.log(await goldenSection(fun, -360, 360))
+    // => { count: 56, y: -1, x: -89.99999939558693 }
+
 }
 
-console.log(goldenSection(fun, 0, { min: -360, max: 360 }))
-// => { min: -360, max: 0.1 }
-
-console.log(goldenSection(fun, 87, { min: -360, max: 360 }))
-// => { min: -360, max: 87.1 }
-
-console.log(goldenSection(fun, 90, { min: -360, max: 360 }))
-// => { min: -360, max: 129.66247495978098 }</code></pre>
+test()
+    .catch((err) => {
+        console.log(err)
+    })</code></pre>
 
 
 
@@ -1273,14 +1346,14 @@ console.log(goldenSection(fun, 90, { min: -360, max: 360 }))
                 </td>
             
 
-            <td class="description last"><p>輸入適應函數，將傳入變數param，需回傳適應函數值，以求解最小值所在起訖範圍為目標</p></td>
+            <td class="description last"><p>輸入適應函數，將傳入變數x，需回傳適應函數值，以求解最小值所在起訖範圍為目標</p></td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>x</code></td>
+                <td class="name"><code>xL</code></td>
             
 
             <td class="type">
@@ -1308,7 +1381,42 @@ console.log(goldenSection(fun, 90, { min: -360, max: 360 }))
                 </td>
             
 
-            <td class="description last"><p>輸入初始值數字</p></td>
+            <td class="description last"><p>輸入初始最小值數字</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>xU</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入初始最大值數字</p></td>
         </tr>
 
     
@@ -1377,7 +1485,7 @@ console.log(goldenSection(fun, 90, { min: -360, max: 360 }))
 
         <tr>
             
-                <td class="name"><code>delta</code></td>
+                <td class="name"><code>minTolerance</code></td>
             
 
             <td class="type">
@@ -1404,19 +1512,19 @@ console.log(goldenSection(fun, 90, { min: -360, max: 360 }))
             
                 <td class="default">
                 
-                    <code>0.1</code>
+                    <code>1e-8</code>
                 
                 </td>
             
 
-            <td class="description last"><p>輸入最小步長數字，預設0.1</p></td>
+            <td class="description last"><p>輸入最小收斂門檻值數字，預設1e-8</p></td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>min</code></td>
+                <td class="name"><code>maxIterations</code></td>
             
 
             <td class="type">
@@ -1443,51 +1551,12 @@ console.log(goldenSection(fun, 90, { min: -360, max: 360 }))
             
                 <td class="default">
                 
-                    <code>-1e20</code>
+                    <code>100</code>
                 
                 </td>
             
 
-            <td class="description last"><p>輸入搜尋範圍最小值數字，預設-1e20</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>max</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Number</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    <code>1e20</code>
-                
-                </td>
-            
-
-            <td class="description last"><p>輸入搜尋範圍最大值數字，預設1e20</p></td>
+            <td class="description last"><p>輸入最大迭代次數整數，預設100</p></td>
         </tr>
 
     
@@ -1520,7 +1589,7 @@ console.log(goldenSection(fun, 90, { min: -360, max: 360 }))
 
         
 <div class="param-desc">
-    <p>回傳物件，含鍵值x,y，x為求解後變數組，y為最優適應函數值</p>
+    <p>回傳Promise，resolve為求解後結果物件，含鍵值x,y，x為求解後變數組，y為最優適應函數值，reject為失敗訊息</p>
 </div>
 
 
@@ -1531,7 +1600,7 @@ console.log(goldenSection(fun, 90, { min: -360, max: 360 }))
     </dt>
     <dd>
         
-<span class="param-type">Object</span>
+<span class="param-type">Promise</span>
 
 
     </dd>
@@ -1546,7 +1615,7 @@ console.log(goldenSection(fun, 90, { min: -360, max: 360 }))
 
     
 
-    <h4 class="name" id=".nelderMead"><span class="type-signature">(static) </span>nelderMead<span class="signature">(fun, params, opt<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Object}</span></h4>
+    <h4 class="name" id=".goldenSectionLiberate"><span class="type-signature">(async, static) </span>goldenSectionLiberate<span class="signature">(fun, opt<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
 
     
 
@@ -1558,7 +1627,774 @@ console.log(goldenSection(fun, 90, { min: -360, max: 360 }))
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nelderMead.mjs.html">nelderMead.mjs</a>, <a href="nelderMead.mjs.html#line56">line 56</a>
+        <a href="goldenSectionLiberate.mjs.html">goldenSectionLiberate.mjs</a>, <a href="goldenSectionLiberate.mjs.html#line42">line 42</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description usertext">
+    <p>黃金比例搜尋法(1維)，求解最小值所在</p>
+<p>Fork: <a href="https://github.com/scijs/minimize-golden-section-1d/blob/master/index.js">minimize-golden-section-1d.js</a></p>
+<p>Unit Test: <a href="https://github.com/yuda-lyu/w-optimization/blob/master/test/goldenSectionLiberate.test.js">Github</a></p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>async function test() {
+
+    function fun(param) {
+        let x = param / 180 * Math.PI
+        return Math.sin(x)
+    }
+
+    console.log(await goldenSectionLiberate(fun, 0))
+    // => { count: 67, y: -1, x: -89.99999939787351 }
+
+}
+
+test()
+    .catch((err) => {
+        console.log(err)
+    })</code></pre>
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>fun</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入適應函數，將傳入變數x，需回傳適應函數值，以求解最小值所在起訖範圍為目標</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opt</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>{}</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入設定物件，預設{}</p>
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>minTolerance</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>1e-8</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入最小收斂門檻值數字，預設1e-8</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>maxIterations</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>100</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入最大迭代次數整數，預設100</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>回傳Promise，resolve為求解後結果物件，含鍵值x,y，x為求解後變數組，y為最優適應函數值，reject為失敗訊息</p>
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id=".limitBFGS"><span class="type-signature">(async, static) </span>limitBFGS<span class="signature">(fun, params, opt<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="limitBFGS.mjs.html">limitBFGS.mjs</a>, <a href="limitBFGS.mjs.html#line105">line 105</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description usertext">
+    <p>L-BFGS法</p>
+<p>Doc: <a href="https://www.hankcs.com/ml/l-bfgs.html">理解L-BFGS算法</a>
+Fork: <a href="https://github.com/yanceyou/bfgs-algorithm/blob/master/lib/BFGSAlgorithm.js">BFGSAlgorithm.js</a></p>
+<p>Unit Test: <a href="https://github.com/yuda-lyu/w-optimization/blob/master/test/limitBFGS.test.js">Github</a></p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>async function test() {
+
+    function fun(params) {
+        let x = params[0] / 180 * Math.PI
+        return Math.sin(x)
+    }
+
+    console.log(await limitBFGS(fun, [0]))
+    // => { count: 85, y: -1, x: [ -90.00000038876749 ] }
+
+    console.log(await limitBFGS(fun, [87]))
+    // => { count: 98, y: -1, x: [ -90.00000021058614 ] }
+
+    console.log(await limitBFGS(fun, [90]))
+    // => { count: 2, y: 100000000000000000000, x: null }
+
+}
+
+test()
+    .catch((err) => {
+        console.log(err)
+    })</code></pre>
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>fun</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入適應函數，將傳入變數組params，需回傳適應函數值，以求解最小值為目標</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>params</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入初始變數組，若適應函數fun需輸入3參數，則就需輸入[a,b,c]陣列作為初始值</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opt</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>{}</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入設定物件，預設{}</p>
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>maxIterations</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>200</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入最大迭代次數整數，預設200</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>minTolerance</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>1e-6</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入最小收斂門檻值數字，預設1e-6</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>delta</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>1e-5</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸求解近似梯度時步長數字，預設1e-5</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>回傳Promise，resolve為求解後結果物件，含鍵值x,y，x為求解後變數組，y為最優適應函數值，reject為失敗訊息</p>
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id=".nelderMead"><span class="type-signature">(async, static) </span>nelderMead<span class="signature">(fun, params, opt<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="nelderMead.mjs.html">nelderMead.mjs</a>, <a href="nelderMead.mjs.html#line67">line 67</a>
     </li></ul></dd>
     
 
@@ -1613,18 +2449,28 @@ console.log(goldenSection(fun, 90, { min: -360, max: 360 }))
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>function fun(params) {
-    let x = params[0]
-    let y = params[1]
-    return Math.sin(y) * x + Math.sin(x) * y + x * x + y * y
+    <pre class="prettyprint"><code>async function test() {
+
+    function fun(params) {
+        let x = params[0] / 180 * Math.PI
+        return Math.sin(x)
+    }
+
+    console.log(await nelderMead(fun, [0]))
+    // => { count: 78, y: -1, x: [ -90.0000000000001 ] }
+
+    console.log(await nelderMead(fun, [87]))
+    // => { count: 58, y: -1, x: [ -90.00000057220495 ] }
+
+    console.log(await nelderMead(fun, [90]))
+    // => { count: 58, y: -1, x: [ 270 ] }
+
 }
 
-let r = nelderMead(fun, [-3.5, 3.5])
-console.log(r)
-// => {
-//   y: 5.786322126017525e-19,
-//   x: [ 0.000007191110664735547, -0.00000719035057196422 ]
-// }</code></pre>
+test()
+    .catch((err) => {
+        console.log(err)
+    })</code></pre>
 
 
 
@@ -1829,7 +2675,7 @@ console.log(r)
 
         <tr>
             
-                <td class="name"><code>zeroDelta</code></td>
+                <td class="name"><code>delta</code></td>
             
 
             <td class="type">
@@ -1861,7 +2707,7 @@ console.log(r)
                 </td>
             
 
-            <td class="description last"><p>輸入最小步長數字，預設0.001</p></td>
+            <td class="description last"><p>輸入步長數字，預設0.001</p></td>
         </tr>
 
     
@@ -2128,7 +2974,7 @@ console.log(r)
 
         
 <div class="param-desc">
-    <p>回傳物件，含鍵值x,y，x為求解後變數組，y為最優適應函數值</p>
+    <p>回傳Promise，resolve為求解後結果物件，含鍵值x,y，x為求解後變數組，y為最優適應函數值，reject為失敗訊息</p>
 </div>
 
 
@@ -2139,7 +2985,457 @@ console.log(r)
     </dt>
     <dd>
         
+<span class="param-type">Promise</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id=".setpBracket"><span class="type-signature">(async, static) </span>setpBracket<span class="signature">(fun, x, opt<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="setpBracket.mjs.html">setpBracket.mjs</a>, <a href="setpBracket.mjs.html#line76">line 76</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description usertext">
+    <p>步階搜尋法(1維)，求解最小值所在起訖範圍</p>
+<p>Fork: <a href="https://github.com/scijs/minimize-golden-section-1d/blob/master/src/bracket-minimum.js">bracket-minimum.js</a></p>
+<p>Unit Test: <a href="https://github.com/yuda-lyu/w-optimization/blob/master/test/setpBracket.test.js">Github</a></p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>async function test() {
+
+    function fun(param) {
+        let x = param / 180 * Math.PI
+        return Math.sin(x)
+    }
+
+    console.log(await setpBracket(fun, 0, { min: -360, max: 360 }))
+    // => {
+    //  count: 13,
+    //  bounded: true,
+    //  min: -204.70000000000002,
+    //  max: 0.1,
+    //  guess: -102.30000000000001,
+    //  fMin: 0.4178670738010769,
+    //  fMax: 0.0017453283658983088,
+    //  fGuess: -0.9770455744352636
+    // }
+
+    console.log(await setpBracket(fun, 87, { min: -360, max: 360 }))
+    // => {
+    //  count: 14,
+    //  bounded: true,
+    //  min: -322.5,
+    //  max: 87.1,
+    //  guess: -117.70000000000002,
+    //  fMin: 0.6087614290087209,
+    //  fMax: 0.9987193571841863,
+    //  fGuess: -0.8853936257544158
+    //}
+
+    console.log(await setpBracket(fun, 90, { min: -360, max: 360 }))
+    // => {
+    //  count: 20,
+    //  bounded: true,
+    //  min: -319.5,
+    //  max: 102.7,
+    //  guess: -114.70000000000002,
+    //  fMin: 0.6494480483301841,
+    //  fMax: 0.9755345439458566,
+    //  fGuess: -0.9085081775267217
+    //}
+
+}
+
+test()
+    .catch((err) => {
+        console.log(err)
+    })</code></pre>
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>fun</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入適應函數，將傳入變數x，需回傳適應函數值，以求解最小值所在起訖範圍為目標</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>x</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入初始值數字</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opt</code></td>
+            
+
+            <td class="type">
+            
+                
 <span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>{}</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入設定物件，預設{}</p>
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>delta</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>0.1</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入步長數字，預設0.1</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>min</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>-1e20</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入搜尋範圍最小值數字，預設-1e20</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>max</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>1e20</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入搜尋範圍最大值數字，預設1e20</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>回傳Promise，resolve為求解後結果物件，含鍵值x,y，x為求解後變數組，y為最優適應函數值，reject為失敗訊息</p>
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
 
 
     </dd>
@@ -2169,7 +3465,7 @@ console.log(r)
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a> on Wed Jan 05 2022 16:59:45 GMT+0800 (台北標準時間) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a> on Wed Jan 19 2022 23:52:04 GMT+0800 (台北標準時間) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>

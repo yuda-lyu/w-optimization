@@ -3,6 +3,7 @@ import size from 'lodash/size'
 import isnum from 'wsemi/src/isnum.mjs'
 import isfun from 'wsemi/src/isfun.mjs'
 import isearr from 'wsemi/src/isearr.mjs'
+import ispm from 'wsemi/src/ispm.mjs'
 import cdbl from 'wsemi/src/cdbl.mjs'
 
 
@@ -29,40 +30,50 @@ function sortOrder(a, b) {
  * @param {Array} params 輸入初始變數組，若適應函數fun需輸入3參數，則就需輸入[a,b,c]陣列作為初始值
  * @param {Object} [opt={}] 輸入設定物件，預設{}
  * @param {Number} [opt.maxIterations=null] 輸入最大迭代次數整數，若無則預設為變數組長度*200
- * @param {Number} [opt.zeroDelta=0.001] 輸入步長數字，預設0.001
+ * @param {Number} [opt.delta=0.001] 輸入步長數字，預設0.001
  * @param {Number} [opt.minErrorDelta=1e-6] 輸入最小誤差步長數字，預設1e-6
  * @param {Number} [opt.minTolerance=1e-5] 輸入最小收斂門檻值數字，預設1e-5
  * @param {Number} [opt.rho=1] 輸入上輪第1節點權重數字，預設1
  * @param {Number} [opt.chi=2] 輸入上輪第2節點權重數字，預設2
  * @param {Number} [opt.psi=-0.5] 輸入下輪第1節點權重數字，預設-0.5
  * @param {Number} [opt.sigma=0.5] 輸入下輪第2節點權重數字，預設0.5
- * @returns {Object} 回傳求解後結果物件，含鍵值x,y，x為求解後變數組，y為最優適應函數值
+ * @returns {Promise} 回傳Promise，resolve為求解後結果物件，含鍵值x,y，x為求解後變數組，y為最優適應函數值，reject為失敗訊息
  * @example
  *
- * function fun(params) {
- *     let x = params[0]
- *     let y = params[1]
- *     return Math.sin(y) * x + Math.sin(x) * y + x * x + y * y
+ * async function test() {
+ *
+ *     function fun(params) {
+ *         let x = params[0] / 180 * Math.PI
+ *         return Math.sin(x)
+ *     }
+ *
+ *     console.log(await nelderMead(fun, [0]))
+ *     // => { count: 78, y: -1, x: [ -90.0000000000001 ] }
+ *
+ *     console.log(await nelderMead(fun, [87]))
+ *     // => { count: 58, y: -1, x: [ -90.00000057220495 ] }
+ *
+ *     console.log(await nelderMead(fun, [90]))
+ *     // => { count: 58, y: -1, x: [ 270 ] }
+ *
  * }
  *
- * let r = nelderMead(fun, [-3.5, 3.5])
- * console.log(r)
- * // => {
- * //   y: 5.786322126017525e-19,
- * //   x: [ 0.000007191110664735547, -0.00000719035057196422 ]
- * // }
+ * test()
+ *     .catch((err) => {
+ *         console.log(err)
+ *     })
  *
  */
-function nelderMead(fun, params, opt = {}) {
+async function nelderMead(fun, params, opt = {}) {
 
-    //check fun
+    //check func
     if (!isfun(fun)) {
-        throw new Error('invalid fun')
+        return Promise.reject('invalid fun')
     }
 
     //check params
     if (!isearr(params)) {
-        throw new Error('params is not an effective array')
+        return Promise.reject('params is not an effective array')
     }
 
     //n
@@ -82,12 +93,12 @@ function nelderMead(fun, params, opt = {}) {
     }
     nonZeroDelta = cdbl(nonZeroDelta)
 
-    //zeroDelta
-    let zeroDelta = get(opt, 'zeroDelta')
-    if (!isnum(zeroDelta)) {
-        zeroDelta = 0.001
+    //delta
+    let delta = get(opt, 'delta')
+    if (!isnum(delta)) {
+        delta = 0.001
     }
-    zeroDelta = cdbl(zeroDelta)
+    delta = cdbl(delta)
 
     //minErrorDelta
     let minErrorDelta = get(opt, 'minErrorDelta')
@@ -131,16 +142,29 @@ function nelderMead(fun, params, opt = {}) {
     }
     sigma = cdbl(sigma)
 
+    //countCalc
+    let countCalc = 0
+
+    //func
+    async function func() { //要使用arguments不能用箭頭函數
+        let r = fun(...arguments)
+        if (ispm(r)) {
+            r = await r
+        }
+        countCalc++
+        return r
+    }
+
     //simplex
     let simplex = new Array(n + 1)
     simplex[0] = params
-    simplex[0].y = fun(params)
+    simplex[0].y = await func(params)
     simplex[0].id = 0
     for (let i = 0; i < n; ++i) {
         let point = params.slice()
-        point[i] = point[i] ? point[i] * nonZeroDelta : zeroDelta
+        point[i] = point[i] ? point[i] * nonZeroDelta : delta
         simplex[i + 1] = point
-        simplex[i + 1].y = fun(point)
+        simplex[i + 1].y = await func(point)
         simplex[i + 1].id = i + 1
     }
 
@@ -162,29 +186,29 @@ function nelderMead(fun, params, opt = {}) {
         //sort
         simplex.sort(sortOrder)
 
-        if (opt.history) {
+        // if (opt.history) {
 
-            // copy the simplex (since later iterations will mutate) and sort it to have a consistent order between iterations
-            let sortedSimplex = simplex.map(function (x) {
-                let state = x.slice()
-                state.y = x.y
-                state.id = x.id
-                return state
-            })
+        //     // copy the simplex (since later iterations will mutate) and sort it to have a consistent order between iterations
+        //     let sortedSimplex = simplex.map(function (x) {
+        //         let state = x.slice()
+        //         state.y = x.y
+        //         state.id = x.id
+        //         return state
+        //     })
 
-            //sort
-            sortedSimplex.sort(function(a, b) {
-                return a.id - b.id
-            })
+        //     //sort
+        //     sortedSimplex.sort(function(a, b) {
+        //         return a.id - b.id
+        //     })
 
-            //push
-            opt.history.push({
-                x: simplex[0].slice(),
-                y: simplex[0].y,
-                simplex: sortedSimplex
-            })
+        //     //push
+        //     opt.history.push({
+        //         x: simplex[0].slice(),
+        //         y: simplex[0].y,
+        //         simplex: sortedSimplex
+        //     })
 
-        }
+        // }
 
         //maxDiff
         maxDiff = 0
@@ -210,12 +234,12 @@ function nelderMead(fun, params, opt = {}) {
         // reflect the worst point past the centroid  and compute loss at reflected point
         let worst = simplex[n]
         weightedSum(reflected, 1 + rho, centroid, -rho, worst)
-        reflected.y = fun(reflected)
+        reflected.y = await func(reflected)
 
         // if the reflected point is the best seen, then possibly expand
         if (reflected.y < simplex[0].y) {
             weightedSum(expanded, 1 + chi, centroid, -chi, worst)
-            expanded.y = fun(expanded)
+            expanded.y = await func(expanded)
             if (expanded.y < reflected.y) {
                 updateSimplex(expanded)
             }
@@ -232,7 +256,7 @@ function nelderMead(fun, params, opt = {}) {
 
                 //inside contraction
                 weightedSum(contracted, 1 + psi, centroid, -psi, worst)
-                contracted.y = fun(contracted)
+                contracted.y = await func(contracted)
                 if (contracted.y < worst.y) {
                     updateSimplex(contracted)
                 }
@@ -245,7 +269,7 @@ function nelderMead(fun, params, opt = {}) {
 
                 //outside contraction
                 weightedSum(contracted, 1 - psi * rho, centroid, psi * rho, worst)
-                contracted.y = fun(contracted)
+                contracted.y = await func(contracted)
                 if (contracted.y < reflected.y) {
                     updateSimplex(contracted)
                 }
@@ -266,7 +290,7 @@ function nelderMead(fun, params, opt = {}) {
                 //reduction
                 for (let i = 1; i < simplex.length; ++i) {
                     weightedSum(simplex[i], 1 - sigma, simplex[0], sigma, simplex[i])
-                    simplex[i].y = fun(simplex[i])
+                    simplex[i].y = await func(simplex[i])
                 }
 
             }
@@ -288,6 +312,7 @@ function nelderMead(fun, params, opt = {}) {
     }
 
     return {
+        count: countCalc,
         y: simplex[0].y,
         x,
     }
