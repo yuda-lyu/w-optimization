@@ -3,7 +3,7 @@
 <head>
     
     <meta charset="utf-8">
-    <title>goldenSection.mjs - Documentation</title>
+    <title>goldenSectionLiberate.mjs - Documentation</title>
     
     
     <script src="scripts/prettify/prettify.js"></script>
@@ -32,7 +32,7 @@
 
 <div id="main">
     
-    <h1 class="page-title">goldenSection.mjs</h1>
+    <h1 class="page-title">goldenSectionLiberate.mjs</h1>
     
 
     
@@ -46,20 +46,19 @@
 import isNumber from 'lodash/isNumber'
 import isnum from 'wsemi/src/isnum.mjs'
 import isfun from 'wsemi/src/isfun.mjs'
-import ispm from 'wsemi/src/ispm.mjs'
 import cdbl from 'wsemi/src/cdbl.mjs'
+import setpBracket from './setpBracket.mjs'
+import goldenSection from './goldenSection.mjs'
 
 
 /**
  * 黃金比例搜尋法(1維)，求解最小值所在
  *
- * Fork: {@link https://github.com/scijs/minimize-golden-section-1d/blob/master/src/golden-section-minimize.js golden-section-minimize.js}
+ * Fork: {@link https://github.com/scijs/minimize-golden-section-1d/blob/master/index.js minimize-golden-section-1d.js}
  *
- * Unit Test: {@link https://github.com/yuda-lyu/w-optimization/blob/master/test/goldenSection.test.js Github}
+ * Unit Test: {@link https://github.com/yuda-lyu/w-optimization/blob/master/test/goldenSectionLiberate.test.js Github}
  * @memberOf w-optimization
  * @param {Function} fun 輸入適應函數，將傳入變數x，需回傳適應函數值，以求解最小值所在起訖範圍為目標
- * @param {Number} xL 輸入初始最小值數字
- * @param {Number} xU 輸入初始最大值數字
  * @param {Object} [opt={}] 輸入設定物件，預設{}
  * @param {Number} [opt.minTolerance=1e-8] 輸入最小收斂門檻值數字，預設1e-8
  * @param {Number} [opt.maxIterations=100] 輸入最大迭代次數整數，預設100
@@ -73,8 +72,8 @@ import cdbl from 'wsemi/src/cdbl.mjs'
  *         return Math.sin(x)
  *     }
  *
- *     console.log(await goldenSection(fun, -360, 360))
- *     // => { count: 56, y: -1, x: -89.99999939558693 }
+ *     console.log(await goldenSectionLiberate(fun, 0))
+ *     // => { count: 67, y: -1, x: -89.99999939787351 }
  *
  * }
  *
@@ -84,123 +83,67 @@ import cdbl from 'wsemi/src/cdbl.mjs'
  *     })
  *
  */
-async function goldenSection(fun, xL, xU, opt = {}) {
+async function goldenSectionLiberate(fun, x, opt = {}) {
 
     //check fun
     if (!isfun(fun)) {
         return Promise.reject('invalid fun')
     }
 
-    //check xL
-    if (!isnum(xL)) {
-        return Promise.reject('xL is not a number')
+    //check x
+    if (!isnum(x)) {
+        return Promise.reject('x is not a number')
     }
 
-    //check xU
-    if (!isnum(xU)) {
-        return Promise.reject('xU is not a number')
+    //xMin
+    let xMin = get(opt, 'min')
+    if (isnum(xMin)) {
+        xMin = cdbl(xMin)
     }
 
-    //minTolerance
-    let minTolerance = get(opt, 'minTolerance')
-    if (!isnum(minTolerance)) {
-        minTolerance = 1e-8
+    //xMax
+    let xMax = get(opt, 'max')
+    if (isnum(xMax)) {
+        xMax = cdbl(xMax)
     }
-    minTolerance = cdbl(minTolerance)
-
-    //maxIterations
-    let maxIterations = get(opt, 'maxIterations')
-    if (!isnum(maxIterations)) {
-        maxIterations = 100
-    }
-    maxIterations = cdbl(maxIterations)
 
     //countCalc
     let countCalc = 0
 
-    //func
-    async function func() { //要使用arguments不能用箭頭函數
-        let r = fun(...arguments)
-        if (ispm(r)) {
-            r = await r
+    //calc xMin and xMax
+    if (!isNumber(xMax) || !isNumber(xMin)) {
+
+        //setpBracket
+        let sb = await setpBracket(fun, x, opt)
+        // console.log('setpBracket sb', sb)
+        xMin = get(sb, 'min')
+        xMax = get(sb, 'max')
+
+        //check
+        if (!isNumber(xMin) || !isNumber(xMax)) {
+            return Promise.reject('can not find bounds by setpBracket')
         }
-        countCalc++
-        return r
+
+        //累加countCalc
+        countCalc += sb.count
+
     }
 
-    let xF
-    let fF
-    let PHI_RATIO = 2 / (1 + Math.sqrt(5))
-    let iteration = 0
+    //goldenSection
+    let r = await goldenSection(fun, xMin, xMax, opt)
+    // console.log('goldenSection r', r)
 
-    // Initial bounds
-    let x1 = xU - PHI_RATIO * (xU - xL)
-    let x2 = xL + PHI_RATIO * (xU - xL)
-    let f1 = await func(x1)
-    let f2 = await func(x2)
-    // console.log('x1', x1, 'f1', f1, 'x2', x2, 'f2', f2)
+    //累加countCalc
+    countCalc += r.count
 
-    // Store these values so that we can return these if they're better.
-    // This happens when the minimization falls *approaches* but never
-    // actually reaches one of the bounds
-    let fL = await func(xL)
-    let fU = await func(xU)
-    let xL0 = xL
-    let xU0 = xU
-    // console.log('xL', xL, 'fL', fL, 'xU', xU, 'fU', fU)
+    //save
+    r.count = countCalc
 
-    // Simple, robust golden section minimization:
-    while (++iteration &lt; maxIterations &amp;&amp; Math.abs(xU - xL) > minTolerance) {
-        if (f2 > f1) {
-            xU = x2
-            x2 = x1
-            f2 = f1
-            x1 = xU - PHI_RATIO * (xU - xL)
-            f1 = await func(x1)
-        }
-        else {
-            xL = x1
-            x1 = x2
-            f1 = f2
-            x2 = xL + PHI_RATIO * (xU - xL)
-            f2 = await func(x2)
-        }
-    }
-
-    //update xF, fF
-    xF = 0.5 * (xU + xL)
-    fF = 0.5 * (f1 + f2)
-    // console.log('xF', xF, 'fF', fF)
-
-    //check
-    if (!isNumber(f2) || !isNumber(f1) || iteration === maxIterations) {
-        return null
-    }
-
-    //bestx, besty
-    let bestx = null
-    let besty = null
-    if (fL &lt; fF) {
-        bestx = xL0
-        besty = fL
-    }
-    else if (fU &lt; fF) {
-        bestx = xU0
-        besty = fU
-    }
-    else {
-        bestx = xF
-        besty = fF
-    }
-
-    return {
-        count: countCalc,
-        y: besty,
-        x: bestx,
-    }
+    return r
 }
 
-export default goldenSection
+
+export default goldenSectionLiberate
 </code></pre>
         </article>
     </section>
