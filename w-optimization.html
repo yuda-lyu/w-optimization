@@ -27,7 +27,7 @@
 
 <nav >
     
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="w-optimization.html">w-optimization</a><ul class='methods'><li data-type='method'><a href="w-optimization.html#.arrBinarySearch">arrBinarySearch</a></li><li data-type='method'><a href="w-optimization.html#.arrBinarySearchClosest">arrBinarySearchClosest</a></li><li data-type='method'><a href="w-optimization.html#.binarySearch">binarySearch</a></li><li data-type='method'><a href="w-optimization.html#.goldenSection">goldenSection</a></li><li data-type='method'><a href="w-optimization.html#.goldenSectionLiberate">goldenSectionLiberate</a></li><li data-type='method'><a href="w-optimization.html#.limitBFGS">limitBFGS</a></li><li data-type='method'><a href="w-optimization.html#.nelderMead">nelderMead</a></li><li data-type='method'><a href="w-optimization.html#.setpBracket">setpBracket</a></li></ul></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="w-optimization.html">w-optimization</a><ul class='methods'><li data-type='method'><a href="w-optimization.html#.arrBinarySearch">arrBinarySearch</a></li><li data-type='method'><a href="w-optimization.html#.arrBinarySearchClosest">arrBinarySearchClosest</a></li><li data-type='method'><a href="w-optimization.html#.binarySearch">binarySearch</a></li><li data-type='method'><a href="w-optimization.html#.cobyla">cobyla</a></li><li data-type='method'><a href="w-optimization.html#.goldenSection">goldenSection</a></li><li data-type='method'><a href="w-optimization.html#.goldenSectionLiberate">goldenSectionLiberate</a></li><li data-type='method'><a href="w-optimization.html#.limitBFGS">limitBFGS</a></li><li data-type='method'><a href="w-optimization.html#.nelderMead">nelderMead</a></li><li data-type='method'><a href="w-optimization.html#.setpBracket">setpBracket</a></li></ul></li></ul><h3>Global</h3><ul><li><a href="global.html#cobylaCore">cobylaCore</a></li><li><a href="global.html#Normal">Normal</a></li></ul>
 </nav>
 
 <div id="main">
@@ -1202,6 +1202,625 @@
 
     
 
+    <h4 class="name" id=".cobyla"><span class="type-signature">(async, static) </span>cobyla<span class="signature">(fun, params, opt<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="cobyla.mjs.html">cobyla.mjs</a>, <a href="cobyla.mjs.html#line1308">line 1308</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description usertext">
+    <p>Michael J. D. Powell之Cobyla求解器</p>
+<p>Fork: <a href="https://github.com/smee/cobyla2/blob/master/Cobyla.js">Cobyla.js</a></p>
+<p>Rela: <a href="https://www.zhangzk.net/docs/publications/thesis.pdf">张在坤/无导数优化方法的研究</a></p>
+<p>Unit Test: <a href="https://github.com/yuda-lyu/w-optimization/blob/master/test/nelderMead.test.js">Github</a></p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>async function test() {
+
+    async function fun(params) {
+        let x = params[0] / 180 * Math.PI
+        return Math.sin(x)
+    }
+
+    console.log(await cobyla(fun, [0]))
+    // => { count: 78, y: -1, x: [ -90.0000000000001 ] }
+
+    console.log(await cobyla(fun, [87]))
+    // => { count: 58, y: -1, x: [ -90.00000057220495 ] }
+
+    console.log(await cobyla(fun, [90]))
+    // => { count: 58, y: -1, x: [ 270 ] }
+
+}
+
+test()
+    .catch((err) => {
+        console.log(err)
+    })</code></pre>
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>fun</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入適應函數，將傳入變數組params，需回傳適應函數值，以求解最小值為目標</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>params</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入初始變數組，若適應函數fun需輸入3參數，則就需輸入[a,b,c]陣列作為初始值</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opt</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>{}</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入設定物件，預設{}</p>
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>maxIterations</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>null</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入最大迭代次數整數，若無則預設為變數組長度*200</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>delta</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>0.001</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入步長數字，預設0.001</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>minErrorDelta</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>1e-6</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入最小誤差步長數字，預設1e-6</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>minTolerance</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>1e-5</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入最小收斂門檻值數字，預設1e-5</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>rho</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>1</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入上輪第1節點權重數字，預設1</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>chi</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>2</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入上輪第2節點權重數字，預設2</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>psi</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>-0.5</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入下輪第1節點權重數字，預設-0.5</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>sigma</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>0.5</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入下輪第2節點權重數字，預設0.5</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>回傳Promise，resolve為求解後結果物件，含鍵值x,y，x為求解後變數組，y為最優適應函數值，reject為失敗訊息</p>
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
     <h4 class="name" id=".goldenSection"><span class="type-signature">(async, static) </span>goldenSection<span class="signature">(fun, xL, xU, opt<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
 
     
@@ -2028,7 +2647,7 @@ Fork: <a href="https://github.com/yanceyou/bfgs-algorithm/blob/master/lib/BFGSAl
     
     <pre class="prettyprint"><code>async function test() {
 
-    function fun(params) {
+    async function fun(params) {
         let x = params[0] / 180 * Math.PI
         return Math.sin(x)
     }
@@ -2394,7 +3013,7 @@ test()
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nelderMead.mjs.html">nelderMead.mjs</a>, <a href="nelderMead.mjs.html#line67">line 67</a>
+        <a href="nelderMead.mjs.html">nelderMead.mjs</a>, <a href="nelderMead.mjs.html#line69">line 69</a>
     </li></ul></dd>
     
 
@@ -2436,6 +3055,7 @@ test()
 <div class="description usertext">
     <p>下山單純形法</p>
 <p>Fork: <a href="https://github.com/benfred/fmin/blob/master/src/nelderMead.js">nelderMead.js</a></p>
+<p>Rela: <a href="https://www.zhangzk.net/docs/publications/thesis.pdf">张在坤/无导数优化方法的研究</a></p>
 <p>Unit Test: <a href="https://github.com/yuda-lyu/w-optimization/blob/master/test/nelderMead.test.js">Github</a></p>
 </div>
 
@@ -2451,7 +3071,7 @@ test()
     
     <pre class="prettyprint"><code>async function test() {
 
-    function fun(params) {
+    async function fun(params) {
         let x = params[0] / 180 * Math.PI
         return Math.sin(x)
     }
@@ -3465,7 +4085,7 @@ test()
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a> on Wed Jan 19 2022 23:52:04 GMT+0800 (台北標準時間) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a> on Sun Jan 23 2022 16:19:51 GMT+0800 (台北標準時間) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>
