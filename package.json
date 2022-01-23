@@ -5,7 +5,6 @@
   "main": "dist/w-optimization.umd.js",
   "dependencies": {
     "lodash": "^4.17.21",
-    "minimize-golden-section-1d": "1.0.3",
     "wsemi": "^1.6.37"
   },
   "devDependencies": {
