@@ -2,7 +2,7 @@ import nelderMead from './src/nelderMead.mjs'
 
 async function test() {
 
-    function fun(params) {
+    async function fun(params) {
         let x = params[0]
         let y = params[1]
         return Math.sin(y) * x + Math.sin(x) * y + x * x + y * y

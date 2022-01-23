@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import w from 'wsemi'
-import nelderMead from './src/nelderMead.mjs'
+import cobyla from './src/cobyla.mjs'
 
 
 // DH-03
@@ -143,11 +143,11 @@ async function test() {
         return fitness
     }
 
-    console.log(await nelderMead(fun, [0, 0, 0])) //初始值影響很大, 用0,0,0比較是曲線, 否則很容易找到高係數而近直線之回歸線
+    console.log(await cobyla(fun, [0, 0, 0])) //初始值影響很大, 用0,0,0比較是曲線, 否則很容易找到高係數而近直線之回歸線
     // => {
-    //   count: 326,
-    //   y: 1782.0083185373996,
-    //   x: [ 79.27689137899918, 4.16685541895392, -19.853651133415656 ]
+    //   count: 95,
+    //   y: 1747.3650361651364,
+    //   x: [ 69.13901179827512, 1.4516027080364329, 25.139245519172714 ]
     // }
 
 }
@@ -157,4 +157,4 @@ test()
         console.log(err)
     })
 
-//node --experimental-modules --es-module-specifier-resolution=node g3.nelderMead.mjs
+//node --experimental-modules --es-module-specifier-resolution=node g3.cobyla.mjs

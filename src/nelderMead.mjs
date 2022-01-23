@@ -24,6 +24,8 @@ function sortOrder(a, b) {
  *
  * Fork: {@link https://github.com/benfred/fmin/blob/master/src/nelderMead.js nelderMead.js}
  *
+ * Rela: {@link https://www.zhangzk.net/docs/publications/thesis.pdf 张在坤/无导数优化方法的研究}
+ *
  * Unit Test: {@link https://github.com/yuda-lyu/w-optimization/blob/master/test/nelderMead.test.js Github}
  * @memberOf w-optimization
  * @param {Function} fun 輸入適應函數，將傳入變數組params，需回傳適應函數值，以求解最小值為目標
@@ -42,7 +44,7 @@ function sortOrder(a, b) {
  *
  * async function test() {
  *
- *     function fun(params) {
+ *     async function fun(params) {
  *         let x = params[0] / 180 * Math.PI
  *         return Math.sin(x)
  *     }

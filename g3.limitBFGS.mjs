@@ -123,7 +123,7 @@ _.each(ps, (v) => {
 
 async function test() {
 
-    function fun(params) {
+    async function fun(params) {
         //Vs=166.92*ln(x+35)-455.84
         //a=166.02, b=35, c=-455.84
         let a = params[0]

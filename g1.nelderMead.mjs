@@ -2,7 +2,7 @@ import nelderMead from './src/nelderMead.mjs'
 
 async function test() {
 
-    function fun(params) {
+    async function fun(params) {
         let x = params[0] / 180 * Math.PI
         return Math.sin(x)
     }
