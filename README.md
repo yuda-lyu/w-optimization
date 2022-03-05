@@ -1,5 +1,5 @@
 # w-optimization
-A tool for data PCA(Principle Component Analysis) and cluster(K-Means & K-Medoids).
+A tool for optimization algorithm.
 
 ![language](https://img.shields.io/badge/language-JavaScript-orange.svg) 
 [![npm version](http://img.shields.io/npm/v/w-optimization.svg?style=flat)](https://npmjs.org/package/w-optimization) 
