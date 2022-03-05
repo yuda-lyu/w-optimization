@@ -63,9 +63,6 @@ function sortOrder(a, b) {
  *     .catch((err) => {
  *         console.log(err)
  *     })
- * // { count: 78, y: -1, x: [ -90.0000000000001 ] }
- * // { count: 58, y: -1, x: [ -90.00000057220495 ] }
- * // { count: 58, y: -1, x: [ 270 ] }
  *
  * async function test2() {
  *
@@ -87,11 +84,6 @@ function sortOrder(a, b) {
  *     .catch((err) => {
  *         console.log(err)
  *     })
- * // {
- * //   count: 130,
- * //   y: 5.786322126017525e-19,
- * //   x: [ 0.000007191110664735547, -0.00000719035057196422 ]
- * // }
  *
  * async function test3() {
  *
@@ -244,11 +236,6 @@ function sortOrder(a, b) {
  *     .catch((err) => {
  *         console.log(err)
  *     })
- * // {
- * //   count: 326,
- * //   y: 1782.0083185373996,
- * //   x: [ 79.27689137899918, 4.16685541895392, -19.853651133415656 ]
- * // }
  *
  */
 async function nelderMead(fun, params, opt = {}) {
