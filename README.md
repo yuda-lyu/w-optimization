@@ -20,15 +20,15 @@ npm i w-optimization
 
 ### Algorithm
 `w-optimization`'s algorithm includes the following:
-* arrBinarySearch [[exam](https://yuda-lyu.github.io/w-optimization/g.arrBinartSearch.mjs)]
-* arrBinarySearchClosest [[exam](https://yuda-lyu.github.io/w-optimization/g.arrBinarySearchClosest.mjs)]
-* binarySearch [[1p](https://yuda-lyu.github.io/w-optimization/g1.binarySearch.mjs)]
-* cobyla [[1p](https://yuda-lyu.github.io/w-optimization/g1.cobyla.mjs)], [[2p](https://yuda-lyu.github.io/w-optimization/g2.cobyla.mjs)], [[3p](https://yuda-lyu.github.io/w-optimization/g3.cobyla.mjs)]
-* goldenSection [[1p](https://yuda-lyu.github.io/w-optimization/g1.goldenSection.mjs)]
-* goldenSectionLiberate [[1p](https://yuda-lyu.github.io/w-optimization/g1.goldenSectionLiberate.mjs)]
-* limitBFGS [[1p](https://yuda-lyu.github.io/w-optimization/g1.limitBFGS.mjs)], [[2p](https://yuda-lyu.github.io/w-optimization/g2.limitBFGS.mjs)], [[3p](https://yuda-lyu.github.io/w-optimization/g3.limitBFGS.mjs)]
-* nelderMead [[1p](https://yuda-lyu.github.io/w-optimization/g1.nelderMead.mjs)], [[2p](https://yuda-lyu.github.io/w-optimization/g2.nelderMead.mjs)], [[3p](https://yuda-lyu.github.io/w-optimization/g3.nelderMead.mjs)]
-* setpBracket [[1p](https://yuda-lyu.github.io/w-optimization/g1.setpBracket.mjs)]
+* arrBinarySearch [[exam](https://github.com/yuda-lyu/w-optimization/blob/master/g.arrBinartSearch.mjs)]
+* arrBinarySearchClosest [[exam](https://github.com/yuda-lyu/w-optimization/blob/master/g.arrBinarySearchClosest.mjs)]
+* binarySearch [[1p](https://github.com/yuda-lyu/w-optimization/blob/master/g1.binarySearch.mjs)]
+* cobyla [[1p](https://github.com/yuda-lyu/w-optimization/blob/master/g1.cobyla.mjs)], [[2p](https://github.com/yuda-lyu/w-optimization/blob/master/g2.cobyla.mjs)], [[3p](https://github.com/yuda-lyu/w-optimization/blob/master/g3.cobyla.mjs)]
+* goldenSection [[1p](https://github.com/yuda-lyu/w-optimization/blob/master/g1.goldenSection.mjs)]
+* goldenSectionLiberate [[1p](https://github.com/yuda-lyu/w-optimization/blob/master/g1.goldenSectionLiberate.mjs)]
+* limitBFGS [[1p](https://github.com/yuda-lyu/w-optimization/blob/master/g1.limitBFGS.mjs)], [[2p](https://github.com/yuda-lyu/w-optimization/blob/master/g2.limitBFGS.mjs)], [[3p](https://github.com/yuda-lyu/w-optimization/blob/master/g3.limitBFGS.mjs)]
+* nelderMead [[1p](https://github.com/yuda-lyu/w-optimization/blob/master/g1.nelderMead.mjs)], [[2p](https://github.com/yuda-lyu/w-optimization/blob/master/g2.nelderMead.mjs)], [[3p](https://github.com/yuda-lyu/w-optimization/blob/master/g3.nelderMead.mjs)]
+* setpBracket [[1p](https://github.com/yuda-lyu/w-optimization/blob/master/g1.setpBracket.mjs)]
 
 ### nelderMead for x1
 ```alias
