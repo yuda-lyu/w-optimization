@@ -3,8 +3,10 @@ import w from 'wsemi'
 import nelderMead from './src/nelderMead.mjs'
 
 
-// DH-03
-let t = `
+async function test() {
+
+
+    let t = `
 0 
 3 
 4 
@@ -105,23 +107,21 @@ let t = `
 99 342
 100 351
 `
-let ps = w.sep(t, '\n')
-let _ps = []
-_.each(ps, (v) => {
-    let s = w.sep(v, ' ')
-    let Depth = _.get(s, 0, '')
-    let Vs = _.get(s, 1, '')
-    if (w.isnum(Depth) && w.isnum(Vs)) {
-        _ps.push({
-            Depth: w.cdbl(Depth),
-            Vs: w.cdbl(Vs),
-        })
-    }
-    ps = _ps
-})
-// console.log(ps)
-
-async function test() {
+    let ps = w.sep(t, '\n')
+    let _ps = []
+    _.each(ps, (v) => {
+        let s = w.sep(v, ' ')
+        let Depth = _.get(s, 0, '')
+        let Vs = _.get(s, 1, '')
+        if (w.isnum(Depth) && w.isnum(Vs)) {
+            _ps.push({
+                Depth: w.cdbl(Depth),
+                Vs: w.cdbl(Vs),
+            })
+        }
+        ps = _ps
+    })
+    // console.log(ps)
 
     async function fun(params) {
         //Vs=166.92*ln(x+35)-455.84
@@ -156,5 +156,10 @@ test()
     .catch((err) => {
         console.log(err)
     })
+// {
+//   count: 326,
+//   y: 1782.0083185373996,
+//   x: [ 79.27689137899918, 4.16685541895392, -19.853651133415656 ]
+// }
 
 //node --experimental-modules --es-module-specifier-resolution=node g3.nelderMead.mjs

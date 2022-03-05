@@ -22,5 +22,8 @@ test()
     .catch((err) => {
         console.log(err)
     })
+// { count: 78, y: -1, x: [ -90.0000000000001 ] }
+// { count: 58, y: -1, x: [ -90.00000057220495 ] }
+// { count: 58, y: -1, x: [ 270 ] }
 
 //node --experimental-modules --es-module-specifier-resolution=node g1.nelderMead.mjs

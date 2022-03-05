@@ -3,7 +3,6 @@ import w from 'wsemi'
 import cobyla from './src/cobyla.mjs'
 
 
-// DH-03
 let t = `
 0 
 3 

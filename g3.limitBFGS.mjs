@@ -3,7 +3,6 @@ import w from 'wsemi'
 import limitBFGS from './src/limitBFGS.mjs'
 
 
-// DH-03
 let t = `
 0 
 3 
