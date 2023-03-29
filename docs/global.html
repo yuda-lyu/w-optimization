@@ -14,6 +14,7 @@
     <link type="text/css" rel="stylesheet" href="styles/prettify.css">
     <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
     <script src="scripts/nav.js" defer></script>
+    
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
@@ -27,7 +28,9 @@
 
 <nav >
     
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="w-optimization.html">w-optimization</a><ul class='methods'><li data-type='method'><a href="w-optimization.html#.arrBinarySearch">arrBinarySearch</a></li><li data-type='method'><a href="w-optimization.html#.arrBinarySearchClosest">arrBinarySearchClosest</a></li><li data-type='method'><a href="w-optimization.html#.binarySearch">binarySearch</a></li><li data-type='method'><a href="w-optimization.html#.cobyla">cobyla</a></li><li data-type='method'><a href="w-optimization.html#.goldenSection">goldenSection</a></li><li data-type='method'><a href="w-optimization.html#.goldenSectionLiberate">goldenSectionLiberate</a></li><li data-type='method'><a href="w-optimization.html#.limitBFGS">limitBFGS</a></li><li data-type='method'><a href="w-optimization.html#.nelderMead">nelderMead</a></li><li data-type='method'><a href="w-optimization.html#.setpBracket">setpBracket</a></li></ul></li></ul><h3>Global</h3><ul><li><a href="global.html#cobylaCore">cobylaCore</a></li><li><a href="global.html#Normal">Normal</a></li></ul>
+    
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="w-optimization.html">w-optimization</a><ul class='methods'><li data-type='method'><a href="w-optimization.html#.arrBinarySearch">arrBinarySearch</a></li><li data-type='method'><a href="w-optimization.html#.arrBinarySearchClosest">arrBinarySearchClosest</a></li><li data-type='method'><a href="w-optimization.html#.binarySearch">binarySearch</a></li><li data-type='method'><a href="w-optimization.html#.cobyla">cobyla</a></li><li data-type='method'><a href="w-optimization.html#.goldenSection">goldenSection</a></li><li data-type='method'><a href="w-optimization.html#.goldenSectionLiberate">goldenSectionLiberate</a></li><li data-type='method'><a href="w-optimization.html#.limitBFGS">limitBFGS</a></li><li data-type='method'><a href="w-optimization.html#.nelderMead">nelderMead</a></li><li data-type='method'><a href="w-optimization.html#.setpBracket">setpBracket</a></li></ul></li></ul><h3>Global</h3><ul><li><a href="global.html#Normal">Normal</a></li><li><a href="global.html#cobylaCore">cobylaCore</a></li></ul>
+    
 </nav>
 
 <div id="main">
@@ -46,6 +49,8 @@
     
         <h2>
         
+            
+        
         </h2>
         
     
@@ -58,6 +63,7 @@
             
 
 <dl class="details">
+    
 
     
 
@@ -126,6 +132,18 @@
 
 
 <dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>Constrained Optimization BY Linear Approximation in Java.</p>
+<p>COBYLA2 is an implementation of Powell’s nonlinear derivative–free constrained optimization that uses
+a linear approximation approach. The algorithm is a sequential trust–region algorithm that employs linear
+approximations to the objective and constraint functions, where the approximations are formed by linear
+interpolation at n + 1 points in the space of the variables and tries to maintain a regular–shaped simplex
+over iterations.</p>
+<p>It solves nonsmooth NLP with a moderate number of variables (about 100). Inequality constraints only.</p>
+<p>The initial point X is taken as one vertex of the initial simplex with zero being another, so, X should
+not be entered as the zero vector.</p></li></ul></dd>
+    
 
     
     <dt class="tag-source">Source:</dt>
@@ -206,7 +224,7 @@ not be entered as the zero vector.</p>
 
     
 
-    <h4 class="name" id="cobylaCore"><span class="type-signature">(async) </span>cobylaCore<span class="signature">(calcfc, n, m, x, rhobeg, rhoend, iprint, maxfun)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="cobylaCore"><span class="type-signature type-signature-async">(async) </span>cobylaCore<span class="signature">(calcfc, n, m, x, rhobeg, rhoend, iprint, maxfun)</span><span class="type-signature"></span></h4>
 
     
 
@@ -214,6 +232,11 @@ not be entered as the zero vector.</p>
 
 
 <dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>Minimizes the objective function F with respect to a set of inequality constraints CON,
+and returns the optimal variable array. F and CON may be non-linear, and should preferably be smooth.</p></li></ul></dd>
+    
 
     
     <dt class="tag-source">Source:</dt>
@@ -257,10 +280,6 @@ not be entered as the zero vector.</p>
 
 
 
-<div class="description usertext">
-    <p>Minimizes the objective function F with respect to a set of inequality constraints CON,
-and returns the optimal variable array. F and CON may be non-linear, and should preferably be smooth.</p>
-</div>
 
 
 
@@ -269,10 +288,7 @@ and returns the optimal variable array. F and CON may be non-linear, and should 
 
 
 
-
-
-
-    <h5>Parameters:</h5>
+    <h5 class="h5-parameters">Parameters:</h5>
     
 
 <table class="params">
@@ -458,7 +474,7 @@ optimal values of the variables obtained in the COBYLA minimization.</p></td>
 
 
 
-<h5>Returns:</h5>
+<h5 class="h5-returns">Returns:</h5>
 
         
 <div class="param-desc">
@@ -491,7 +507,7 @@ optimal values of the variables obtained in the COBYLA minimization.</p></td>
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.10</a> on Thu Jan 19 2023 12:31:53 GMT+0800 (台北標準時間) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a> on Wed Mar 29 2023 15:05:22 GMT+0800 (台北標準時間) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>
