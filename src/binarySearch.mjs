@@ -1,4 +1,4 @@
-import get from 'lodash/get'
+import get from 'lodash-es/get'
 import isfun from 'wsemi/src/isfun'
 import isnum from 'wsemi/src/isnum'
 import cdbl from 'wsemi/src/cdbl'
