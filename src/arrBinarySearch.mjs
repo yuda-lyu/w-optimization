@@ -1,12 +1,12 @@
-import get from 'lodash-es/get'
-import size from 'lodash-es/size'
-import map from 'lodash-es/map'
-import filter from 'lodash-es/filter'
-import sortBy from 'lodash-es/sortBy'
-import isearr from 'wsemi/src/isearr'
-import isnum from 'wsemi/src/isnum'
-import isbol from 'wsemi/src/isbol'
-import cdbl from 'wsemi/src/cdbl'
+import get from 'lodash-es/get.js'
+import size from 'lodash-es/size.js'
+import map from 'lodash-es/map.js'
+import filter from 'lodash-es/filter.js'
+import sortBy from 'lodash-es/sortBy.js'
+import isearr from 'wsemi/src/isearr.mjs'
+import isnum from 'wsemi/src/isnum.mjs'
+import isbol from 'wsemi/src/isbol.mjs'
+import cdbl from 'wsemi/src/cdbl.mjs'
 
 
 /**

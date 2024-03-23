@@ -1,10 +1,10 @@
-import get from 'lodash-es/get'
-import each from 'lodash-es/each'
-import map from 'lodash-es/map'
-import size from 'lodash-es/size'
-import times from 'lodash-es/times'
-import random from 'lodash-es/random'
-import range from 'lodash-es/range'
+import get from 'lodash-es/get.js'
+import each from 'lodash-es/each.js'
+import map from 'lodash-es/map.js'
+import size from 'lodash-es/size.js'
+import times from 'lodash-es/times.js'
+import random from 'lodash-es/random.js'
+import range from 'lodash-es/range.js'
 import cdbl from 'wsemi/src/cdbl.mjs'
 
 

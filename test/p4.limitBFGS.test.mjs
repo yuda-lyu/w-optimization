@@ -1,10 +1,13 @@
+import assert from 'assert'
 import _ from 'lodash-es'
 import w from 'wsemi'
-import limitBFGS from './src/limitBFGS.mjs'
+import limitBFGS from '../src/limitBFGS.mjs'
 
 
-// DH-28
-let t = `
+describe('limitBFGS', function() {
+
+    // DH-28
+    let t = `
 -5 77.5
 -4 81.375
 -3 85.25
@@ -110,27 +113,25 @@ let t = `
 99 377
 100 381
 `
-let ps = w.sep(t, '\n')
-let _ps = []
-_.each(ps, (v) => {
-    let s = w.sep(v, ' ')
-    let Depth = _.get(s, 0, '')
-    let Vs = _.get(s, 1, '')
-    if (w.isnum(Depth) && w.isnum(Vs)) {
-        _ps.push({
-            Depth: w.cdbl(Depth),
-            Vs: w.cdbl(Vs),
-        })
-    }
-    ps = _ps
-})
-// console.log(ps)
-
-async function test() {
+    let ps = w.sep(t, '\n')
+    let _ps = []
+    _.each(ps, (v) => {
+        let s = w.sep(v, ' ')
+        let Depth = _.get(s, 0, '')
+        let Vs = _.get(s, 1, '')
+        if (w.isnum(Depth) && w.isnum(Vs)) {
+            _ps.push({
+                Depth: w.cdbl(Depth),
+                Vs: w.cdbl(Vs),
+            })
+        }
+        ps = _ps
+    })
+    // console.log(ps)
 
     async function fun(params) {
-        //Vs=166.92*ln(x+35)-455.84
-        //a=166.02, b=35, c=-455.84
+    //Vs=166.92*ln(x+35)-455.84
+    //a=166.02, b=35, c=-455.84
         let a = params[0]
         let b = params[1]
         let c = params[2]
@@ -149,18 +150,22 @@ async function test() {
     }
 
     //此問題limitBFGS的delta得要設大, 否則無法收斂
-    console.log(await limitBFGS(fun, [0, 0, 0], { delta: 0.01 })) //初始值影響很大, 用0,0,0比較是曲線, 否則很容易找到高係數而近直線之回歸線
+    // console.log(await limitBFGS(fun, [0, 0, 0], { delta: 0.01 })) //初始值影響很大, 用0,0,0比較是曲線, 否則很容易找到高係數而近直線之回歸線
     // => {
     //   count: 796,
     //   y: 1599.1774726353633,
     //   x: [ 182.88072716002188, 32.16369422488677, -526.3504550721323 ]
     // }
+    let rt1 = {
+        count: 796,
+        y: 1599.1774726353633,
+        x: [182.88072716002188, 32.16369422488677, -526.3504550721323]
+    }
 
-}
-
-test()
-    .catch((err) => {
-        console.log(err)
+    it(`should return ${JSON.stringify(rt1)} when input fun, [0, 0, 0], { delta: 0.01 }`, async function() {
+        let rr = await limitBFGS(fun, [0, 0, 0], { delta: 0.01 })
+        let rt = rt1
+        assert.strict.deepEqual(rr, rt)
     })
 
-//node --experimental-modules --es-module-specifier-resolution=node g4.limitBFGS.mjs
+})

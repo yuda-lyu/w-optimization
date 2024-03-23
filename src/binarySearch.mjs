@@ -1,7 +1,7 @@
-import get from 'lodash-es/get'
-import isfun from 'wsemi/src/isfun'
-import isnum from 'wsemi/src/isnum'
-import cdbl from 'wsemi/src/cdbl'
+import get from 'lodash-es/get.js'
+import isfun from 'wsemi/src/isfun.mjs'
+import isnum from 'wsemi/src/isnum.mjs'
+import cdbl from 'wsemi/src/cdbl.mjs'
 
 
 /**

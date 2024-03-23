@@ -1,5 +1,5 @@
-import get from 'lodash-es/get'
-import size from 'lodash-es/size'
+import get from 'lodash-es/get.js'
+import size from 'lodash-es/size.js'
 import isnum from 'wsemi/src/isnum.mjs'
 import isfun from 'wsemi/src/isfun.mjs'
 import isearr from 'wsemi/src/isearr.mjs'

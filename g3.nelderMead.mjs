@@ -3,10 +3,7 @@ import w from 'wsemi'
 import nelderMead from './src/nelderMead.mjs'
 
 
-async function test() {
-
-
-    let t = `
+let t = `
 0 
 3 
 4 
@@ -107,21 +104,23 @@ async function test() {
 99 342
 100 351
 `
-    let ps = w.sep(t, '\n')
-    let _ps = []
-    _.each(ps, (v) => {
-        let s = w.sep(v, ' ')
-        let Depth = _.get(s, 0, '')
-        let Vs = _.get(s, 1, '')
-        if (w.isnum(Depth) && w.isnum(Vs)) {
-            _ps.push({
-                Depth: w.cdbl(Depth),
-                Vs: w.cdbl(Vs),
-            })
-        }
-        ps = _ps
-    })
-    // console.log(ps)
+let ps = w.sep(t, '\n')
+let _ps = []
+_.each(ps, (v) => {
+    let s = w.sep(v, ' ')
+    let Depth = _.get(s, 0, '')
+    let Vs = _.get(s, 1, '')
+    if (w.isnum(Depth) && w.isnum(Vs)) {
+        _ps.push({
+            Depth: w.cdbl(Depth),
+            Vs: w.cdbl(Vs),
+        })
+    }
+    ps = _ps
+})
+// console.log(ps)
+
+async function test() {
 
     async function fun(params) {
         //Vs=166.92*ln(x+35)-455.84
