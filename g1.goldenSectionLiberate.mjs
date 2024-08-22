@@ -17,4 +17,4 @@ test()
         console.log(err)
     })
 
-//node --experimental-modules --es-module-specifier-resolution=node g1.goldenSectionLiberate.mjs
+//node --experimental-modules g1.goldenSectionLiberate.mjs

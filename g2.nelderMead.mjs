@@ -27,4 +27,4 @@ test()
 //   x: [ 0.000007191110664735547, -0.00000719035057196422 ]
 // }
 
-//node --experimental-modules --es-module-specifier-resolution=node g2.nelderMead.mjs
+//node --experimental-modules g2.nelderMead.mjs

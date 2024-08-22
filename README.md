@@ -4,7 +4,6 @@ A tool for optimization algorithm.
 ![language](https://img.shields.io/badge/language-JavaScript-orange.svg) 
 [![npm version](http://img.shields.io/npm/v/w-optimization.svg?style=flat)](https://npmjs.org/package/w-optimization) 
 [![license](https://img.shields.io/npm/l/w-optimization.svg?style=flat)](https://npmjs.org/package/w-optimization) 
-[![gzip file size](http://img.badgesize.io/yuda-lyu/w-optimization/master/dist/w-optimization.umd.js.svg?compression=gzip)](https://github.com/yuda-lyu/w-optimization)
 [![npm download](https://img.shields.io/npm/dt/w-optimization.svg)](https://npmjs.org/package/w-optimization) 
 [![npm download](https://img.shields.io/npm/dm/w-optimization.svg)](https://npmjs.org/package/w-optimization) 
 [![jsdelivr download](https://img.shields.io/jsdelivr/npm/hm/w-optimization.svg)](https://www.jsdelivr.com/package/npm/w-optimization)
@@ -219,7 +218,7 @@ async function test() {
         let c = params[2]
         let fitness = 0
         _.each(ps, (v) => {
-            let d = Math.max(v.Depth + b, 0.001) ////深度+b需>0
+            let d = Math.max(v.Depth + b, 0.001) //深度+b需>0
             let Vs = a * Math.log(d) + c
             Vs = Math.max(Vs, 0) //不能給予0.001, 否則適應函數為分連續可微
             let dy = Vs - v.Vs

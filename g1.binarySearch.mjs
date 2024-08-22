@@ -14,4 +14,4 @@ console.log(binarySearch(fun, 90, 267))
 console.log(binarySearch(fun, 90, 270))
 // => { y: -1, x: 270 }
 
-//node --experimental-modules --es-module-specifier-resolution=node g1.binarySearch.mjs
+//node --experimental-modules g1.binarySearch.mjs

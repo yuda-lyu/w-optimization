@@ -1,10 +1,10 @@
 import assert from 'assert'
 import _ from 'lodash-es'
 import w from 'wsemi'
-import nelderMead from '../src/nelderMead.mjs'
+import omlDE from '../src/omlDE.mjs'
 
 
-describe('nelderMead', function() {
+describe('omlDE', function() {
 
     let t = `
 -5 77.5
@@ -128,6 +128,25 @@ describe('nelderMead', function() {
     })
     // console.log(ps)
 
+    let dps = [
+        { //x1: 182.79083587256468
+            // values: w.rang(180, 190, 1000),
+            values: w.rang(100, 300, 1000),
+            n: 1000,
+        },
+        { //x2: 32.12798318733953
+            // values: w.rang(25, 35, 1000),
+            values: w.rang(0, 50, 1000),
+            n: 1000,
+        },
+        { //x3: -525.813178715664
+            // values: w.rang(-530, -520, 1000),
+            values: w.rang(-1000, 0, 1000),
+            n: 1000,
+        },
+        //y: 1598.9661723792265
+    ]
+
     async function fun(params) {
         //Vs=166.92*ln(x+35)-455.84
         //a=166.02, b=35, c=-455.84
@@ -148,22 +167,28 @@ describe('nelderMead', function() {
         return fitness
     }
 
-    // console.log(await nelderMead(fun, [0, 0, 0])) //初始值影響很大, 用0,0,0比較是曲線, 否則很容易找到高係數而近直線之回歸線
-    // => {
-    //   count: 939,
-    //   y: 1598.9661723792265,
-    //   x: [ 182.79083587256468, 32.12798318733953, -525.813178715664 ]
+    // let r = await omlDE(dps, fun)
+    // console.log('bestSolution', r.bestSolution)
+    // console.log('stopMode', r.stopMode)
+    // console.log('stopNg', r.stopNg)
+    // console.log('stopExecutions', r.stopExecutions)
+    // => bestSolution {
+    //   ps: [
+    //     { ind: 416, value: 183.19999999999726 },
+    //     { ind: 646, value: 32.3000000000003 },
+    //     { ind: 472, value: -528 }
+    //   ],
+    //   fitness: 1599.218200884655
     // }
-    let rt1 = {
-        count: 939,
-        y: 1598.9661723792265,
-        x: [182.79083587256468, 32.12798318733953, -525.813178715664]
-    }
+    // => stopMode stop by iContinue[100] >= NContiguous[100]
+    // => stopNg 4358
+    // => stopExecutions 654688
 
-    it(`should return ${JSON.stringify(rt1)} when input fun, [0, 0, 0]`, async function() {
-        let rr = await nelderMead(fun, [0, 0, 0])
-        let rt = rt1
-        assert.strict.deepEqual(rr, rt)
+    it(`should return true when input dps, fun`, async function() {
+        let rr = await omlDE(dps, fun)
+        //隨機多點最佳化不能保證穩定值, 故偵測欄位是否存在
+        let rt = w.iseobj(_.get(rr, 'bestSolution')) && w.isearr(_.get(rr, 'bestSolution.ps')) && w.isnum(_.get(rr, 'bestSolution.fitness'))
+        assert.strict.deepEqual(true, rt)
     })
 
 })

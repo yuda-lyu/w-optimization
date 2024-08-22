@@ -1,16 +1,16 @@
 {
   "name": "w-optimization",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "main": "dist/w-optimization.umd.js",
   "dependencies": {
     "lodash-es": "^4.17.21",
-    "wsemi": "^1.7.49"
+    "wsemi": "^1.7.55"
   },
   "devDependencies": {
     "w-package-tools": "^1.0.75"
   },
   "scripts": {
-    "test": "mocha --parallel --timeout 60000 --experimental-modules --es-module-specifier-resolution=node",
+    "test": "mocha --parallel --timeout 60000 --experimental-modules",
     "deploy": "gh-pages -d docs"
   },
   "repository": {

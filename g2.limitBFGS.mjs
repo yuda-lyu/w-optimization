@@ -23,4 +23,4 @@ test()
         console.log(err)
     })
 
-//node --experimental-modules --es-module-specifier-resolution=node g2.limitBFGS.mjs
+//node --experimental-modules g2.limitBFGS.mjs

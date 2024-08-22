@@ -11,4 +11,4 @@ console.log(arrBinarySearchClosest(arr, 4.5))
 console.log(arrBinarySearchClosest(arr, 5))
 // => { ind: 3, indSorted: 6, value: 6, diff: 1 }
 
-//node --experimental-modules --es-module-specifier-resolution=node g1.arrBinarySearchClosest.mjs
+//node --experimental-modules g1.arrBinarySearchClosest.mjs

@@ -6,7 +6,6 @@ import nelderMead from '../src/nelderMead.mjs'
 
 describe('nelderMead', function() {
 
-
     let t = `
 0 
 3 
@@ -132,7 +131,7 @@ describe('nelderMead', function() {
         let c = params[2]
         let fitness = 0
         _.each(ps, (v) => {
-            let d = Math.max(v.Depth + b, 0.001) ////深度+b需>0
+            let d = Math.max(v.Depth + b, 0.001) //深度+b需>0
             let Vs = a * Math.log(d) + c
             Vs = Math.max(Vs, 0) //不能給予0.001, 否則適應函數為分連續可微
             let dy = Vs - v.Vs

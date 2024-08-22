@@ -11,10 +11,9 @@
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}\\g1.limitBFGS.mjs",
+            "program": "${workspaceFolder}\\g5.omlDE.mjs",
             "runtimeArgs": [
                 "--experimental-modules",
-                "--es-module-specifier-resolution=node"
             ]
         }
     ]

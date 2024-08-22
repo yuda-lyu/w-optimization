@@ -3,7 +3,6 @@ import w from 'wsemi'
 import limitBFGS from './src/limitBFGS.mjs'
 
 
-// DH-28
 let t = `
 -5 77.5
 -4 81.375
@@ -136,7 +135,7 @@ async function test() {
         let c = params[2]
         let fitness = 0
         _.each(ps, (v) => {
-            let d = Math.max(v.Depth + b, 0.001) ////深度+b需>0
+            let d = Math.max(v.Depth + b, 0.001) //深度+b需>0
             let Vs = a * Math.log(d) + c
             Vs = Math.max(Vs, 0) //不能給予0.001, 否則適應函數為分連續可微
             let dy = Vs - v.Vs
@@ -163,4 +162,4 @@ test()
         console.log(err)
     })
 
-//node --experimental-modules --es-module-specifier-resolution=node g4.limitBFGS.mjs
+//node --experimental-modules g4.limitBFGS.mjs

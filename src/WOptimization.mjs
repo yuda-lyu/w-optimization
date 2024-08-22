@@ -7,8 +7,10 @@ import goldenSectionLiberate from './goldenSectionLiberate.mjs'
 import limitBFGS from './limitBFGS.mjs'
 import nelderMead from './nelderMead.mjs'
 import setpBracket from './setpBracket.mjs'
+import omlDE from './omlDE.mjs'
 
 
+//此處須人工添加
 let WOptimization = {
     arrBinarySearch,
     arrBinarySearchClosest,
@@ -19,6 +21,7 @@ let WOptimization = {
     limitBFGS,
     nelderMead,
     setpBracket,
+    omlDE,
 }
 
 

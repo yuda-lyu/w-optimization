@@ -22,4 +22,4 @@ test()
         console.log(err)
     })
 
-//node --experimental-modules --es-module-specifier-resolution=node g2.cobyla.mjs
+//node --experimental-modules g2.cobyla.mjs
