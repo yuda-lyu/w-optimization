@@ -1,6 +1,6 @@
 {
   "name": "w-optimization",
-  "version": "1.0.14",
+  "version": "1.0.15",
   "main": "dist/w-optimization.umd.js",
   "dependencies": {
     "lodash-es": "^4.17.21",

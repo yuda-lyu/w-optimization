@@ -309,7 +309,7 @@ async function omlDE(dps, funFit, opt = {}) {
                 }
 
                 //omlModifyParameter
-                j = omlModifyParameter(j, dps[i].n, ModeOutLimit)
+                j = omlModifyParameter(j, dps[i].n - 1, ModeOutLimit)
 
                 //update
                 s.ps[i].ind = j
