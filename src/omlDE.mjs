@@ -7,6 +7,7 @@ import isnum from 'wsemi/src/isnum.mjs'
 import isestr from 'wsemi/src/isestr.mjs'
 import ispint from 'wsemi/src/ispint.mjs'
 import isbol from 'wsemi/src/isbol.mjs'
+import isfun from 'wsemi/src/isfun.mjs'
 import ispm from 'wsemi/src/ispm.mjs'
 import cint from 'wsemi/src/cint.mjs'
 import cdbl from 'wsemi/src/cdbl.mjs'
@@ -84,6 +85,12 @@ async function omlDE(dps, funFit, opt = {}) {
     if (!isbol(UseLocalSearch)) {
         UseLocalSearch = true
     }
+
+    //funGetBetter, 當有更優解出現時呼叫函數
+    let funGetBetter = get(opt, 'funGetBetter')
+
+    //funEndGeneration, 當各世代計算結束後呼叫函數
+    let funEndGeneration = get(opt, 'funEndGeneration')
 
     //deCrossoverFactorStart, 初始交配因子
     let deCrossoverFactorStart = get(opt, 'deCrossoverFactorStart', '')
@@ -444,9 +451,17 @@ async function omlDE(dps, funFit, opt = {}) {
         //push
         hists.push(cloneDeep(children[0]))
 
-        //update bestSolution
+        //bestSolution
         if (bestSolution.fitness > children[0].fitness) {
+
+            //update
             bestSolution = cloneDeep(children[0])
+
+            //funGetBetter
+            if (isfun(funGetBetter)) {
+                funGetBetter(cloneDeep(bestSolution), i)
+            }
+
             iContinue = 0
         }
         else {
@@ -581,6 +596,11 @@ async function omlDE(dps, funFit, opt = {}) {
             stopNg = i
             stopExecutions = iExecute
             break
+        }
+
+        //funEndGeneration
+        if (isfun(funEndGeneration)) {
+            funEndGeneration(cloneDeep(children), cloneDeep(bestSolution), i)
         }
 
         //update parents
