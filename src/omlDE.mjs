@@ -151,7 +151,7 @@ async function omlDE(dps, funFit, opt = {}) {
     //deMutation, 突變運算子
     let deMutation = get(opt, 'deMutation', '')
     if (!arrHas(deMutation, ['1R2RR', '1B2RR', '1R2BR', '1R4RRRR', '1B4RRRR', '1R4BRRR', '1S4BSRR'])) {
-        deMutation = '1R2BR'
+        deMutation = '1B2RR'
     }
 
     let iRepeat = 0 //初始化再搜尋次數
@@ -253,7 +253,7 @@ async function omlDE(dps, funFit, opt = {}) {
             ir5 = inds[4]
         }
         else if (deMutation === '1B4RRRR') {
-            ir1 = 1
+            ir1 = 0
             ir2 = inds[0]
             ir3 = inds[1]
             ir4 = inds[2]
@@ -261,14 +261,14 @@ async function omlDE(dps, funFit, opt = {}) {
         }
         else if (deMutation === '1R4BRRR') {
             ir1 = inds[0]
-            ir2 = 1
+            ir2 = 0
             ir3 = inds[1]
             ir4 = inds[2]
             ir5 = inds[3]
         }
         else if (deMutation === '1S4BSRR') {
             ir1 = k
-            ir2 = 1
+            ir2 = 0
             ir3 = k
             ir4 = inds[2]
             ir5 = inds[3]
