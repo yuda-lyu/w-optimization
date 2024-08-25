@@ -1,10 +1,10 @@
 {
   "name": "w-optimization",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "main": "dist/w-optimization.umd.js",
   "dependencies": {
     "lodash-es": "^4.17.21",
-    "wsemi": "^1.7.55"
+    "wsemi": "^1.7.56"
   },
   "devDependencies": {
     "w-package-tools": "^1.0.75"
