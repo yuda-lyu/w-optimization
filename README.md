@@ -19,8 +19,8 @@ npm i w-optimization
 
 ### Algorithm
 `w-optimization`'s algorithm includes the following:
-* arrBinarySearch [[exam](https://github.com/yuda-lyu/w-optimization/blob/master/g1.arrBinartSearch.mjs)]
-* arrBinarySearchClosest [[exam](https://github.com/yuda-lyu/w-optimization/blob/master/g1.arrBinarySearchClosest.mjs)]
+* arrBinarySearch [[1p](https://github.com/yuda-lyu/w-optimization/blob/master/g1.arrBinartSearch.mjs)]
+* arrBinarySearchClosest [[1p](https://github.com/yuda-lyu/w-optimization/blob/master/g1.arrBinarySearchClosest.mjs)]
 * binarySearch [[1p](https://github.com/yuda-lyu/w-optimization/blob/master/g1.binarySearch.mjs)]
 * cobyla [[1p](https://github.com/yuda-lyu/w-optimization/blob/master/g1.cobyla.mjs)], [[2p](https://github.com/yuda-lyu/w-optimization/blob/master/g2.cobyla.mjs)], [[3p](https://github.com/yuda-lyu/w-optimization/blob/master/g3.cobyla.mjs)]
 * goldenSection [[1p](https://github.com/yuda-lyu/w-optimization/blob/master/g1.goldenSection.mjs)]
