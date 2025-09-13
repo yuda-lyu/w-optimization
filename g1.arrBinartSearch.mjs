@@ -8,4 +8,4 @@ console.log(arrBinarySearch(arr, 2))
 console.log(arrBinarySearch(arr, 5))
 // => null
 
-//node --experimental-modules g1.arrBinartSearch.mjs
+//node g1.arrBinartSearch.mjs

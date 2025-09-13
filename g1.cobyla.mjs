@@ -24,4 +24,4 @@ test()
         console.log(err)
     })
 
-//node --experimental-modules g1.cobyla.mjs
+//node g1.cobyla.mjs

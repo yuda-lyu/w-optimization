@@ -161,4 +161,4 @@ test()
         console.log(err)
     })
 
-//node --experimental-modules g4.nelderMead.mjs
+//node g4.nelderMead.mjs

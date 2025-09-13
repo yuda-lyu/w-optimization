@@ -23,4 +23,4 @@ test()
         console.log(err)
     })
 
-//node --experimental-modules g1.limitBFGS.mjs
+//node g1.limitBFGS.mjs

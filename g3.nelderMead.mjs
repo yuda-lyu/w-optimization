@@ -161,4 +161,4 @@ test()
 //   x: [ 79.27689137899918, 4.16685541895392, -19.853651133415656 ]
 // }
 
-//node --experimental-modules g3.nelderMead.mjs
+//node g3.nelderMead.mjs

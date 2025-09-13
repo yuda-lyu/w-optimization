@@ -13,15 +13,14 @@ To view documentation or get support, visit [docs](https://yuda-lyu.github.io/w-
 
 ## Installation
 ### Using npm(ES6 module):
-> **Note:** w-optimization is mainly dependent on `wsemi` and `lodash-es`.
 ```alias
 npm i w-optimization
 ```
 
 ### Algorithm
 `w-optimization`'s algorithm includes the following:
-* arrBinarySearch [[exam](https://github.com/yuda-lyu/w-optimization/blob/master/g.arrBinartSearch.mjs)]
-* arrBinarySearchClosest [[exam](https://github.com/yuda-lyu/w-optimization/blob/master/g.arrBinarySearchClosest.mjs)]
+* arrBinarySearch [[exam](https://github.com/yuda-lyu/w-optimization/blob/master/g1.arrBinartSearch.mjs)]
+* arrBinarySearchClosest [[exam](https://github.com/yuda-lyu/w-optimization/blob/master/g1.arrBinarySearchClosest.mjs)]
 * binarySearch [[1p](https://github.com/yuda-lyu/w-optimization/blob/master/g1.binarySearch.mjs)]
 * cobyla [[1p](https://github.com/yuda-lyu/w-optimization/blob/master/g1.cobyla.mjs)], [[2p](https://github.com/yuda-lyu/w-optimization/blob/master/g2.cobyla.mjs)], [[3p](https://github.com/yuda-lyu/w-optimization/blob/master/g3.cobyla.mjs)]
 * goldenSection [[1p](https://github.com/yuda-lyu/w-optimization/blob/master/g1.goldenSection.mjs)]

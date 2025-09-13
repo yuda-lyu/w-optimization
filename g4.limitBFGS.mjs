@@ -162,4 +162,4 @@ test()
         console.log(err)
     })
 
-//node --experimental-modules g4.limitBFGS.mjs
+//node g4.limitBFGS.mjs

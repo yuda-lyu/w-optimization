@@ -190,4 +190,4 @@ test()
         console.log(err)
     })
 
-//node --experimental-modules g4.omlDE.mjs
+//node g4.omlDE.mjs

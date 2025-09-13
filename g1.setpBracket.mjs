@@ -50,4 +50,4 @@ test()
         console.log(err)
     })
 
-//node --experimental-modules g1.setpBracket.mjs
+//node g1.setpBracket.mjs

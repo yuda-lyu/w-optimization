@@ -156,4 +156,4 @@ test()
         console.log(err)
     })
 
-//node --experimental-modules g3.cobyla.mjs
+//node g3.cobyla.mjs
