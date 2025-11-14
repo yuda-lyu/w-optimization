@@ -566,9 +566,14 @@ async function omlDE(dps, funFit, opt = {}) {
                 return
             }
 
+            //_ps
+            let _ps = map(r.x, (v, i) => {
+                return omlDiscreteValue(v, i, dps)
+            })
+
             //s
             let s = {
-                ps: r.x,
+                ps: _ps,
                 fitness: r.y,
             }
 

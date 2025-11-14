@@ -23,8 +23,8 @@ function omlDiscreteValue(value, i, dps) {
     each(values, (v, k) => {
         let d = value - v
         d = Math.abs(d)
-        if (d < diff) {
-            d = diff
+        if (diff > d) {
+            diff = d
             _ind = k
             _value = v
         }
