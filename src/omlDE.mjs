@@ -161,6 +161,20 @@ async function omlDE(dps, funFit, opt = {}) {
         deMutation = '1B2RR'
     }
 
+    //Np最低需求檢查, 確保operCrossover內inds取值不會undefined
+    let mutationNpMin = {
+        '1R2RR': 3,
+        '1B2RR': 2,
+        '1R2BR': 2,
+        '1R4RRRR': 5,
+        '1B4RRRR': 4,
+        '1R4BRRR': 4,
+        '1S4BSRR': 4,
+    }
+    if (Np < mutationNpMin[deMutation]) {
+        throw new Error(`Np[${Np}] is less than the minimum[${mutationNpMin[deMutation]}] required by deMutation[${deMutation}]`)
+    }
+
     let iRepeat = 0 //初始化再搜尋次數
     let iContinue = 0 //初始化現在連續世代數
     let iExecute = 0 //初始化核心分析次數
