@@ -4,7 +4,7 @@ import cint from 'wsemi/src/cint.mjs'
 import randomIntRange from 'wsemi/src/randomIntRange.mjs'
 
 
-function omlModifyParameter(ind, iUp, mode = 'mapping') {
+function _modifyParameter(ind, iUp, mode = 'mapping') {
 
     //check ind
     if (!isint(ind)) {
@@ -47,4 +47,4 @@ function omlModifyParameter(ind, iUp, mode = 'mapping') {
 }
 
 
-export default omlModifyParameter
+export default _modifyParameter

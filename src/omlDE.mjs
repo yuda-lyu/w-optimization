@@ -14,11 +14,12 @@ import cdbl from 'wsemi/src/cdbl.mjs'
 import arrHas from 'wsemi/src/arrHas.mjs'
 import randomIntsNdpRange from 'wsemi/src/randomIntsNdpRange.mjs'
 import randomIntRange from 'wsemi/src/randomIntRange.mjs'
-import nelderMead from './nelderMead.mjs'
-import omlDefSolution from './omlDefSolution.mjs'
-import omlGenSolution from './omlGenSolution.mjs'
-import omlModifyParameter from './omlModifyParameter.mjs'
-import omlDiscreteValue from './omlDiscreteValue.mjs'
+import _defSolution from './_defSolution.mjs'
+import _genSolution from './_genSolution.mjs'
+import _modifyParameter from './_modifyParameter.mjs'
+import _isSameSolution from './_isSameSolution.mjs'
+import _dynamicValue from './_dynamicValue.mjs'
+import _localSearch from './_localSearch.mjs'
 
 
 async function omlDE(dps, funFit, opt = {}) {
@@ -80,10 +81,16 @@ async function omlDE(dps, funFit, opt = {}) {
         UseImmigration = true
     }
 
-    //UseLocalSearch, 是否使用局部搜尋策略, 現在預設nelderMead
+    //UseLocalSearch, 是否使用局部搜尋策略
     let UseLocalSearch = get(opt, 'UseLocalSearch', '')
     if (!isbol(UseLocalSearch)) {
         UseLocalSearch = true
+    }
+
+    //LocalSearchMethod, 局部搜尋方法
+    let LocalSearchMethod = get(opt, 'LocalSearchMethod', '')
+    if (!arrHas(LocalSearchMethod, ['NelderMead', 'Neighbor', 'OneGold', 'Gold', 'SA', 'TA'])) {
+        LocalSearchMethod = 'NelderMead'
     }
 
     //funGetBetter, 當有更優解出現時呼叫函數
@@ -208,8 +215,8 @@ async function omlDE(dps, funFit, opt = {}) {
 
         for (let k = 0; k < Np; k++) {
 
-            //omlGenSolution
-            let _s = omlGenSolution(dps)
+            //_genSolution
+            let _s = _genSolution(dps)
 
             //calcFitness
             let s = await calcFitness(_s, 'init')
@@ -246,7 +253,7 @@ async function omlDE(dps, funFit, opt = {}) {
         let ir5 = null
 
         //s
-        let s = omlDefSolution(dps)
+        let s = _defSolution(dps)
 
         //inds
         let inds = randomIntsNdpRange(0, Np - 1, Np)
@@ -329,8 +336,8 @@ async function omlDE(dps, funFit, opt = {}) {
                     )
                 }
 
-                //omlModifyParameter
-                j = omlModifyParameter(j, dps[i].n - 1, ModeOutLimit)
+                //_modifyParameter
+                j = _modifyParameter(j, dps[i].n - 1, ModeOutLimit)
 
                 //update
                 s.ps[i].ind = j
@@ -355,85 +362,13 @@ async function omlDE(dps, funFit, opt = {}) {
         i++
 
         //dynamic CrossoverFactor
-        let deCrossoverFactor = null
-        if (deCrossoverFactorStart === deCrossoverFactorEnd) {
-            deCrossoverFactor = deCrossoverFactorStart
-        }
-        else if (deCrossoverFactorDynamic < -4) {
-            deCrossoverFactor = deCrossoverFactorEnd
-        }
-        else if (deCrossoverFactorDynamic > 4) {
-            deCrossoverFactor = deCrossoverFactorStart
-        }
-        else {
-            if (NContiguous > 1) {
-                let rValueNow
-                if (deCrossoverFactorDynamic >= 0) {
-                    rValueNow = Math.pow((iContinue / (NContiguous - 1)), Math.exp(deCrossoverFactorDynamic))
-                }
-                else {
-                    rValueNow = 1 - Math.pow(((NContiguous - 1 - iContinue) / (NContiguous - 1)), Math.exp(-deCrossoverFactorDynamic))
-                }
-                deCrossoverFactor = rValueNow * (deCrossoverFactorEnd - deCrossoverFactorStart) + deCrossoverFactorStart
-            }
-            else {
-                deCrossoverFactor = deCrossoverFactorStart
-            }
-        }
+        let deCrossoverFactor = _dynamicValue(deCrossoverFactorStart, deCrossoverFactorEnd, deCrossoverFactorDynamic, iContinue, NContiguous)
 
         //dynamic F
-        let deF = null
-        if (deFStart === deFEnd) {
-            deF = deFStart
-        }
-        else if (deFDynamic < -4) {
-            deF = deFEnd
-        }
-        else if (deFDynamic > 4) {
-            deF = deFStart
-        }
-        else {
-            if (NContiguous > 1) {
-                let rValueNow
-                if (deFDynamic >= 0) {
-                    rValueNow = Math.pow((iContinue / (NContiguous - 1)), Math.exp(deFDynamic))
-                }
-                else {
-                    rValueNow = 1 - Math.pow(((NContiguous - 1 - iContinue) / (NContiguous - 1)), Math.exp(-deFDynamic))
-                }
-                deF = rValueNow * (deFEnd - deFStart) + deFStart
-            }
-            else {
-                deF = deFStart
-            }
-        }
+        let deF = _dynamicValue(deFStart, deFEnd, deFDynamic, iContinue, NContiguous)
 
         //dynamic Landa
-        let deLanda = null
-        if (deLandaStart === deLandaEnd) {
-            deLanda = deLandaStart
-        }
-        else if (deLandaDynamic < -4) {
-            deLanda = deLandaEnd
-        }
-        else if (deLandaDynamic > 4) {
-            deLanda = deLandaStart
-        }
-        else {
-            if (NContiguous > 1) {
-                let rValueNow
-                if (deLandaDynamic >= 0) {
-                    rValueNow = Math.pow((iContinue / (NContiguous - 1)), Math.exp(deLandaDynamic))
-                }
-                else {
-                    rValueNow = 1 - Math.pow(((NContiguous - 1 - iContinue) / (NContiguous - 1)), Math.exp(-deLandaDynamic))
-                }
-                deLanda = rValueNow * (deLandaEnd - deLandaStart) + deLandaStart
-            }
-            else {
-                deLanda = deLandaStart
-            }
-        }
+        let deLanda = _dynamicValue(deLandaStart, deLandaEnd, deLandaDynamic, iContinue, NContiguous)
 
         for (let k = 0; k < Np; k++) {
 
@@ -489,8 +424,8 @@ async function omlDE(dps, funFit, opt = {}) {
             //由前往後處理, 不變更當前最佳解children[0], 故k是從1至Np-1
             for (let k = 1; k <= Np - 1; k++) {
 
-                //omlGenSolution
-                let _s = omlGenSolution(dps)
+                //_genSolution
+                let _s = _genSolution(dps)
 
                 //calcFitness
                 let s = await calcFitness(_s, 'strategyRepeat')
@@ -519,11 +454,12 @@ async function omlDE(dps, funFit, opt = {}) {
         let strategyImmigration = async () => {
 
             //由後往前處理, 不變更當前最佳解children[0], 故k是從Np-1至1, 因僅處理1次故仍有機率出現重複個體
+            //比對ind陣列是否相同(對齊VB AE_Compare), 而非僅比fitness — 後者過鬆會把fitness相同但ind不同之個體誤判
             for (let k = Np - 1; k >= 1; k--) {
-                if (children[k - 1].fitness === children[k].fitness) {
+                if (_isSameSolution(children[k - 1], children[k])) {
 
-                    //omlGenSolution
-                    let _s = omlGenSolution(dps)
+                    //_genSolution
+                    let _s = _genSolution(dps)
 
                     //calcFitness
                     let s = await calcFitness(_s, 'strategyImmigration')
@@ -547,52 +483,16 @@ async function omlDE(dps, funFit, opt = {}) {
         //若出現更優最佳解, 考量效能故不再更新hists與bestSolution, 待下個世代時再更新
         let strategyLocalSearch = async () => {
 
-            let fun = async(vs) => {
-
-                //_ps
-                let _ps = map(vs, (v, i) => {
-                    return omlDiscreteValue(v, i, dps)
-                })
-
-                //_s
-                let _s = {
-                    ps: _ps,
-                    fitness: null,
-                }
-
-                //calcFitness
-                let s = await calcFitness(_s, 'strategyLocalSearch')
-
-                return s.fitness
-            }
-
-            //bestPs, 使用當前最佳解children[0]
-            let bestPs = cloneDeep(children[0].ps)
-
-            //bestVs
-            let bestVs = map(bestPs, 'value')
-
-            //r
-            let r = await nelderMead(fun, bestVs)
+            //依LocalSearchMethod分派局部搜尋
+            let improved = await _localSearch(LocalSearchMethod, children[0], dps, funFit, calcFitness, ModeOutLimit)
 
             //check
-            if (r.y >= children[0].fitness) {
+            if (improved.fitness >= children[0].fitness) {
                 return
             }
 
-            //_ps
-            let _ps = map(r.x, (v, i) => {
-                return omlDiscreteValue(v, i, dps)
-            })
-
-            //s
-            let s = {
-                ps: _ps,
-                fitness: r.y,
-            }
-
             //update
-            children[0] = s
+            children[0] = improved
 
         }
         if (UseLocalSearch) {

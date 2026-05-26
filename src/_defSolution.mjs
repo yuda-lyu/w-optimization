@@ -1,10 +1,9 @@
 import get from 'lodash-es/get.js'
 import size from 'lodash-es/size.js'
 import map from 'lodash-es/map.js'
-import randomIntRange from 'wsemi/src/randomIntRange.mjs'
 
 
-function omlGenSolution(dps) {
+function _defSolution(dps) {
 
     //check
     if (size(dps) === 0) {
@@ -35,10 +34,10 @@ function omlGenSolution(dps) {
         }
 
         //ind
-        let ind = randomIntRange(0, n - 1)
+        let ind = null
 
         //value
-        let value = values[ind]
+        let value = null
 
         //p
         let p = {
@@ -61,4 +60,4 @@ function omlGenSolution(dps) {
 }
 
 
-export default omlGenSolution
+export default _defSolution

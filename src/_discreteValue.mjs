@@ -3,7 +3,7 @@ import size from 'lodash-es/size.js'
 import each from 'lodash-es/each.js'
 
 
-function omlDiscreteValue(value, i, dps) {
+function _discreteValue(value, i, dps) {
 
     //check
     if (size(dps) === 0) {
@@ -40,4 +40,4 @@ function omlDiscreteValue(value, i, dps) {
 }
 
 
-export default omlDiscreteValue
+export default _discreteValue
