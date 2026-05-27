@@ -72,7 +72,7 @@ async function sdmGold(sOriginal, dps, calcFitness) {
             let kSign = (k === 0) ? -1 : 1
             let oldInd = sOriginal.ps[i].ind
             let j = oldInd + kSign
-            j = _modifyParameter(j, dps[i].n - 1, 'limit') //Gold硬性用limit
+            j = _modifyParameter(j, dps[i].n - 1, 'Limit') //Gold硬性用limit
 
             if (j !== oldInd) {
                 let _ps = cloneDeep(sOriginal.ps)
@@ -169,7 +169,7 @@ async function sdmGold(sOriginal, dps, calcFitness) {
             let iSame = 0
             for (let i = 0; i < Nd; i++) {
                 let j = sOriginal.ps[i].ind + Math.round(rGradient[i] * rDistance)
-                j = _modifyParameter(j, dps[i].n - 1, 'limit')
+                j = _modifyParameter(j, dps[i].n - 1, 'Limit')
                 _ps[i].ind = j
                 _ps[i].value = dps[i].values[j]
                 if (j === sOriginal.ps[i].ind) {
@@ -299,8 +299,8 @@ async function sdm(dps, funFit, opt = {}) {
 
     //ModeOutLimit
     let ModeOutLimit = get(opt, 'ModeOutLimit', '')
-    if (!arrHas(ModeOutLimit, ['mapping', 'limit', 'random'])) {
-        ModeOutLimit = 'mapping'
+    if (!arrHas(ModeOutLimit, ['Mapping', 'Limit', 'Random'])) {
+        ModeOutLimit = 'Mapping'
     }
 
     //iExecute

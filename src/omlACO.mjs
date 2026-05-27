@@ -81,8 +81,8 @@ async function omlACO(dps, funFit, opt = {}) {
 
     //ModeOutLimit (ACO本身原本沒有此opt, 因LocalSearch helper需要傳入故補上)
     let ModeOutLimit = get(opt, 'ModeOutLimit', '')
-    if (!arrHas(ModeOutLimit, ['mapping', 'limit', 'random'])) {
-        ModeOutLimit = 'mapping'
+    if (!arrHas(ModeOutLimit, ['Mapping', 'Limit', 'Random'])) {
+        ModeOutLimit = 'Mapping'
     }
 
     //UseForcedExplore, 是否每代強制重產後半族群Na/2..Na-1 (ACO特有內建探索, VB原碼此分支always-on)
@@ -354,27 +354,8 @@ async function omlACO(dps, funFit, opt = {}) {
         //避免 strategyLocalSearch 改善 ants[0] 後讓 adapter 把 LS 功勞算到 params 頭上
         let antsBestFitnessForFeedback = ants[0].fitness
 
-        //push history
-        hists.push(cloneDeep(ants[0]))
-
-        //bestSolution
-        if (bestSolution.fitness > ants[0].fitness) {
-
-            //update
-            bestSolution = cloneDeep(ants[0])
-
-            //funGetBetter
-            if (isfun(funGetBetter)) {
-                funGetBetter(cloneDeep(bestSolution), i)
-            }
-
-            iContinue = 0
-        }
-        else {
-            iContinue += 1
-        }
-
-        //strategyImmigration, 移民策略, 對應AE_ACO_Strategy_Immigration
+        //strategyImmigration, 移民策略 (對齊 .bas 順序: 排在 hists / bestSolution 之前, 改善立即反映)
+        //對應 AE_ACO_Strategy_Immigration
         let strategyImmigration = async () => {
 
             //由後往前處理, 不變更當前最佳螞蟻ants[0], 故k是從Na-1至1
@@ -395,7 +376,7 @@ async function omlACO(dps, funFit, opt = {}) {
             await strategyImmigration()
         }
 
-        //strategyLocalSearch, 局部搜尋策略
+        //strategyLocalSearch, 局部搜尋策略 (對齊 .bas 順序: 排在 hists / bestSolution 之前, 改善立即反映)
         let strategyLocalSearch = async () => {
 
             //依LocalSearchMethod分派局部搜尋
@@ -411,6 +392,26 @@ async function omlACO(dps, funFit, opt = {}) {
 
         }
         await strategyLocalSearch()
+
+        //push history (對齊 .bas: hists 記錄 strategy 後之 final ants[0])
+        hists.push(cloneDeep(ants[0]))
+
+        //bestSolution (對齊 .bas: bestSolution / iContinue 反映 strategy 後之 final ants[0])
+        if (bestSolution.fitness > ants[0].fitness) {
+
+            //update
+            bestSolution = cloneDeep(ants[0])
+
+            //funGetBetter
+            if (isfun(funGetBetter)) {
+                funGetBetter(cloneDeep(bestSolution), i)
+            }
+
+            iContinue = 0
+        }
+        else {
+            iContinue += 1
+        }
 
         //strategyRepeat, 對應VB原碼Repeat雙分支
         //達門檻: 重產 ant[1..Na-1] + 重置iContinue + iRepeat++

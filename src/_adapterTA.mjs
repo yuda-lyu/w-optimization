@@ -25,7 +25,7 @@ import _modifyParameter from './_modifyParameter.mjs'
 //                      提示: 門檻應跟 fitness 量級匹配, 例 fitness ≈ 1000 時建議 threshold ≈ 10-100
 //  taThresholdRatio:   number, 門檻衰減率 (每代 threshold = ratio · threshold), 預設 0.99
 //                      值越小衰減越快; 0.99 平緩, 0.6 快(對齊 omlTA Support 版預設)
-//  ModeOutLimit:       string, 'mapping' / 'limit' / 'random', 預設 'mapping'
+//  ModeOutLimit:       string, 'Mapping' / 'Limit' / 'Random', 預設 'Mapping'
 //
 //API:
 //  suggest()                    —抽一組 params 物件
@@ -52,8 +52,8 @@ function _adapterTA(schema, opt = {}) {
 
     //ModeOutLimit
     let ModeOutLimit = get(opt, 'ModeOutLimit', '')
-    if (!arrHas(ModeOutLimit, ['mapping', 'limit', 'random'])) {
-        ModeOutLimit = 'mapping'
+    if (!arrHas(ModeOutLimit, ['Mapping', 'Limit', 'Random'])) {
+        ModeOutLimit = 'Mapping'
     }
 
     //Nd = schema 維度數

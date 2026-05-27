@@ -172,7 +172,7 @@ async function test() {
         { name: 'psoC2', values: w.rang(0, 4, 20) }, //21 階, step 0.2
         { name: 'psoBeta', values: w.rang(0.5, 1.0, 10) }, //11 階, step 0.05
         { name: 'psoGamma', values: w.rang(0.1, 1.0, 9) }, //10 階, step 0.1
-        { name: 'ModeOutLimit', values: ['mapping', 'limit', 'random'] },
+        { name: 'ModeOutLimit', values: ['Mapping', 'Limit', 'Random'] },
     ]
 
     //建立 ACO meta-optimizer

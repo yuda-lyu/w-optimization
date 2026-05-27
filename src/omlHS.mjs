@@ -64,8 +64,8 @@ async function omlHS(dps, funFit, opt = {}) {
 
     //ModeOutLimit, 設計變數指標超過範圍之處理方式
     let ModeOutLimit = get(opt, 'ModeOutLimit', '')
-    if (!arrHas(ModeOutLimit, ['mapping', 'limit', 'random'])) {
-        ModeOutLimit = 'mapping'
+    if (!arrHas(ModeOutLimit, ['Mapping', 'Limit', 'Random'])) {
+        ModeOutLimit = 'Mapping'
     }
 
     //UseRepeat, 是否使用再搜尋策略
@@ -474,10 +474,59 @@ async function omlHS(dps, funFit, opt = {}) {
             memory = sortBy(memory, 'fitness')
         }
 
-        //push
+        //strategyImmigration, 移民策略, 對應AE_HS_Strategy_Immigration
+        //(對齊 .bas 順序: 排在 hists / bestSolution 之前, 改善立即反映)
+        let strategyImmigration = async () => {
+
+            //由後往前處理, 不變更當前最佳解memory[0], 故k是從Ns-1至1
+            for (let k = Ns - 1; k >= 1; k--) {
+                if (_isSameSolution(memory[k - 1], memory[k])) {
+
+                    //_genSolution
+                    let _s = _genSolution(dps)
+
+                    //calcFitness
+                    let s = await calcFitness(_s, 'strategyImmigration')
+
+                    //update
+                    memory[k] = s
+
+                }
+            }
+
+            //sortBy
+            memory = sortBy(memory, 'fitness')
+
+        }
+
+        //strategyLocalSearch, 局部搜尋策略 (對齊 .bas 順序: 排在 hists / bestSolution 之前, 改善立即反映)
+        let strategyLocalSearch = async () => {
+
+            //依LocalSearchMethod分派局部搜尋
+            let s = await _localSearch(LocalSearchMethod, memory[0], dps, funFit, calcFitness, ModeOutLimit)
+
+            //check
+            if (s.fitness >= memory[0].fitness) {
+                return
+            }
+
+            //update
+            memory[0] = s
+
+        }
+
+        //Strategy: 每Ns次迭代跑一次(對應VB之 If i Mod Ns = 0)
+        if ((i + 1) % Ns === 0) {
+            if (UseImmigration) {
+                await strategyImmigration()
+            }
+            await strategyLocalSearch()
+        }
+
+        //push (對齊 .bas: hists 記錄 strategy 後之 final memory[0])
         hists.push(cloneDeep(memory[0]))
 
-        //bestSolution
+        //bestSolution (對齊 .bas: bestSolution / iContinue 反映 strategy 後之 final memory[0])
         if (bestSolution.fitness > memory[0].fitness) {
 
             //update
@@ -494,8 +543,7 @@ async function omlHS(dps, funFit, opt = {}) {
             iContinue += 1
         }
 
-        //strategyRepeat, 再搜尋策略
-        //若出現更優最佳解, 考量效能故不再更新hists與bestSolution, 待下個迭代時再更新
+        //strategyRepeat, 再搜尋策略 (對齊 .bas 順序: 排在 bestSolution 更新後, 改善留到下代 evolution 才反映)
         let strategyRepeat = async () => {
 
             //由前往後處理, 不變更當前最佳解memory[0], 故k是從1至Ns-1
@@ -524,54 +572,6 @@ async function omlHS(dps, funFit, opt = {}) {
         }
         if (UseRepeat && iContinue >= NContiguous && iRepeat < NRepeat) {
             await strategyRepeat()
-        }
-
-        //strategyImmigration, 移民策略, 對應AE_HS_Strategy_Immigration
-        let strategyImmigration = async () => {
-
-            //由後往前處理, 不變更當前最佳解memory[0], 故k是從Ns-1至1
-            for (let k = Ns - 1; k >= 1; k--) {
-                if (_isSameSolution(memory[k - 1], memory[k])) {
-
-                    //_genSolution
-                    let _s = _genSolution(dps)
-
-                    //calcFitness
-                    let s = await calcFitness(_s, 'strategyImmigration')
-
-                    //update
-                    memory[k] = s
-
-                }
-            }
-
-            //sortBy
-            memory = sortBy(memory, 'fitness')
-
-        }
-
-        //strategyLocalSearch, 局部搜尋策略
-        let strategyLocalSearch = async () => {
-
-            //依LocalSearchMethod分派局部搜尋
-            let s = await _localSearch(LocalSearchMethod, memory[0], dps, funFit, calcFitness, ModeOutLimit)
-
-            //check
-            if (s.fitness >= memory[0].fitness) {
-                return
-            }
-
-            //update
-            memory[0] = s
-
-        }
-
-        //Strategy: 每Ns次迭代跑一次(對應VB之 If i Mod Ns = 0)
-        if ((i + 1) % Ns === 0) {
-            if (UseImmigration) {
-                await strategyImmigration()
-            }
-            await strategyLocalSearch()
         }
 
         //stopMode

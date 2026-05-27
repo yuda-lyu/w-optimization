@@ -157,7 +157,7 @@ let schema = [
     { name: 'rgaCrossover', values: ['Flat Crossover', 'BLX-a Crossover', 'Linear Crossover', 'Arithmetical Crossover', 'Chung Crossover', 'DE1 Crossover', '3P Crossover', '3PB Crossover', 'DE2 Crossover', '4P Crossover', '4PB Crossover', 'HS Crossover', 'Guiding Function'] },
     { name: 'rgaMutation', values: ['Constant1', 'Constant2', 'Constant3', 'Linear0.1', 'Linear0.2', 'Linear0.3', 'Exponent0.1', 'Exponent0.2', 'Exponent0.3', 'Global Space'] },
     { name: 'rgaElitism', values: ['No', 'BestOne', 'HalfPop', 'AllPop'] },
-    { name: 'ModeOutLimit', values: ['mapping', 'limit', 'random'] },
+    { name: 'ModeOutLimit', values: ['Mapping', 'Limit', 'Random'] },
 ]
 
 

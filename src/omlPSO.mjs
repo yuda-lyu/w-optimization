@@ -63,8 +63,8 @@ async function omlPSO(dps, funFit, opt = {}) {
 
     //ModeOutLimit, 設計變數指標超過範圍之處理方式
     let ModeOutLimit = get(opt, 'ModeOutLimit', '')
-    if (!arrHas(ModeOutLimit, ['mapping', 'limit', 'random'])) {
-        ModeOutLimit = 'mapping'
+    if (!arrHas(ModeOutLimit, ['Mapping', 'Limit', 'Random'])) {
+        ModeOutLimit = 'Mapping'
     }
 
     //UseRepeat, 是否使用再搜尋策略
@@ -355,51 +355,7 @@ async function omlPSO(dps, funFit, opt = {}) {
         //避免 strategyLocalSearch 改善 particles[0] 後讓 adapter 把 LS 功勞算到 params 頭上
         let particlesBestFitnessForFeedback = particles[0].fitness
 
-        //push history
-        hists.push(cloneDeep(particles[0]))
-
-        //bestSolution (用 gs 因為 gs 已是全域最佳)
-        if (bestSolution.fitness > gs.fitness) {
-
-            //update
-            bestSolution = { ps: cloneDeep(gs.ps), fitness: gs.fitness }
-
-            //funGetBetter
-            if (isfun(funGetBetter)) {
-                funGetBetter(cloneDeep(bestSolution), i)
-            }
-
-            iContinue = 0
-        }
-        else {
-            iContinue += 1
-        }
-
-        //strategyRepeat, 再搜尋策略
-        //若出現更優最佳解, 考量效能故不再更新hists與bestSolution, 待下個迭代時再更新
-        let strategyRepeat = async () => {
-
-            //由前往後處理, 不變更當前最佳粒子particles[0], 故k是從1至Np-1
-            for (let k = 1; k <= Np - 1; k++) {
-                let p = await genParticle('strategyRepeat')
-                particles[k] = p
-            }
-
-            //sortBy
-            particles = sortBy(particles, 'fitness')
-
-            //重產非最佳解未必會有更優最佳解, 仍須重置iContinue避免再搜尋策略弱化
-            iContinue = 0
-
-            //次數增加
-            iRepeat += 1
-
-        }
-        if (UseRepeat && iContinue >= NContiguous && iRepeat < NRepeat) {
-            await strategyRepeat()
-        }
-
-        //strategyImmigration, 移民策略, 對應AE_PSO_Strategy_Immigration
+        //strategyImmigration, 移民策略 (對齊 .bas 順序: 排在 hists / bestSolution 之前, 改善立即反映)
         //VB原碼 AE_PSO_QuickSort 開頭 Exit Sub 讓排序被 disable, 此處修正為先 sortBy 再比鄰
         let strategyImmigration = async () => {
 
@@ -414,12 +370,17 @@ async function omlPSO(dps, funFit, opt = {}) {
             //sortBy
             particles = sortBy(particles, 'fitness')
 
+            //同步 gs: Immigration 重產隨機個體後 particles[0] 可能比 gs 好, 必須同步避免下代 runEvolution 用到 stale gs
+            if (gs.fitness > particles[0].fitness) {
+                gs = { ps: cloneDeep(particles[0].ps), fitness: particles[0].fitness }
+            }
+
         }
         if (UseImmigration) {
             await strategyImmigration()
         }
 
-        //strategyLocalSearch, 局部搜尋策略
+        //strategyLocalSearch, 局部搜尋策略 (對齊 .bas 順序: 排在 hists / bestSolution 之前, 改善立即反映)
         let strategyLocalSearch = async () => {
 
             //依LocalSearchMethod分派局部搜尋(只傳 particles[0] 的 ps+fitness, 不傳整個 particle)
@@ -442,6 +403,49 @@ async function omlPSO(dps, funFit, opt = {}) {
 
         }
         await strategyLocalSearch()
+
+        //push history (對齊 .bas: hists 記錄 strategy 後之 final particles[0])
+        hists.push(cloneDeep(particles[0]))
+
+        //bestSolution (對齊 .bas: bestSolution / iContinue 反映 strategy 後之 final particles[0])
+        if (bestSolution.fitness > particles[0].fitness) {
+
+            //update
+            bestSolution = { ps: cloneDeep(particles[0].ps), fitness: particles[0].fitness }
+
+            //funGetBetter
+            if (isfun(funGetBetter)) {
+                funGetBetter(cloneDeep(bestSolution), i)
+            }
+
+            iContinue = 0
+        }
+        else {
+            iContinue += 1
+        }
+
+        //strategyRepeat, 再搜尋策略 (對齊 .bas 順序: 排在 bestSolution 更新後, 改善留到下代 evolution 才反映)
+        let strategyRepeat = async () => {
+
+            //由前往後處理, 不變更當前最佳粒子particles[0], 故k是從1至Np-1
+            for (let k = 1; k <= Np - 1; k++) {
+                let p = await genParticle('strategyRepeat')
+                particles[k] = p
+            }
+
+            //sortBy
+            particles = sortBy(particles, 'fitness')
+
+            //重產非最佳解未必會有更優最佳解, 仍須重置iContinue避免再搜尋策略弱化
+            iContinue = 0
+
+            //次數增加
+            iRepeat += 1
+
+        }
+        if (UseRepeat && iContinue >= NContiguous && iRepeat < NRepeat) {
+            await strategyRepeat()
+        }
 
         //stopMode
         if (i >= Nl) {

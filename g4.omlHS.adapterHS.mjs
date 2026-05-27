@@ -172,7 +172,7 @@ async function test() {
         { name: 'hsPAR', values: w.rang(0, 1, 20) }, //21 階, step 0.05
         { name: 'hsHMC', values: ['Original', '2M Consideration', '2MB Consideration', '3M Consideration', '3MB Consideration', '4M Consideration', '4MB Consideration'] },
         { name: 'hsPA', values: ['Constant1', 'Constant2', 'Constant3', 'Linear0.1', 'Linear0.2', 'Linear0.3', 'Exponent0.1', 'Exponent0.2', 'Exponent0.3', 'Global Space', 'Available Space', 'Modified Global Best'] },
-        { name: 'ModeOutLimit', values: ['mapping', 'limit', 'random'] },
+        { name: 'ModeOutLimit', values: ['Mapping', 'Limit', 'Random'] },
     ]
 
     //建立 HS meta-optimizer

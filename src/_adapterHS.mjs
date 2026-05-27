@@ -25,7 +25,7 @@ import _modifyParameter from './_modifyParameter.mjs'
 //  hsPAR:           number, Pitch Adjustment Rate [0, 1], 預設 0.3
 //  hsHMC:           string, HMC 模式 ('Original' / '2M' / '2MB' / '3M' / '3MB' / '4M' / '4MB' Consideration), 預設 'Original'
 //  hsPA:            string, PA  模式 ('Constant1/2/3' / 'Linear0.1/0.2/0.3' / 'Exponent0.1/0.2/0.3' / 'Global Space' / 'Available Space' / 'Modified Global Best'), 預設 'Linear0.1'
-//  ModeOutLimit:    string, 'mapping' / 'limit' / 'random', 預設 'mapping'
+//  ModeOutLimit:    string, 'Mapping' / 'Limit' / 'Random', 預設 'Mapping'
 //
 //API:
 //  suggest()                    —抽一組 params 物件(初始化階段 Ns 次走隨機, 之後走 HMC+PA)
@@ -71,8 +71,8 @@ function _adapterHS(schema, opt = {}) {
 
     //ModeOutLimit
     let ModeOutLimit = get(opt, 'ModeOutLimit', '')
-    if (!arrHas(ModeOutLimit, ['mapping', 'limit', 'random'])) {
-        ModeOutLimit = 'mapping'
+    if (!arrHas(ModeOutLimit, ['Mapping', 'Limit', 'Random'])) {
+        ModeOutLimit = 'Mapping'
     }
 
     //Ns 最低需求檢查(對齊 omlHS)

@@ -172,7 +172,7 @@ async function test() {
         { name: 'deF', values: w.rang(0, 2, 20) }, //21 階, step 0.1
         { name: 'deLanda', values: w.rang(0, 1, 10) }, //11 階, step 0.1
         { name: 'deMutation', values: ['1R2RR', '1B2RR', '1R2BR', '1R4RRRR', '1B4RRRR', '1R4BRRR', '1S4BSRR'] },
-        { name: 'ModeOutLimit', values: ['mapping', 'limit', 'random'] },
+        { name: 'ModeOutLimit', values: ['Mapping', 'Limit', 'Random'] },
     ]
 
     //建立 HS meta-optimizer

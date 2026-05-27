@@ -85,8 +85,8 @@ async function omlRGA(dps, funFit, opt = {}) {
 
     //ModeOutLimit, 設計變數指標超過範圍之處理方式
     let ModeOutLimit = get(opt, 'ModeOutLimit', '')
-    if (!arrHas(ModeOutLimit, ['mapping', 'limit', 'random'])) {
-        ModeOutLimit = 'mapping'
+    if (!arrHas(ModeOutLimit, ['Mapping', 'Limit', 'Random'])) {
+        ModeOutLimit = 'Mapping'
     }
 
     //UseRepeat, 是否使用再搜尋策略
@@ -798,12 +798,12 @@ async function omlRGA(dps, funFit, opt = {}) {
             return childs
         }
         else if (rgaElitism === 'BestOne') {
-            //用親代最佳取代子代最差(已sortBy, 最差在尾)
+            //用親代最佳取代子代最差, 因外部已先sortBy故最差在尾, 但親代最佳有可能超過子代全部成為最佳, 故外部仍須再sortBy
             childs[Np - 1] = cloneDeep(parents[0])
             return childs
         }
         else if (rgaElitism === 'HalfPop') {
-            //子代後半換成親代前半
+            //子代後半換成親代前半, 親代前半可能有更佳, 故外部仍須再sortBy
             let half = Math.floor(Np / 2)
             for (let k = half; k < Np; k++) {
                 childs[k] = cloneDeep(parents[k - half])
@@ -811,7 +811,7 @@ async function omlRGA(dps, funFit, opt = {}) {
             return childs
         }
         else if (rgaElitism === 'AllPop') {
-            //親代+子代合併排序取前Np個
+            //親代+子代合併排序取前Np個, 最佳必然在頭
             let all = []
             for (let k = 0; k < Np; k++) {
                 all.push(parents[k])
@@ -885,12 +885,59 @@ async function omlRGA(dps, funFit, opt = {}) {
 
         //Elitism
         children = runElitism(children)
+
+        //sortBy, 菁英策略可能是不做菁英, 故仍須排序
         children = sortBy(children, 'fitness')
 
-        //push
+        //strategyImmigration, 移民策略 (對齊 .bas 順序: 排在 hists / bestSolution 之前, 改善立即反映)
+        //對應VB之AE_RGA_Strategy_Immigration, 重複個體重新生成
+        let strategyImmigration = async () => {
+
+            //由後往前處理, 不變更當前最佳解children[0], 故k是從Np-1至1
+            for (let k = Np - 1; k >= 1; k--) {
+                if (_isSameSolution(children[k - 1], children[k])) {
+
+                    //_genSolution
+                    let _s = _genSolution(dps)
+
+                    //calcFitness
+                    let s = await calcFitness(_s, 'strategyImmigration')
+
+                    //update
+                    children[k] = s
+
+                }
+            }
+
+            //sortBy
+            children = sortBy(children, 'fitness')
+
+        }
+        if (UseImmigration) {
+            await strategyImmigration()
+        }
+
+        //strategyLocalSearch, 局部搜尋策略 (對齊 .bas 順序: 排在 hists / bestSolution 之前, 改善立即反映)
+        let strategyLocalSearch = async () => {
+
+            //依LocalSearchMethod分派局部搜尋
+            let s = await _localSearch(LocalSearchMethod, children[0], dps, funFit, calcFitness, ModeOutLimit)
+
+            //check
+            if (s.fitness >= children[0].fitness) {
+                return
+            }
+
+            //update
+            children[0] = s
+
+        }
+        await strategyLocalSearch()
+
+        //push (對齊 .bas: hists 記錄 strategy 後之 final children[0])
         hists.push(cloneDeep(children[0]))
 
-        //bestSolution
+        //bestSolution (對齊 .bas: bestSolution / iContinue 反映 strategy 後之 final children[0])
         if (bestSolution.fitness > children[0].fitness) {
 
             //update
@@ -907,8 +954,7 @@ async function omlRGA(dps, funFit, opt = {}) {
             iContinue += 1
         }
 
-        //strategyRepeat, 再搜尋策略
-        //若出現更優最佳解, 考量效能故不再更新hists與bestSolution, 待下個世代時再更新
+        //strategyRepeat, 再搜尋策略 (對齊 .bas 順序: 排在 bestSolution 更新後, 改善留到下代 evolution 才反映)
         let strategyRepeat = async () => {
 
             //由前往後處理, 不變更當前最佳解children[0], 故k是從1至Np-1
@@ -938,52 +984,6 @@ async function omlRGA(dps, funFit, opt = {}) {
         if (UseRepeat && iContinue >= NContiguous && iRepeat < NRepeat) {
             await strategyRepeat()
         }
-
-        //strategyImmigration, 移民策略
-        //對應VB之AE_RGA_Strategy_Immigration, 重複個體重新生成
-        let strategyImmigration = async () => {
-
-            //由後往前處理, 不變更當前最佳解children[0], 故k是從Np-1至1
-            for (let k = Np - 1; k >= 1; k--) {
-                if (_isSameSolution(children[k - 1], children[k])) {
-
-                    //_genSolution
-                    let _s = _genSolution(dps)
-
-                    //calcFitness
-                    let s = await calcFitness(_s, 'strategyImmigration')
-
-                    //update
-                    children[k] = s
-
-                }
-            }
-
-            //sortBy
-            children = sortBy(children, 'fitness')
-
-        }
-        if (UseImmigration) {
-            await strategyImmigration()
-        }
-
-        //strategyLocalSearch, 局部搜尋策略
-        //若出現更優最佳解, 考量效能故不再更新hists與bestSolution, 待下個世代時再更新
-        let strategyLocalSearch = async () => {
-
-            //依LocalSearchMethod分派局部搜尋
-            let s = await _localSearch(LocalSearchMethod, children[0], dps, funFit, calcFitness, ModeOutLimit)
-
-            //check
-            if (s.fitness >= children[0].fitness) {
-                return
-            }
-
-            //update
-            children[0] = s
-
-        }
-        await strategyLocalSearch()
 
         //stopMode
         if (i >= Ng) {

@@ -170,7 +170,7 @@ async function test() {
         { name: 'acoAlpha', values: w.rang(0, 1, 10) },
         { name: 'acoRo', values: w.rang(0, 1, 10) },
         //ModeOutLimit 僅於 LocalSearchMethod != 'None' 時才會經 _localSearch 路徑生效, 關 LS 時為空轉
-        { name: 'ModeOutLimit', values: ['mapping', 'limit', 'random'] },
+        { name: 'ModeOutLimit', values: ['Mapping', 'Limit', 'Random'] },
     ]
 
     //建立 TA meta-optimizer

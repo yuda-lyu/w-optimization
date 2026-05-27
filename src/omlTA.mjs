@@ -98,8 +98,8 @@ async function omlTA(dps, funFit, opt = {}) {
 
     //ModeOutLimit, 設計變數指標超過範圍之處理方式
     let ModeOutLimit = get(opt, 'ModeOutLimit', '')
-    if (!arrHas(ModeOutLimit, ['mapping', 'limit', 'random'])) {
-        ModeOutLimit = 'mapping'
+    if (!arrHas(ModeOutLimit, ['Mapping', 'Limit', 'Random'])) {
+        ModeOutLimit = 'Mapping'
     }
 
     //taThresholdType, 門檻數列型態

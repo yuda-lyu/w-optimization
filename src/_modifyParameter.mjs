@@ -4,7 +4,7 @@ import cint from 'wsemi/src/cint.mjs'
 import randomIntRange from 'wsemi/src/randomIntRange.mjs'
 
 
-function _modifyParameter(ind, iUp, mode = 'mapping') {
+function _modifyParameter(ind, iUp, mode = 'Mapping') {
 
     //check ind
     if (!isint(ind)) {
@@ -23,17 +23,17 @@ function _modifyParameter(ind, iUp, mode = 'mapping') {
         return 0
     }
 
-    if (mode === 'limit') {
+    if (mode === 'Limit') {
         //指標限制0至iUp
         ind = Math.min(ind, iUp)
         ind = Math.max(ind, 0)
     }
-    else if (mode === 'mapping') {
+    else if (mode === 'Mapping') {
         //指標低於0或超過iUp, 則由另一側重算; 合法ind範圍為[0, iUp], 周期為iUp+1
         let n = iUp + 1
         ind = ((ind % n) + n) % n
     }
-    else if (mode === 'random') {
+    else if (mode === 'Random') {
         //指標低於0或超過iUp, 則隨機重產
         if (ind < 0 || ind > iUp) {
             ind = randomIntRange(0, iUp)

@@ -18,7 +18,7 @@ import _modifyParameter from './_modifyParameter.mjs'
 //  saInitialTemperature: number, 初始溫度, 預設 1
 //                        提示: 溫度應跟 fitness 量級匹配, 例 fitness ≈ 1000 時建議 T ≈ 10-100
 //  saAlpha:              number, 溫度衰減率 (改善時 T = α·T), 預設 0.9
-//  ModeOutLimit:         string, 'mapping' / 'limit' / 'random', 預設 'mapping'
+//  ModeOutLimit:         string, 'Mapping' / 'Limit' / 'Random', 預設 'Mapping'
 //
 //API:
 //  suggest()                    —抽一組 params 物件(第 1 次為隨機初始, 之後為當前點之鄰點)
@@ -45,8 +45,8 @@ function _adapterSA(schema, opt = {}) {
 
     //ModeOutLimit
     let ModeOutLimit = get(opt, 'ModeOutLimit', '')
-    if (!arrHas(ModeOutLimit, ['mapping', 'limit', 'random'])) {
-        ModeOutLimit = 'mapping'
+    if (!arrHas(ModeOutLimit, ['Mapping', 'Limit', 'Random'])) {
+        ModeOutLimit = 'Mapping'
     }
 
     //Nd = schema 維度數

@@ -156,7 +156,7 @@ let schema = [
     { name: 'psoC2', values: w.rang(0, 4, 20) },
     { name: 'psoBeta', values: w.rang(0.5, 1.0, 10) },
     { name: 'psoGamma', values: w.rang(0.1, 1.0, 9) },
-    { name: 'ModeOutLimit', values: ['mapping', 'limit', 'random'] },
+    { name: 'ModeOutLimit', values: ['Mapping', 'Limit', 'Random'] },
 ]
 
 
