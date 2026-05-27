@@ -101,23 +101,24 @@ async function omlRGA(dps, funFit, opt = {}) {
         UseImmigration = true
     }
 
-    //UseLocalSearch, 是否使用局部搜尋策略
-    let UseLocalSearch = get(opt, 'UseLocalSearch', '')
-    if (!isbol(UseLocalSearch)) {
-        UseLocalSearch = true
-    }
-
-    //LocalSearchMethod, 局部搜尋方法
+    //LocalSearchMethod, 局部搜尋方法 ('None' = 不做局部搜尋)
     let LocalSearchMethod = get(opt, 'LocalSearchMethod', '')
-    if (!arrHas(LocalSearchMethod, ['NelderMead', 'Neighbor', 'OneGold', 'Gold', 'SA', 'TA'])) {
+    if (!arrHas(LocalSearchMethod, ['None', 'Neighbor', 'TA', 'SA', 'OneGold', 'Gold', 'NelderMead'])) {
         LocalSearchMethod = 'NelderMead'
     }
 
     //funGetBetter, 當有更優解出現時呼叫函數
     let funGetBetter = get(opt, 'funGetBetter')
 
-    //funEndGeneration, 當各世代計算結束後呼叫函數
-    let funEndGeneration = get(opt, 'funEndGeneration')
+    //funGenerationBefore, 每代開頭之自適應接口(可覆寫本代要用的超參數)
+    //收 { params, iGeneration, iContinue, iExecute, bestFitness }, 可回傳 { params: { ... 覆寫的 keys } } 或 undefined
+    //params 預設為 _dynamicValue 算出來的 rgaMutationRate 加上 rgaSelection / rgaCrossover / rgaMutation / rgaElitism / ModeOutLimit / LocalSearchMethod
+    let funGenerationBefore = get(opt, 'funGenerationBefore')
+
+    //funGenerationAfter, 每代結束後之自適應回饋接口
+    //收 { params, iGeneration, iContinue, iExecute, childrenBestFitness, bestFitness }, 不需回傳
+    let funGenerationAfter = get(opt, 'funGenerationAfter')
+
 
     //rgaMutationRateStart, 初始突變率
     let rgaMutationRateStart = get(opt, 'rgaMutationRateStart', '')
@@ -829,8 +830,39 @@ async function omlRGA(dps, funFit, opt = {}) {
     while (true) {
         i++
 
-        //dynamic MutationRate
-        let rgaMutationRate = _dynamicValue(rgaMutationRateStart, rgaMutationRateEnd, rgaMutationRateDynamic, iContinue, NContiguous)
+        //params: 本代要用的超參數, 預設由 _dynamicValue + opt 提供, 外部可透過 funGenerationBefore 覆寫
+        let params = {
+            rgaMutationRate: _dynamicValue(rgaMutationRateStart, rgaMutationRateEnd, rgaMutationRateDynamic, iContinue, NContiguous),
+            rgaSelection,
+            rgaCrossover,
+            rgaMutation,
+            rgaElitism,
+            ModeOutLimit,
+            LocalSearchMethod,
+        }
+
+        //funGenerationBefore: 自適應接口, 讓外部覆寫本代要用的超參數
+        if (isfun(funGenerationBefore)) {
+            let r = await funGenerationBefore({
+                params: cloneDeep(params),
+                iGeneration: i,
+                iContinue,
+                iExecute,
+                bestFitness: bestSolution.fitness,
+            })
+            if (r && r.params) {
+                params = { ...params, ...r.params }
+            }
+        }
+
+        //把覆寫後的 params 賦值回 closure 變數(讓既有 runCrossover / runMutation / runElitism / strategyLocalSearch 自動讀)
+        rgaSelection = params.rgaSelection
+        rgaCrossover = params.rgaCrossover
+        rgaMutation = params.rgaMutation
+        rgaElitism = params.rgaElitism
+        ModeOutLimit = params.ModeOutLimit
+        LocalSearchMethod = params.LocalSearchMethod
+        let rgaMutationRate = params.rgaMutationRate
 
         //Crossover, 產生Np個子代
         children = runCrossover()
@@ -845,6 +877,11 @@ async function omlRGA(dps, funFit, opt = {}) {
 
         //sortBy children
         children = sortBy(children, 'fitness')
+
+        //childrenBestFitness for adapter feedback: 抓本代 Elitism + LS 之前的最佳 fitness
+        //避免 runElitism 把上代 parents 拉進來、或 strategyLocalSearch 改善 children[0] 後
+        //讓 adapter 把 Elitism/LS 的功勞算到 params 頭上
+        let childrenBestFitnessForFeedback = children[0].fitness
 
         //Elitism
         children = runElitism(children)
@@ -935,20 +972,18 @@ async function omlRGA(dps, funFit, opt = {}) {
         let strategyLocalSearch = async () => {
 
             //依LocalSearchMethod分派局部搜尋
-            let improved = await _localSearch(LocalSearchMethod, children[0], dps, funFit, calcFitness, ModeOutLimit)
+            let s = await _localSearch(LocalSearchMethod, children[0], dps, funFit, calcFitness, ModeOutLimit)
 
             //check
-            if (improved.fitness >= children[0].fitness) {
+            if (s.fitness >= children[0].fitness) {
                 return
             }
 
             //update
-            children[0] = improved
+            children[0] = s
 
         }
-        if (UseLocalSearch) {
-            await strategyLocalSearch()
-        }
+        await strategyLocalSearch()
 
         //stopMode
         if (i >= Ng) {
@@ -961,16 +996,24 @@ async function omlRGA(dps, funFit, opt = {}) {
             stopMode = `stop by iExecute[${iExecute}] >= NCore[${NCore}]`
         }
 
+        //funGenerationAfter, 自適應回饋接口
+        //放在 stop 判斷之前, 確保末代 suggest() 也有配對 feedback()
+        if (isfun(funGenerationAfter)) {
+            await funGenerationAfter({
+                params: cloneDeep(params),
+                iGeneration: i,
+                iContinue,
+                iExecute,
+                childrenBestFitness: childrenBestFitnessForFeedback,
+                bestFitness: bestSolution.fitness,
+            })
+        }
+
         //stop
         if (isestr(stopMode)) {
             stopNg = i
             stopExecutions = iExecute
             break
-        }
-
-        //funEndGeneration
-        if (isfun(funEndGeneration)) {
-            funEndGeneration(cloneDeep(children), cloneDeep(bestSolution), i)
         }
 
         //update parents
@@ -984,6 +1027,7 @@ async function omlRGA(dps, funFit, opt = {}) {
         hists,
         stopMode,
         stopNg,
+        stopIteration: stopNg, //跨演算法通用別名 (omlDE/RGA: stopNg / omlHS: stopNi / omlPSO/ACO: stopNl)
         stopExecutions,
     }
 

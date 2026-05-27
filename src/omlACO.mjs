@@ -73,15 +73,9 @@ async function omlACO(dps, funFit, opt = {}) {
         UseImmigration = true
     }
 
-    //UseLocalSearch, 是否使用局部搜尋策略
-    let UseLocalSearch = get(opt, 'UseLocalSearch', '')
-    if (!isbol(UseLocalSearch)) {
-        UseLocalSearch = true
-    }
-
-    //LocalSearchMethod, 局部搜尋方法
+    //LocalSearchMethod, 局部搜尋方法 ('None' = 不做局部搜尋)
     let LocalSearchMethod = get(opt, 'LocalSearchMethod', '')
-    if (!arrHas(LocalSearchMethod, ['NelderMead', 'Neighbor', 'OneGold', 'Gold', 'SA', 'TA'])) {
+    if (!arrHas(LocalSearchMethod, ['None', 'Neighbor', 'TA', 'SA', 'OneGold', 'Gold', 'NelderMead'])) {
         LocalSearchMethod = 'NelderMead'
     }
 
@@ -102,6 +96,15 @@ async function omlACO(dps, funFit, opt = {}) {
 
     //funEndLoop, 每次主迴圈結束後呼叫函數
     let funEndLoop = get(opt, 'funEndLoop')
+
+    //funGenerationBefore, 每代開頭之自適應接口(可覆寫本代要用的超參數)
+    //收 { params, iGeneration, iContinue, iExecute, bestFitness }, 可回傳 { params: { ... 覆寫的 keys } } 或 undefined
+    //params 預設為 _dynamicValue 算出來的 acoExploitationRate / acoAlpha / acoRo 加上 ModeOutLimit / LocalSearchMethod
+    let funGenerationBefore = get(opt, 'funGenerationBefore')
+
+    //funGenerationAfter, 每代結束後之自適應回饋接口
+    //收 { params, iGeneration, iContinue, iExecute, childrenBestFitness, bestFitness }, 不需回傳
+    let funGenerationAfter = get(opt, 'funGenerationAfter')
 
     //acoExploitationRateStart, 初始開發率 (小=開發, 大=探索)
     let acoExploitationRateStart = get(opt, 'acoExploitationRateStart', '')
@@ -314,13 +317,42 @@ async function omlACO(dps, funFit, opt = {}) {
     while (true) {
         i++
 
-        //dynamic factors
-        let acoExploitationRate = _dynamicValue(acoExploitationRateStart, acoExploitationRateEnd, acoExploitationRateDynamic, iContinue, NContiguous)
-        let acoAlpha = _dynamicValue(acoAlphaStart, acoAlphaEnd, acoAlphaDynamic, iContinue, NContiguous)
-        let acoRo = _dynamicValue(acoRoStart, acoRoEnd, acoRoDynamic, iContinue, NContiguous)
+        //params: 本代要用的超參數, 預設由 _dynamicValue + opt 提供, 外部可透過 funGenerationBefore 覆寫
+        let params = {
+            acoExploitationRate: _dynamicValue(acoExploitationRateStart, acoExploitationRateEnd, acoExploitationRateDynamic, iContinue, NContiguous),
+            acoAlpha: _dynamicValue(acoAlphaStart, acoAlphaEnd, acoAlphaDynamic, iContinue, NContiguous),
+            acoRo: _dynamicValue(acoRoStart, acoRoEnd, acoRoDynamic, iContinue, NContiguous),
+            ModeOutLimit,
+            LocalSearchMethod,
+        }
+
+        //funGenerationBefore: 自適應接口, 讓外部覆寫本代要用的超參數
+        if (isfun(funGenerationBefore)) {
+            let r = await funGenerationBefore({
+                params: cloneDeep(params),
+                iGeneration: i,
+                iContinue,
+                iExecute,
+                bestFitness: bestSolution.fitness,
+            })
+            if (r && r.params) {
+                params = { ...params, ...r.params }
+            }
+        }
+
+        //把覆寫後的 params 賦值回 closure 變數(讓既有 strategyImmigration / strategyLocalSearch / strategyRepeat / forcedExplore 自動讀)
+        ModeOutLimit = params.ModeOutLimit
+        LocalSearchMethod = params.LocalSearchMethod
+        let acoExploitationRate = params.acoExploitationRate
+        let acoAlpha = params.acoAlpha
+        let acoRo = params.acoRo
 
         //Behavior
         await runBehavior(acoExploitationRate, acoAlpha, acoRo)
+
+        //antsBestFitness for adapter feedback: 抓本代 LS 之前的最佳 fitness
+        //避免 strategyLocalSearch 改善 ants[0] 後讓 adapter 把 LS 功勞算到 params 頭上
+        let antsBestFitnessForFeedback = ants[0].fitness
 
         //push history
         hists.push(cloneDeep(ants[0]))
@@ -367,20 +399,18 @@ async function omlACO(dps, funFit, opt = {}) {
         let strategyLocalSearch = async () => {
 
             //依LocalSearchMethod分派局部搜尋
-            let improved = await _localSearch(LocalSearchMethod, ants[0], dps, funFit, calcFitness, ModeOutLimit)
+            let s = await _localSearch(LocalSearchMethod, ants[0], dps, funFit, calcFitness, ModeOutLimit)
 
             //check
-            if (improved.fitness >= ants[0].fitness) {
+            if (s.fitness >= ants[0].fitness) {
                 return
             }
 
             //update
-            ants[0] = improved
+            ants[0] = s
 
         }
-        if (UseLocalSearch) {
-            await strategyLocalSearch()
-        }
+        await strategyLocalSearch()
 
         //strategyRepeat, 對應VB原碼Repeat雙分支
         //達門檻: 重產 ant[1..Na-1] + 重置iContinue + iRepeat++
@@ -423,6 +453,19 @@ async function omlACO(dps, funFit, opt = {}) {
             stopMode = `stop by iExecute[${iExecute}] >= NCore[${NCore}]`
         }
 
+        //funGenerationAfter, 自適應回饋接口
+        //放在 stop 判斷之前, 確保末代 suggest() 也有配對 feedback()
+        if (isfun(funGenerationAfter)) {
+            await funGenerationAfter({
+                params: cloneDeep(params),
+                iGeneration: i,
+                iContinue,
+                iExecute,
+                childrenBestFitness: antsBestFitnessForFeedback,
+                bestFitness: bestSolution.fitness,
+            })
+        }
+
         //stop
         if (isestr(stopMode)) {
             stopNl = i
@@ -443,6 +486,7 @@ async function omlACO(dps, funFit, opt = {}) {
         hists,
         stopMode,
         stopNl,
+        stopIteration: stopNl, //跨演算法通用別名 (omlDE/RGA: stopNg / omlHS: stopNi / omlPSO/ACO: stopNl)
         stopExecutions,
     }
 

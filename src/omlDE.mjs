@@ -81,23 +81,25 @@ async function omlDE(dps, funFit, opt = {}) {
         UseImmigration = true
     }
 
-    //UseLocalSearch, 是否使用局部搜尋策略
-    let UseLocalSearch = get(opt, 'UseLocalSearch', '')
-    if (!isbol(UseLocalSearch)) {
-        UseLocalSearch = true
-    }
-
-    //LocalSearchMethod, 局部搜尋方法
+    //LocalSearchMethod, 局部搜尋方法 ('None' = 不做局部搜尋)
     let LocalSearchMethod = get(opt, 'LocalSearchMethod', '')
-    if (!arrHas(LocalSearchMethod, ['NelderMead', 'Neighbor', 'OneGold', 'Gold', 'SA', 'TA'])) {
+    if (!arrHas(LocalSearchMethod, ['None', 'Neighbor', 'TA', 'SA', 'OneGold', 'Gold', 'NelderMead'])) {
         LocalSearchMethod = 'NelderMead'
     }
 
     //funGetBetter, 當有更優解出現時呼叫函數
     let funGetBetter = get(opt, 'funGetBetter')
 
-    //funEndGeneration, 當各世代計算結束後呼叫函數
-    let funEndGeneration = get(opt, 'funEndGeneration')
+    //funGenerationBefore, 每代開頭之自適應接口(可覆寫本代要用的超參數)
+    //收 { params, iGeneration, iContinue, iExecute, bestFitness }, 可回傳 { params: { ... 覆寫的 keys } } 或 undefined
+    //params 預設為 _dynamicValue 算出來的 deCrossoverFactor / deF / deLanda 加上 deMutation / ModeOutLimit / LocalSearchMethod
+    //外部可基於 ctx 用 ACO / Bayesian / RL 等任意方法決定本代用什麼參數
+    let funGenerationBefore = get(opt, 'funGenerationBefore')
+
+    //funGenerationAfter, 每代結束後之自適應回饋接口
+    //收 { params, iGeneration, iContinue, iExecute, childrenBestFitness, bestFitness }, 不需回傳
+    //外部可基於本代 fitness 做 ACO pheromone 更新等學習動作
+    let funGenerationAfter = get(opt, 'funGenerationAfter')
 
     //deCrossoverFactorStart, 初始交配因子
     let deCrossoverFactorStart = get(opt, 'deCrossoverFactorStart', '')
@@ -361,28 +363,52 @@ async function omlDE(dps, funFit, opt = {}) {
     while (true) {
         i++
 
-        //dynamic CrossoverFactor
-        let deCrossoverFactor = _dynamicValue(deCrossoverFactorStart, deCrossoverFactorEnd, deCrossoverFactorDynamic, iContinue, NContiguous)
+        //params: 本代要用的超參數, 預設由 _dynamicValue 算出, 外部可透過 funGenerationBefore 覆寫
+        let params = {
+            deCrossoverFactor: _dynamicValue(deCrossoverFactorStart, deCrossoverFactorEnd, deCrossoverFactorDynamic, iContinue, NContiguous),
+            deF: _dynamicValue(deFStart, deFEnd, deFDynamic, iContinue, NContiguous),
+            deLanda: _dynamicValue(deLandaStart, deLandaEnd, deLandaDynamic, iContinue, NContiguous),
+            deMutation,
+            ModeOutLimit,
+            LocalSearchMethod,
+        }
 
-        //dynamic F
-        let deF = _dynamicValue(deFStart, deFEnd, deFDynamic, iContinue, NContiguous)
+        //funGenerationBefore: 自適應接口, 讓外部覆寫本代要用的超參數
+        if (isfun(funGenerationBefore)) {
+            let r = await funGenerationBefore({
+                params: cloneDeep(params),
+                iGeneration: i,
+                iContinue,
+                iExecute,
+                bestFitness: bestSolution.fitness,
+            })
+            if (r && r.params) {
+                params = { ...params, ...r.params }
+            }
+        }
 
-        //dynamic Landa
-        let deLanda = _dynamicValue(deLandaStart, deLandaEnd, deLandaDynamic, iContinue, NContiguous)
+        //childrenBestFitness for adapter feedback: 追蹤本代「raw offspring」最佳 fitness
+        //避開兩個訊號失真問題:
+        //  H2: survivor selection (line 405-410) 會把上代 parents 保留進 children 陣列,
+        //      若本代 offspring 全比 parents 差, children[0] 反映的是「上代 parent 的好」,
+        //      不是「本代 params 的成果」, adapter 會把 parent credit 誤算給 params
+        //  H3: strategyLocalSearch 會改善 children[0], 若直接用 children[0].fitness,
+        //      adapter 會把 LS 功勞算到 params 頭上
+        //rawOffspringBest 只看 operCrossover 直接產出的 s.fitness, 不受 survivor / LS 干擾
+        let childrenBestFitnessForFeedback = Infinity
 
         for (let k = 0; k < Np; k++) {
 
             //operCrossover
-            let _s = operCrossover(dps, parents, k, {
-                deMutation,
-                deCrossoverFactor,
-                deF,
-                deLanda,
-                ModeOutLimit,
-            })
+            let _s = operCrossover(dps, parents, k, params)
 
             //calcFitness
             let s = await calcFitness(_s, 'operCrossover')
+
+            //追蹤 raw offspring 最佳 fitness (用於 adapter feedback)
+            if (s.fitness < childrenBestFitnessForFeedback) {
+                childrenBestFitnessForFeedback = s.fitness
+            }
 
             //update children[k]
             if (parents[k].fitness > s.fitness) {
@@ -483,21 +509,19 @@ async function omlDE(dps, funFit, opt = {}) {
         //若出現更優最佳解, 考量效能故不再更新hists與bestSolution, 待下個世代時再更新
         let strategyLocalSearch = async () => {
 
-            //依LocalSearchMethod分派局部搜尋
-            let improved = await _localSearch(LocalSearchMethod, children[0], dps, funFit, calcFitness, ModeOutLimit)
+            //依LocalSearchMethod分派局部搜尋(用本代params, 可被funGenerationBefore覆寫)
+            let s = await _localSearch(params.LocalSearchMethod, children[0], dps, funFit, calcFitness, params.ModeOutLimit)
 
             //check
-            if (improved.fitness >= children[0].fitness) {
+            if (s.fitness >= children[0].fitness) {
                 return
             }
 
             //update
-            children[0] = improved
+            children[0] = s
 
         }
-        if (UseLocalSearch) {
-            await strategyLocalSearch()
-        }
+        await strategyLocalSearch()
 
         //stopMode
         if (i >= Ng) {
@@ -510,16 +534,24 @@ async function omlDE(dps, funFit, opt = {}) {
             stopMode = `stop by iExecute[${iExecute}] >= NCore[${NCore}]`
         }
 
+        //funGenerationAfter, 自適應回饋接口(收 ctx 含 params 與 childrenBestFitness)
+        //放在 stop 判斷之前, 確保末代 suggest() 也有配對 feedback()
+        if (isfun(funGenerationAfter)) {
+            await funGenerationAfter({
+                params: cloneDeep(params),
+                iGeneration: i,
+                iContinue,
+                iExecute,
+                childrenBestFitness: childrenBestFitnessForFeedback,
+                bestFitness: bestSolution.fitness,
+            })
+        }
+
         //stop
         if (isestr(stopMode)) {
             stopNg = i
             stopExecutions = iExecute
             break
-        }
-
-        //funEndGeneration
-        if (isfun(funEndGeneration)) {
-            funEndGeneration(cloneDeep(children), cloneDeep(bestSolution), i)
         }
 
         //update parents
@@ -533,6 +565,7 @@ async function omlDE(dps, funFit, opt = {}) {
         hists,
         stopMode,
         stopNg,
+        stopIteration: stopNg, //跨演算法通用別名 (omlDE/RGA: stopNg / omlHS: stopNi / omlPSO/ACO: stopNl)
         stopExecutions,
     }
 

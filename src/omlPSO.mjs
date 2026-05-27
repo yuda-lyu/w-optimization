@@ -79,15 +79,9 @@ async function omlPSO(dps, funFit, opt = {}) {
         UseImmigration = true
     }
 
-    //UseLocalSearch, 是否使用局部搜尋策略
-    let UseLocalSearch = get(opt, 'UseLocalSearch', '')
-    if (!isbol(UseLocalSearch)) {
-        UseLocalSearch = true
-    }
-
-    //LocalSearchMethod, 局部搜尋方法
+    //LocalSearchMethod, 局部搜尋方法 ('None' = 不做局部搜尋)
     let LocalSearchMethod = get(opt, 'LocalSearchMethod', '')
-    if (!arrHas(LocalSearchMethod, ['NelderMead', 'Neighbor', 'OneGold', 'Gold', 'SA', 'TA'])) {
+    if (!arrHas(LocalSearchMethod, ['None', 'Neighbor', 'TA', 'SA', 'OneGold', 'Gold', 'NelderMead'])) {
         LocalSearchMethod = 'NelderMead'
     }
 
@@ -96,6 +90,15 @@ async function omlPSO(dps, funFit, opt = {}) {
 
     //funEndLoop, 每次主迴圈結束後呼叫函數
     let funEndLoop = get(opt, 'funEndLoop')
+
+    //funGenerationBefore, 每代開頭之自適應接口(可覆寫本代要用的超參數)
+    //收 { params, iGeneration, iContinue, iExecute, bestFitness }, 可回傳 { params: { ... 覆寫的 keys } } 或 undefined
+    //params 預設為 _dynamicValue 算出來的 psoC1 / psoC2 加上 psoBeta / psoGamma / psoInertiaMin / ModeOutLimit / LocalSearchMethod
+    let funGenerationBefore = get(opt, 'funGenerationBefore')
+
+    //funGenerationAfter, 每代結束後之自適應回饋接口
+    //收 { params, iGeneration, iContinue, iExecute, childrenBestFitness, bestFitness }, 不需回傳
+    let funGenerationAfter = get(opt, 'funGenerationAfter')
 
     //psoC1Start, 初始C1 (個體經驗權重)
     let psoC1Start = get(opt, 'psoC1Start', '')
@@ -308,17 +311,49 @@ async function omlPSO(dps, funFit, opt = {}) {
     while (true) {
         i++
 
-        //dynamic C1
-        let psoC1 = _dynamicValue(psoC1Start, psoC1End, psoC1Dynamic, iContinue, NContiguous)
+        //params: 本代要用的超參數, 預設由 _dynamicValue + opt 提供, 外部可透過 funGenerationBefore 覆寫
+        let params = {
+            psoC1: _dynamicValue(psoC1Start, psoC1End, psoC1Dynamic, iContinue, NContiguous),
+            psoC2: _dynamicValue(psoC2Start, psoC2End, psoC2Dynamic, iContinue, NContiguous),
+            psoBeta,
+            psoGamma,
+            psoInertiaMin,
+            ModeOutLimit,
+            LocalSearchMethod,
+        }
 
-        //dynamic C2
-        let psoC2 = _dynamicValue(psoC2Start, psoC2End, psoC2Dynamic, iContinue, NContiguous)
+        //funGenerationBefore: 自適應接口, 讓外部覆寫本代要用的超參數
+        if (isfun(funGenerationBefore)) {
+            let r = await funGenerationBefore({
+                params: cloneDeep(params),
+                iGeneration: i,
+                iContinue,
+                iExecute,
+                bestFitness: bestSolution.fitness,
+            })
+            if (r && r.params) {
+                params = { ...params, ...r.params }
+            }
+        }
+
+        //把覆寫後的 params 賦值回 closure 變數(讓既有 runEvolution / genParticle / strategyLocalSearch 自動讀)
+        psoBeta = params.psoBeta
+        psoGamma = params.psoGamma
+        psoInertiaMin = params.psoInertiaMin
+        ModeOutLimit = params.ModeOutLimit
+        LocalSearchMethod = params.LocalSearchMethod
+        let psoC1 = params.psoC1
+        let psoC2 = params.psoC2
 
         //Evolution
         await runEvolution(psoC1, psoC2)
 
         //sortBy particles by fitness
         particles = sortBy(particles, 'fitness')
+
+        //particlesBestFitness for adapter feedback: 抓本代 LS 之前的最佳 fitness
+        //避免 strategyLocalSearch 改善 particles[0] 後讓 adapter 把 LS 功勞算到 params 頭上
+        let particlesBestFitnessForFeedback = particles[0].fitness
 
         //push history
         hists.push(cloneDeep(particles[0]))
@@ -389,26 +424,24 @@ async function omlPSO(dps, funFit, opt = {}) {
 
             //依LocalSearchMethod分派局部搜尋(只傳 particles[0] 的 ps+fitness, 不傳整個 particle)
             let currentBest = { ps: cloneDeep(particles[0].ps), fitness: particles[0].fitness }
-            let improved = await _localSearch(LocalSearchMethod, currentBest, dps, funFit, calcFitness, ModeOutLimit)
+            let s = await _localSearch(LocalSearchMethod, currentBest, dps, funFit, calcFitness, ModeOutLimit)
 
             //check
-            if (improved.fitness >= particles[0].fitness) {
+            if (s.fitness >= particles[0].fitness) {
                 return
             }
 
             //update particle[0] 之 ps + fitness (velocity / inertia / bs 保留)
-            particles[0].ps = improved.ps
-            particles[0].fitness = improved.fitness
+            particles[0].ps = s.ps
+            particles[0].fitness = s.fitness
 
             //同步更新 gs
-            if (gs.fitness > improved.fitness) {
-                gs = { ps: cloneDeep(improved.ps), fitness: improved.fitness }
+            if (gs.fitness > s.fitness) {
+                gs = { ps: cloneDeep(s.ps), fitness: s.fitness }
             }
 
         }
-        if (UseLocalSearch) {
-            await strategyLocalSearch()
-        }
+        await strategyLocalSearch()
 
         //stopMode
         if (i >= Nl) {
@@ -419,6 +452,19 @@ async function omlPSO(dps, funFit, opt = {}) {
         }
         else if (iExecute >= NCore) {
             stopMode = `stop by iExecute[${iExecute}] >= NCore[${NCore}]`
+        }
+
+        //funGenerationAfter, 自適應回饋接口
+        //放在 stop 判斷之前, 確保末代 suggest() 也有配對 feedback()
+        if (isfun(funGenerationAfter)) {
+            await funGenerationAfter({
+                params: cloneDeep(params),
+                iGeneration: i,
+                iContinue,
+                iExecute,
+                childrenBestFitness: particlesBestFitnessForFeedback,
+                bestFitness: bestSolution.fitness,
+            })
         }
 
         //stop
@@ -441,6 +487,7 @@ async function omlPSO(dps, funFit, opt = {}) {
         hists,
         stopMode,
         stopNl,
+        stopIteration: stopNl, //跨演算法通用別名 (omlDE/RGA: stopNg / omlHS: stopNi / omlPSO/ACO: stopNl)
         stopExecutions,
     }
 

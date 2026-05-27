@@ -19,8 +19,10 @@ import sdm from './sdm.mjs'
 
 //此處須人工添加
 let WOptimization = {
+
     arrBinarySearch,
     arrBinarySearchClosest,
+
     binarySearch,
     cobyla,
     goldenSection,
@@ -28,14 +30,17 @@ let WOptimization = {
     limitBFGS,
     nelderMead,
     setpBracket,
+    sdm,
+
+    omlSA,
+    omlTA,
+
     omlDE,
     omlRGA,
     omlHS,
     omlPSO,
     omlACO,
-    omlSA,
-    omlTA,
-    sdm,
+
 }
 
 

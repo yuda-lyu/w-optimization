@@ -1,5 +1,4 @@
 import map from 'lodash-es/map.js'
-import cloneDeep from 'lodash-es/cloneDeep.js'
 import nelderMead from './nelderMead.mjs'
 import _discreteValue from './_discreteValue.mjs'
 import omlSA from './omlSA.mjs'
@@ -9,19 +8,23 @@ import sdm from './sdm.mjs'
 
 //_localSearch, 局部搜尋統一分派, 給5隨機演算法之strategyLocalSearch呼叫
 //
-//method:
-//  'NelderMead' (預設): Nelder-Mead simplex法, 對連續變數效果好
+//method (從輕到重排列):
+//  'None':              不做局部搜尋, 直接回傳 currentBest
 //  'Neighbor':          SDM Neighbor模式, 對每變數試 ±1 選最大改善
+//  'TA':                Threshold Accepting 短週期精煉
+//  'SA':                Simulated Annealing 短週期精煉
 //  'OneGold':           SDM 一次黃金比例梯度搜尋
 //  'Gold':              SDM 重複黃金比例梯度搜尋至無改善
-//  'SA':                Simulated Annealing 短週期精煉
-//  'TA':                Threshold Accepting 短週期精煉
+//  'NelderMead' (預設): Nelder-Mead simplex法, 對連續變數效果好
 //
 //currentBest: 當前最佳解 { ps, fitness }
-//回傳: 改善後的解(若無改善則回傳原解 currentBest)
+//回傳: 改善後的解(若無改善或 method='None' 則回傳原解 currentBest)
 async function _localSearch(method, currentBest, dps, funFit, calcFitness, ModeOutLimit, opt = {}) {
 
-    if (method === 'NelderMead') {
+    if (method === 'None') {
+        return currentBest
+    }
+    else if (method === 'NelderMead') {
 
         let fun = async (vs) => {
             let _ps = map(vs, (v, i) => _discreteValue(v, i, dps))

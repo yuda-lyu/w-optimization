@@ -80,23 +80,23 @@ async function omlHS(dps, funFit, opt = {}) {
         UseImmigration = true
     }
 
-    //UseLocalSearch, 是否使用局部搜尋策略
-    let UseLocalSearch = get(opt, 'UseLocalSearch', '')
-    if (!isbol(UseLocalSearch)) {
-        UseLocalSearch = true
-    }
-
-    //LocalSearchMethod, 局部搜尋方法
+    //LocalSearchMethod, 局部搜尋方法 ('None' = 不做局部搜尋)
     let LocalSearchMethod = get(opt, 'LocalSearchMethod', '')
-    if (!arrHas(LocalSearchMethod, ['NelderMead', 'Neighbor', 'OneGold', 'Gold', 'SA', 'TA'])) {
+    if (!arrHas(LocalSearchMethod, ['None', 'Neighbor', 'TA', 'SA', 'OneGold', 'Gold', 'NelderMead'])) {
         LocalSearchMethod = 'NelderMead'
     }
 
     //funGetBetter, 當有更優解出現時呼叫函數
     let funGetBetter = get(opt, 'funGetBetter')
 
-    //funEndImpro, 每次improvisation結束後呼叫函數
-    let funEndImpro = get(opt, 'funEndImpro')
+    //funGenerationBefore, 每代開頭之自適應接口(可覆寫本代要用的超參數)
+    //收 { params, iGeneration, iContinue, iExecute, bestFitness }, 可回傳 { params: { ... 覆寫的 keys } } 或 undefined
+    //params 預設為 _dynamicValue 算出來的 hsHMCR/hsPAR 加上 hsHMC / hsPA / ModeOutLimit / LocalSearchMethod
+    let funGenerationBefore = get(opt, 'funGenerationBefore')
+
+    //funGenerationAfter, 每代結束後之自適應回饋接口
+    //收 { params, iGeneration, iContinue, iExecute, childrenBestFitness, bestFitness }, 不需回傳
+    let funGenerationAfter = get(opt, 'funGenerationAfter')
 
     //hsHMCRStart, 初始HMCR (Harmony Memory Consideration Rate)
     let hsHMCRStart = get(opt, 'hsHMCRStart', '')
@@ -430,11 +430,37 @@ async function omlHS(dps, funFit, opt = {}) {
     while (true) {
         i++
 
-        //dynamic HMCR
-        let hsHMCR = _dynamicValue(hsHMCRStart, hsHMCREnd, hsHMCRDynamic, iContinue, NContiguous)
+        //params: 本代要用的超參數, 預設由 _dynamicValue + opt 提供, 外部可透過 funGenerationBefore 覆寫
+        let params = {
+            hsHMCR: _dynamicValue(hsHMCRStart, hsHMCREnd, hsHMCRDynamic, iContinue, NContiguous),
+            hsPAR: _dynamicValue(hsPARStart, hsPAREnd, hsPARDynamic, iContinue, NContiguous),
+            hsHMC,
+            hsPA,
+            ModeOutLimit,
+            LocalSearchMethod,
+        }
 
-        //dynamic PAR
-        let hsPAR = _dynamicValue(hsPARStart, hsPAREnd, hsPARDynamic, iContinue, NContiguous)
+        //funGenerationBefore: 自適應接口, 讓外部覆寫本代要用的超參數
+        if (isfun(funGenerationBefore)) {
+            let r = await funGenerationBefore({
+                params: cloneDeep(params),
+                iGeneration: i,
+                iContinue,
+                iExecute,
+                bestFitness: bestSolution.fitness,
+            })
+            if (r && r.params) {
+                params = { ...params, ...r.params }
+            }
+        }
+
+        //把覆寫後的 params 賦值回 closure 變數(讓 runHMCImpro / strategyLocalSearch 自動讀)
+        hsHMC = params.hsHMC
+        hsPA = params.hsPA
+        ModeOutLimit = params.ModeOutLimit
+        LocalSearchMethod = params.LocalSearchMethod
+        let hsHMCR = params.hsHMCR
+        let hsPAR = params.hsPAR
 
         //Improvisation, 產生1個新和聲
         let _s = runHMCImpro(hsHMCR, hsPAR)
@@ -528,15 +554,15 @@ async function omlHS(dps, funFit, opt = {}) {
         let strategyLocalSearch = async () => {
 
             //依LocalSearchMethod分派局部搜尋
-            let improved = await _localSearch(LocalSearchMethod, memory[0], dps, funFit, calcFitness, ModeOutLimit)
+            let s = await _localSearch(LocalSearchMethod, memory[0], dps, funFit, calcFitness, ModeOutLimit)
 
             //check
-            if (improved.fitness >= memory[0].fitness) {
+            if (s.fitness >= memory[0].fitness) {
                 return
             }
 
             //update
-            memory[0] = improved
+            memory[0] = s
 
         }
 
@@ -545,9 +571,7 @@ async function omlHS(dps, funFit, opt = {}) {
             if (UseImmigration) {
                 await strategyImmigration()
             }
-            if (UseLocalSearch) {
-                await strategyLocalSearch()
-            }
+            await strategyLocalSearch()
         }
 
         //stopMode
@@ -561,16 +585,24 @@ async function omlHS(dps, funFit, opt = {}) {
             stopMode = `stop by iExecute[${iExecute}] >= NCore[${NCore}]`
         }
 
+        //funGenerationAfter, 自適應回饋接口
+        //放在 stop 判斷之前, 確保末代 suggest() 也有配對 feedback()
+        if (isfun(funGenerationAfter)) {
+            await funGenerationAfter({
+                params: cloneDeep(params),
+                iGeneration: i,
+                iContinue,
+                iExecute,
+                childrenBestFitness: s.fitness,
+                bestFitness: bestSolution.fitness,
+            })
+        }
+
         //stop
         if (isestr(stopMode)) {
             stopNi = i
             stopExecutions = iExecute
             break
-        }
-
-        //funEndImpro
-        if (isfun(funEndImpro)) {
-            funEndImpro(cloneDeep(memory), cloneDeep(bestSolution), i)
         }
 
     }
@@ -581,6 +613,7 @@ async function omlHS(dps, funFit, opt = {}) {
         hists,
         stopMode,
         stopNi,
+        stopIteration: stopNi, //跨演算法通用別名 (omlDE/RGA: stopNg / omlHS: stopNi / omlPSO/ACO: stopNl)
         stopExecutions,
     }
 
