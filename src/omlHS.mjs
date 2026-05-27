@@ -129,14 +129,14 @@ async function omlHS(dps, funFit, opt = {}) {
     //hsPARStart, 初始PAR (Pitch Adjustment Rate)
     let hsPARStart = get(opt, 'hsPARStart', '')
     if (!isnum(hsPARStart)) {
-        hsPARStart = 0.3
+        hsPARStart = 0.5
     }
     hsPARStart = cdbl(hsPARStart)
 
     //hsPAREnd, 最終PAR
     let hsPAREnd = get(opt, 'hsPAREnd', '')
     if (!isnum(hsPAREnd)) {
-        hsPAREnd = 0.3
+        hsPAREnd = 0.5
     }
     hsPAREnd = cdbl(hsPAREnd)
 
