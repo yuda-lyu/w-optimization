@@ -202,7 +202,7 @@ async function omlRGA(dps, funFit, opt = {}) {
     //rgaElitism, 菁英策略
     let rgaElitism = get(opt, 'rgaElitism', '')
     let rgaElitismList = [
-        'No',
+        'None',
         'BestOne',
         'HalfPop',
         'AllPop',
@@ -800,7 +800,7 @@ async function omlRGA(dps, funFit, opt = {}) {
     //runElitism, 對應AE_RGA_Strategy_Elitism, parents與childs皆已sortBy fitness
     let runElitism = (childs) => {
 
-        if (rgaElitism === 'No') {
+        if (rgaElitism === 'None') {
             //不做菁英
             return childs
         }
