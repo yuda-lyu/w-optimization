@@ -13,6 +13,7 @@ import cdbl from 'wsemi/src/cdbl.mjs'
 import arrHas from 'wsemi/src/arrHas.mjs'
 import _genSolution from './_genSolution.mjs'
 import _randPickNeighbor from './_randPickNeighbor.mjs'
+import _validateDps from './_validateDps.mjs'
 
 
 //buildThresholdList, 產生門檻數列, 對應VB之AE_TA_ThresholdList
@@ -74,6 +75,9 @@ async function omlTA(dps, funFit, opt = {}) {
     //此版本同時支援「主演算法」與「LocalSearch helper」雙用途:
     //  - 主演算法: 不傳opt.initSolution, 內部隨機初始化
     //  - LocalSearch: 傳opt.initSolution + opt.calcFitness(共享caller之iExecute counter)
+
+    //_validateDps
+    _validateDps(dps)
 
     //Nl, 最大總迴圈數
     let Nl = get(opt, 'Nl', '')

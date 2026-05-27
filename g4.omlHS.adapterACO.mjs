@@ -146,9 +146,9 @@ _.each(ps, (v) => {
 async function test() {
 
     let dps = [
-        { values: w.rang(100, 300, 1000), n: 1000 },
-        { values: w.rang(0, 50, 1000), n: 1000 },
-        { values: w.rang(-1000, 0, 1000), n: 1000 },
+        { values: w.rang(100, 300, 1000), n: 1001 },
+        { values: w.rang(0, 50, 1000), n: 1001 },
+        { values: w.rang(-1000, 0, 1000), n: 1001 },
     ]
 
     async function fun(params) {
@@ -173,6 +173,7 @@ async function test() {
         { name: 'hsHMC', values: ['Original', '2M Consideration', '2MB Consideration', '3M Consideration', '3MB Consideration', '4M Consideration', '4MB Consideration'] },
         { name: 'hsPA', values: ['Constant1', 'Constant2', 'Constant3', 'Linear0.1', 'Linear0.2', 'Linear0.3', 'Exponent0.1', 'Exponent0.2', 'Exponent0.3', 'Global Space', 'Available Space', 'Modified Global Best'] },
         { name: 'ModeOutLimit', values: ['Mapping', 'Limit', 'Random'] },
+        { name: 'LocalSearchMethod', values: ['None', 'Neighbor', 'TA', 'SA', 'OneGold', 'Gold', 'NelderMead'] },
     ]
 
     //建立 ACO meta-optimizer
@@ -188,7 +189,6 @@ async function test() {
     let r = await omlHS(dps, fun, {
         Np: 20,
         NContiguous: 100,
-        LocalSearchMethod: 'None', //關掉 LocalSearch 簡化觀察 ACO 自身對 DE 超參數之適配效果
         funGenerationBefore: (ctx) => { //每代開頭: ACO 抽一組超參數覆寫
             let params = aco.suggest()
             //記錄抽到的 idx (用 value 反查 idx)

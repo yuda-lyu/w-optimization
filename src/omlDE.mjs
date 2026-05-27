@@ -20,10 +20,14 @@ import _modifyParameter from './_modifyParameter.mjs'
 import _isSameSolution from './_isSameSolution.mjs'
 import _dynamicValue from './_dynamicValue.mjs'
 import _localSearch from './_localSearch.mjs'
+import _validateDps from './_validateDps.mjs'
 
 
 async function omlDE(dps, funFit, opt = {}) {
     //Differential Evolution, 差分演化法
+
+    //_validateDps
+    _validateDps(dps)
 
     //Ng, 總世代數
     let Ng = get(opt, 'Ng', '')
@@ -91,14 +95,16 @@ async function omlDE(dps, funFit, opt = {}) {
     let funGetBetter = get(opt, 'funGetBetter')
 
     //funGenerationBefore, 每代開頭之自適應接口(可覆寫本代要用的超參數)
-    //收 { params, iGeneration, iContinue, iExecute, bestFitness }, 可回傳 { params: { ... 覆寫的 keys } } 或 undefined
+    //收 { params }, 可回傳 { params: { ... 覆寫的 keys } } 或 undefined
     //params 預設為 _dynamicValue 算出來的 deCrossoverFactor / deF / deLanda 加上 deMutation / ModeOutLimit / LocalSearchMethod
-    //外部可基於 ctx 用 ACO / Bayesian / RL 等任意方法決定本代用什麼參數
+    //外部可基於 params 用 ACO / Bayesian / RL 等任意方法決定本代用什麼參數
     let funGenerationBefore = get(opt, 'funGenerationBefore')
 
     //funGenerationAfter, 每代結束後之自適應回饋接口
-    //收 { params, iGeneration, iContinue, iExecute, childrenBestFitness, bestFitness }, 不需回傳
-    //外部可基於本代 fitness 做 ACO pheromone 更新等學習動作
+    //收 { params, childrenBestFitness }, 不需回傳
+    //  params:              本代實際使用之超參數(已含 funGenerationBefore 之覆寫)
+    //  childrenBestFitness: 本代所有 strategy(Immigration + LS)跑完後 children[0].fitness
+    //                       對齊 .bas history(i) 語意, 反映本代 params 全部影響(含 LS)
     let funGenerationAfter = get(opt, 'funGenerationAfter')
 
     //deCrossoverFactorStart, 初始交配因子
@@ -377,25 +383,11 @@ async function omlDE(dps, funFit, opt = {}) {
         if (isfun(funGenerationBefore)) {
             let r = await funGenerationBefore({
                 params: cloneDeep(params),
-                iGeneration: i,
-                iContinue,
-                iExecute,
-                bestFitness: bestSolution.fitness,
             })
             if (r && r.params) {
                 params = { ...params, ...r.params }
             }
         }
-
-        //childrenBestFitness for adapter feedback: 追蹤本代「raw offspring」最佳 fitness
-        //避開兩個訊號失真問題:
-        //  H2: survivor selection (line 405-410) 會把上代 parents 保留進 children 陣列,
-        //      若本代 offspring 全比 parents 差, children[0] 反映的是「上代 parent 的好」,
-        //      不是「本代 params 的成果」, adapter 會把 parent credit 誤算給 params
-        //  H3: strategyLocalSearch 會改善 children[0], 若直接用 children[0].fitness,
-        //      adapter 會把 LS 功勞算到 params 頭上
-        //rawOffspringBest 只看 operCrossover 直接產出的 s.fitness, 不受 survivor / LS 干擾
-        let childrenBestFitnessForFeedback = Infinity
 
         for (let k = 0; k < Np; k++) {
 
@@ -405,10 +397,6 @@ async function omlDE(dps, funFit, opt = {}) {
             //calcFitness
             let s = await calcFitness(_s, 'operCrossover')
 
-            //追蹤 raw offspring 最佳 fitness (用於 adapter feedback)
-            if (s.fitness < childrenBestFitnessForFeedback) {
-                childrenBestFitnessForFeedback = s.fitness
-            }
 
             //update children[k]
             if (parents[k].fitness > s.fitness) {
@@ -536,11 +524,7 @@ async function omlDE(dps, funFit, opt = {}) {
         if (isfun(funGenerationAfter)) {
             await funGenerationAfter({
                 params: cloneDeep(params),
-                iGeneration: i,
-                iContinue,
-                iExecute,
-                childrenBestFitness: childrenBestFitnessForFeedback,
-                bestFitness: bestSolution.fitness,
+                childrenBestFitness: children[0].fitness,
             })
         }
 

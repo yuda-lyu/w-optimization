@@ -8,6 +8,7 @@ import ispm from 'wsemi/src/ispm.mjs'
 import arrHas from 'wsemi/src/arrHas.mjs'
 import _genSolution from './_genSolution.mjs'
 import _modifyParameter from './_modifyParameter.mjs'
+import _validateDps from './_validateDps.mjs'
 
 
 //sdmNeighbor, 對每變數試 ±1, 選最大改善方向作為下一步, 對應VB之AE_SDM_Neighbor
@@ -290,6 +291,9 @@ async function sdm(dps, funFit, opt = {}) {
     //  - 'Neighbor': 對每變數試 ±1, 選最大改善方向, 反覆直到無改善
     //  - 'OneGold':  做一次梯度+黃金比+二分搜尋
     //  - 'Gold':     重複 OneGold 直到 fitness 不變
+
+    //_validateDps
+    _validateDps(dps)
 
     //sdmMode
     let sdmMode = get(opt, 'sdmMode', '')

@@ -146,9 +146,9 @@ _.each(ps, (v) => {
 async function test() {
 
     let dps = [
-        { values: w.rang(100, 300, 1000), n: 1000 },
-        { values: w.rang(0, 50, 1000), n: 1000 },
-        { values: w.rang(-1000, 0, 1000), n: 1000 },
+        { values: w.rang(100, 300, 1000), n: 1001 },
+        { values: w.rang(0, 50, 1000), n: 1001 },
+        { values: w.rang(-1000, 0, 1000), n: 1001 },
     ]
 
     async function fun(params) {
@@ -173,6 +173,7 @@ async function test() {
         { name: 'deLanda', values: w.rang(0, 1, 10) }, //11 階, step 0.1
         { name: 'deMutation', values: ['1R2RR', '1B2RR', '1R2BR', '1R4RRRR', '1B4RRRR', '1R4BRRR', '1S4BSRR'] },
         { name: 'ModeOutLimit', values: ['Mapping', 'Limit', 'Random'] },
+        { name: 'LocalSearchMethod', values: ['None', 'Neighbor', 'TA', 'SA', 'OneGold', 'Gold', 'NelderMead'] },
     ]
 
     //建立 SA meta-optimizer
@@ -189,7 +190,6 @@ async function test() {
     let r = await omlDE(dps, fun, {
         Np: 20,
         NContiguous: 100,
-        LocalSearchMethod: 'None',
         funGenerationBefore: (ctx) => {
             let params = sa.suggest()
             schema.forEach((s, i) => {

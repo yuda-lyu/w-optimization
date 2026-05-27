@@ -8,8 +8,8 @@ describe('sdm', function() {
     //2變數例: sin(y)*x + sin(x)*y + x^2 + y^2, 最佳解約於 (0, 0) 附近
     //sdm為非隨機求解法, 固定起點應產生固定解, 用deepEqual嚴格比對
     let dps = [
-        { values: w.rang(-5, 5, 200), n: 200 },
-        { values: w.rang(-5, 5, 200), n: 200 },
+        { values: w.rang(-5, 5, 200), n: 201 },
+        { values: w.rang(-5, 5, 200), n: 201 },
     ]
 
     async function fun(params) {

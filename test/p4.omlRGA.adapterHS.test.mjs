@@ -129,9 +129,9 @@ describe('omlRGA + _adapterHS', function() {
     })
 
     let dps = [
-        { values: w.rang(100, 300, 1000), n: 1000 },
-        { values: w.rang(0, 50, 1000), n: 1000 },
-        { values: w.rang(-1000, 0, 1000), n: 1000 },
+        { values: w.rang(100, 300, 1000), n: 1001 },
+        { values: w.rang(0, 50, 1000), n: 1001 },
+        { values: w.rang(-1000, 0, 1000), n: 1001 },
     ]
 
     async function fun(params) {
@@ -155,6 +155,7 @@ describe('omlRGA + _adapterHS', function() {
         { name: 'rgaMutation', values: ['Constant1', 'Constant2', 'Constant3', 'Linear0.1', 'Linear0.2', 'Linear0.3', 'Exponent0.1', 'Exponent0.2', 'Exponent0.3', 'Global Space'] },
         { name: 'rgaElitism', values: ['No', 'BestOne', 'HalfPop', 'AllPop'] },
         { name: 'ModeOutLimit', values: ['Mapping', 'Limit', 'Random'] },
+        { name: 'LocalSearchMethod', values: ['None', 'Neighbor', 'TA', 'SA', 'OneGold', 'Gold', 'NelderMead'] },
     ]
 
     it(`should return true when omlRGA controlled by _adapterHS`, async function() {
@@ -168,7 +169,6 @@ describe('omlRGA + _adapterHS', function() {
         let rr = await omlRGA(dps, fun, {
             Np: 20,
             NContiguous: 100,
-            LocalSearchMethod: 'None',
             funGenerationBefore: () => ({ params: hs.suggest() }),
             funGenerationAfter: (ctx) => hs.feedback(ctx.params, ctx.childrenBestFitness),
         })

@@ -18,10 +18,14 @@ import _isSameSolution from './_isSameSolution.mjs'
 import _dynamicValue from './_dynamicValue.mjs'
 import _pickByWeights from './_pickByWeights.mjs'
 import _localSearch from './_localSearch.mjs'
+import _validateDps from './_validateDps.mjs'
 
 
 async function omlACO(dps, funFit, opt = {}) {
     //Ant Colony Optimization, 蟻群最佳化
+
+    //_validateDps
+    _validateDps(dps)
 
     //Nl, 最大總迴圈數
     let Nl = get(opt, 'Nl', '')
@@ -98,12 +102,15 @@ async function omlACO(dps, funFit, opt = {}) {
     let funEndLoop = get(opt, 'funEndLoop')
 
     //funGenerationBefore, 每代開頭之自適應接口(可覆寫本代要用的超參數)
-    //收 { params, iGeneration, iContinue, iExecute, bestFitness }, 可回傳 { params: { ... 覆寫的 keys } } 或 undefined
+    //收 { params }, 可回傳 { params: { ... 覆寫的 keys } } 或 undefined
     //params 預設為 _dynamicValue 算出來的 acoExploitationRate / acoAlpha / acoRo 加上 ModeOutLimit / LocalSearchMethod
     let funGenerationBefore = get(opt, 'funGenerationBefore')
 
     //funGenerationAfter, 每代結束後之自適應回饋接口
-    //收 { params, iGeneration, iContinue, iExecute, childrenBestFitness, bestFitness }, 不需回傳
+    //收 { params, childrenBestFitness }, 不需回傳
+    //  params:              本代實際使用之超參數(已含 funGenerationBefore 之覆寫)
+    //  childrenBestFitness: 本代所有 strategy(Immigration + LS + Repeat/ForcedExplore)跑完後 ants[0].fitness
+    //                       對齊 .bas history(i) 語意, 反映本代 params 全部影響(含 LS)
     let funGenerationAfter = get(opt, 'funGenerationAfter')
 
     //acoExploitationRateStart, 初始開發率 (小=開發, 大=探索)
@@ -330,10 +337,6 @@ async function omlACO(dps, funFit, opt = {}) {
         if (isfun(funGenerationBefore)) {
             let r = await funGenerationBefore({
                 params: cloneDeep(params),
-                iGeneration: i,
-                iContinue,
-                iExecute,
-                bestFitness: bestSolution.fitness,
             })
             if (r && r.params) {
                 params = { ...params, ...r.params }
@@ -349,10 +352,6 @@ async function omlACO(dps, funFit, opt = {}) {
 
         //Behavior
         await runBehavior(acoExploitationRate, acoAlpha, acoRo)
-
-        //antsBestFitness for adapter feedback: 抓本代 LS 之前的最佳 fitness
-        //避免 strategyLocalSearch 改善 ants[0] 後讓 adapter 把 LS 功勞算到 params 頭上
-        let antsBestFitnessForFeedback = ants[0].fitness
 
         //strategyImmigration, 移民策略 (對齊 .bas 順序: 排在 hists / bestSolution 之前, 改善立即反映)
         //對應 AE_ACO_Strategy_Immigration
@@ -459,11 +458,7 @@ async function omlACO(dps, funFit, opt = {}) {
         if (isfun(funGenerationAfter)) {
             await funGenerationAfter({
                 params: cloneDeep(params),
-                iGeneration: i,
-                iContinue,
-                iExecute,
-                childrenBestFitness: antsBestFitnessForFeedback,
-                bestFitness: bestSolution.fitness,
+                childrenBestFitness: ants[0].fitness,
             })
         }
 

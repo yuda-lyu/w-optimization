@@ -129,9 +129,9 @@ describe('omlPSO + _adapterSA', function() {
     })
 
     let dps = [
-        { values: w.rang(100, 300, 1000), n: 1000 },
-        { values: w.rang(0, 50, 1000), n: 1000 },
-        { values: w.rang(-1000, 0, 1000), n: 1000 },
+        { values: w.rang(100, 300, 1000), n: 1001 },
+        { values: w.rang(0, 50, 1000), n: 1001 },
+        { values: w.rang(-1000, 0, 1000), n: 1001 },
     ]
 
     async function fun(params) {
@@ -154,6 +154,7 @@ describe('omlPSO + _adapterSA', function() {
         { name: 'psoBeta', values: w.rang(0.5, 1.0, 10) },
         { name: 'psoGamma', values: w.rang(0.1, 1.0, 9) },
         { name: 'ModeOutLimit', values: ['Mapping', 'Limit', 'Random'] },
+        { name: 'LocalSearchMethod', values: ['None', 'Neighbor', 'TA', 'SA', 'OneGold', 'Gold', 'NelderMead'] },
     ]
 
     it(`should return true when omlPSO controlled by _adapterSA`, async function() {
@@ -164,7 +165,6 @@ describe('omlPSO + _adapterSA', function() {
         let rr = await omlPSO(dps, fun, {
             Np: 20,
             NContiguous: 100,
-            LocalSearchMethod: 'None',
             funGenerationBefore: () => ({ params: sa.suggest() }),
             funGenerationAfter: (ctx) => sa.feedback(ctx.params, ctx.childrenBestFitness),
         })

@@ -145,9 +145,9 @@ _.each(ps, (v) => {
 async function test() {
 
     let dps = [
-        { values: w.rang(100, 300, 1000), n: 1000 },
-        { values: w.rang(0, 50, 1000), n: 1000 },
-        { values: w.rang(-1000, 0, 1000), n: 1000 },
+        { values: w.rang(100, 300, 1000), n: 1001 },
+        { values: w.rang(0, 50, 1000), n: 1001 },
+        { values: w.rang(-1000, 0, 1000), n: 1001 },
     ]
 
     async function fun(params) {
@@ -171,6 +171,7 @@ async function test() {
         { name: 'psoBeta', values: w.rang(0.5, 1.0, 10) },
         { name: 'psoGamma', values: w.rang(0.1, 1.0, 9) },
         { name: 'ModeOutLimit', values: ['Mapping', 'Limit', 'Random'] },
+        { name: 'LocalSearchMethod', values: ['None', 'Neighbor', 'TA', 'SA', 'OneGold', 'Gold', 'NelderMead'] },
     ]
 
     //建立 TA meta-optimizer
@@ -186,7 +187,6 @@ async function test() {
     let r = await omlPSO(dps, fun, {
         Np: 20,
         NContiguous: 100,
-        LocalSearchMethod: 'None',
         funGenerationBefore: (ctx) => {
             let params = ta.suggest()
             schema.forEach((s, i) => {

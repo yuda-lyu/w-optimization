@@ -133,9 +133,9 @@ _.each(ps, (v) => {
 
 
 let dps = [
-    { values: w.rang(100, 300, 1000), n: 1000 },
-    { values: w.rang(0, 50, 1000), n: 1000 },
-    { values: w.rang(-1000, 0, 1000), n: 1000 },
+    { values: w.rang(100, 300, 1000), n: 1001 },
+    { values: w.rang(0, 50, 1000), n: 1001 },
+    { values: w.rang(-1000, 0, 1000), n: 1001 },
 ]
 
 async function fun(params) {
@@ -158,6 +158,7 @@ let schema = [
     { name: 'rgaMutation', values: ['Constant1', 'Constant2', 'Constant3', 'Linear0.1', 'Linear0.2', 'Linear0.3', 'Exponent0.1', 'Exponent0.2', 'Exponent0.3', 'Global Space'] },
     { name: 'rgaElitism', values: ['No', 'BestOne', 'HalfPop', 'AllPop'] },
     { name: 'ModeOutLimit', values: ['Mapping', 'Limit', 'Random'] },
+    { name: 'LocalSearchMethod', values: ['None', 'Neighbor', 'TA', 'SA', 'OneGold', 'Gold', 'NelderMead'] },
 ]
 
 
@@ -178,7 +179,6 @@ let scenarios = [
             let aco = _adapterACO(schema, { acoExploitationRate: 0.8, acoAlpha: 0.1 })
             return {
                 ...baseOpt,
-                LocalSearchMethod: 'None',
                 funGenerationBefore: () => ({ params: aco.suggest() }),
                 funGenerationAfter: (ctx) => aco.feedback(ctx.params, ctx.childrenBestFitness),
             }
@@ -190,7 +190,6 @@ let scenarios = [
             let hs = _adapterHS(schema, { Ns: 10, hsHMCR: 0.9, hsPAR: 0.3, hsHMC: 'Original', hsPA: 'Linear0.1' })
             return {
                 ...baseOpt,
-                LocalSearchMethod: 'None',
                 funGenerationBefore: () => ({ params: hs.suggest() }),
                 funGenerationAfter: (ctx) => hs.feedback(ctx.params, ctx.childrenBestFitness),
             }
@@ -202,7 +201,6 @@ let scenarios = [
             let sa = _adapterSA(schema, { saInitialTemperature: 50, saAlpha: 0.95 })
             return {
                 ...baseOpt,
-                LocalSearchMethod: 'None',
                 funGenerationBefore: () => ({ params: sa.suggest() }),
                 funGenerationAfter: (ctx) => sa.feedback(ctx.params, ctx.childrenBestFitness),
             }
@@ -214,7 +212,6 @@ let scenarios = [
             let ta = _adapterTA(schema, { taThresholdInitial: 50, taThresholdRatio: 0.99 })
             return {
                 ...baseOpt,
-                LocalSearchMethod: 'None',
                 funGenerationBefore: () => ({ params: ta.suggest() }),
                 funGenerationAfter: (ctx) => ta.feedback(ctx.params, ctx.childrenBestFitness),
             }

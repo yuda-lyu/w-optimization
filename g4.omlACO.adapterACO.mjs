@@ -144,9 +144,9 @@ _.each(ps, (v) => {
 async function test() {
 
     let dps = [
-        { values: w.rang(100, 300, 1000), n: 1000 },
-        { values: w.rang(0, 50, 1000), n: 1000 },
-        { values: w.rang(-1000, 0, 1000), n: 1000 },
+        { values: w.rang(100, 300, 1000), n: 1001 },
+        { values: w.rang(0, 50, 1000), n: 1001 },
+        { values: w.rang(-1000, 0, 1000), n: 1001 },
     ]
 
     async function fun(params) {
@@ -168,8 +168,8 @@ async function test() {
         { name: 'acoExploitationRate', values: w.rang(0, 1, 20) }, //21 階, step 0.05
         { name: 'acoAlpha', values: w.rang(0, 1, 10) }, //11 階, step 0.1
         { name: 'acoRo', values: w.rang(0, 1, 10) }, //11 階, step 0.1
-        //ModeOutLimit 僅於 LocalSearchMethod != 'None' 時才會經 _localSearch 路徑生效, 關 LS 時為空轉
-        { name: 'ModeOutLimit', values: ['Mapping', 'Limit', 'Random'] },
+        { name: 'ModeOutLimit', values: ['Mapping', 'Limit', 'Random'] }, //ModeOutLimit 僅於 LocalSearchMethod != 'None' 時才會經 _localSearch 路徑生效, 若為關 LS 時則無效
+        { name: 'LocalSearchMethod', values: ['None', 'Neighbor', 'TA', 'SA', 'OneGold', 'Gold', 'NelderMead'] },
     ]
 
     //建立外層 ACO meta-optimizer
@@ -185,7 +185,6 @@ async function test() {
     let r = await omlACO(dps, fun, {
         Na: 20,
         NContiguous: 100,
-        LocalSearchMethod: 'None',
         funGenerationBefore: (ctx) => {
             let params = aco.suggest()
             schema.forEach((s, i) => {

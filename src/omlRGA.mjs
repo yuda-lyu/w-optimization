@@ -21,6 +21,7 @@ import _isSameSolution from './_isSameSolution.mjs'
 import _dynamicValue from './_dynamicValue.mjs'
 import _pickByWeights from './_pickByWeights.mjs'
 import _localSearch from './_localSearch.mjs'
+import _validateDps from './_validateDps.mjs'
 
 
 //arrStd, 計算陣列標準差, 對應VB之Std_Long
@@ -44,6 +45,9 @@ function arrStd(arr) {
 
 async function omlRGA(dps, funFit, opt = {}) {
     //Real-coded Genetic Algorithm, 實數編碼基因演算法
+
+    //_validateDps
+    _validateDps(dps)
 
     //Ng, 總世代數
     let Ng = get(opt, 'Ng', '')
@@ -111,12 +115,15 @@ async function omlRGA(dps, funFit, opt = {}) {
     let funGetBetter = get(opt, 'funGetBetter')
 
     //funGenerationBefore, 每代開頭之自適應接口(可覆寫本代要用的超參數)
-    //收 { params, iGeneration, iContinue, iExecute, bestFitness }, 可回傳 { params: { ... 覆寫的 keys } } 或 undefined
+    //收 { params }, 可回傳 { params: { ... 覆寫的 keys } } 或 undefined
     //params 預設為 _dynamicValue 算出來的 rgaMutationRate 加上 rgaSelection / rgaCrossover / rgaMutation / rgaElitism / ModeOutLimit / LocalSearchMethod
     let funGenerationBefore = get(opt, 'funGenerationBefore')
 
     //funGenerationAfter, 每代結束後之自適應回饋接口
-    //收 { params, iGeneration, iContinue, iExecute, childrenBestFitness, bestFitness }, 不需回傳
+    //收 { params, childrenBestFitness }, 不需回傳
+    //  params:              本代實際使用之超參數(已含 funGenerationBefore 之覆寫)
+    //  childrenBestFitness: 本代所有 strategy(Elitism + Immigration + LS)跑完後 children[0].fitness
+    //                       對齊 .bas history(i) 語意, 反映本代 params 全部影響(含 LS)
     let funGenerationAfter = get(opt, 'funGenerationAfter')
 
 
@@ -845,10 +852,6 @@ async function omlRGA(dps, funFit, opt = {}) {
         if (isfun(funGenerationBefore)) {
             let r = await funGenerationBefore({
                 params: cloneDeep(params),
-                iGeneration: i,
-                iContinue,
-                iExecute,
-                bestFitness: bestSolution.fitness,
             })
             if (r && r.params) {
                 params = { ...params, ...r.params }
@@ -877,11 +880,6 @@ async function omlRGA(dps, funFit, opt = {}) {
 
         //sortBy children
         children = sortBy(children, 'fitness')
-
-        //childrenBestFitness for adapter feedback: 抓本代 Elitism + LS 之前的最佳 fitness
-        //避免 runElitism 把上代 parents 拉進來、或 strategyLocalSearch 改善 children[0] 後
-        //讓 adapter 把 Elitism/LS 的功勞算到 params 頭上
-        let childrenBestFitnessForFeedback = children[0].fitness
 
         //Elitism
         children = runElitism(children)
@@ -1001,11 +999,7 @@ async function omlRGA(dps, funFit, opt = {}) {
         if (isfun(funGenerationAfter)) {
             await funGenerationAfter({
                 params: cloneDeep(params),
-                iGeneration: i,
-                iContinue,
-                iExecute,
-                childrenBestFitness: childrenBestFitnessForFeedback,
-                bestFitness: bestSolution.fitness,
+                childrenBestFitness: children[0].fitness,
             })
         }
 

@@ -19,10 +19,14 @@ import _modifyParameter from './_modifyParameter.mjs'
 import _isSameSolution from './_isSameSolution.mjs'
 import _dynamicValue from './_dynamicValue.mjs'
 import _localSearch from './_localSearch.mjs'
+import _validateDps from './_validateDps.mjs'
 
 
 async function omlHS(dps, funFit, opt = {}) {
     //Harmony Search, 和聲搜尋演算法
+
+    //_validateDps
+    _validateDps(dps)
 
     //Ni, 最大Improvisation迭代次數
     let Ni = get(opt, 'Ni', '')
@@ -90,12 +94,15 @@ async function omlHS(dps, funFit, opt = {}) {
     let funGetBetter = get(opt, 'funGetBetter')
 
     //funGenerationBefore, 每代開頭之自適應接口(可覆寫本代要用的超參數)
-    //收 { params, iGeneration, iContinue, iExecute, bestFitness }, 可回傳 { params: { ... 覆寫的 keys } } 或 undefined
+    //收 { params }, 可回傳 { params: { ... 覆寫的 keys } } 或 undefined
     //params 預設為 _dynamicValue 算出來的 hsHMCR/hsPAR 加上 hsHMC / hsPA / ModeOutLimit / LocalSearchMethod
     let funGenerationBefore = get(opt, 'funGenerationBefore')
 
     //funGenerationAfter, 每代結束後之自適應回饋接口
-    //收 { params, iGeneration, iContinue, iExecute, childrenBestFitness, bestFitness }, 不需回傳
+    //收 { params, childrenBestFitness }, 不需回傳
+    //  params:              本代實際使用之超參數(已含 funGenerationBefore 之覆寫)
+    //  childrenBestFitness: 本代所有 strategy(Immigration + LS, 每 Ns 代才跑)跑完後 memory[0].fitness
+    //                       對齊 .bas history(i) 語意, 反映本代 params 全部影響(含 LS, 只在 strategy 代生效)
     let funGenerationAfter = get(opt, 'funGenerationAfter')
 
     //hsHMCRStart, 初始HMCR (Harmony Memory Consideration Rate)
@@ -444,10 +451,6 @@ async function omlHS(dps, funFit, opt = {}) {
         if (isfun(funGenerationBefore)) {
             let r = await funGenerationBefore({
                 params: cloneDeep(params),
-                iGeneration: i,
-                iContinue,
-                iExecute,
-                bestFitness: bestSolution.fitness,
             })
             if (r && r.params) {
                 params = { ...params, ...r.params }
@@ -590,11 +593,7 @@ async function omlHS(dps, funFit, opt = {}) {
         if (isfun(funGenerationAfter)) {
             await funGenerationAfter({
                 params: cloneDeep(params),
-                iGeneration: i,
-                iContinue,
-                iExecute,
-                childrenBestFitness: s.fitness,
-                bestFitness: bestSolution.fitness,
+                childrenBestFitness: memory[0].fitness,
             })
         }
 
