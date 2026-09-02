@@ -1,9 +1,9 @@
 {
   "name": "w-optimization",
-  "version": "1.0.32",
+  "version": "1.0.33",
   "main": "dist/w-optimization.umd.js",
   "dependencies": {
-    "wsemi": "^1.8.81"
+    "wsemi": "^1.8.84"
   },
   "devDependencies": {
     "w-package-tools": "^1.1.15"
