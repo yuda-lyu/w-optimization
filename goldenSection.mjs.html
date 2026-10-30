@@ -29,7 +29,7 @@
 <nav >
     
     
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="w-optimization.html">w-optimization</a><ul class='methods'><li data-type='method'><a href="w-optimization.html#.arrBinarySearch">arrBinarySearch</a></li><li data-type='method'><a href="w-optimization.html#.arrBinarySearchClosest">arrBinarySearchClosest</a></li><li data-type='method'><a href="w-optimization.html#.binarySearch">binarySearch</a></li><li data-type='method'><a href="w-optimization.html#.cobyla">cobyla</a></li><li data-type='method'><a href="w-optimization.html#.goldenSection">goldenSection</a></li><li data-type='method'><a href="w-optimization.html#.goldenSectionLiberate">goldenSectionLiberate</a></li><li data-type='method'><a href="w-optimization.html#.limitBFGS">limitBFGS</a></li><li data-type='method'><a href="w-optimization.html#.nelderMead">nelderMead</a></li><li data-type='method'><a href="w-optimization.html#.setpBracket">setpBracket</a></li></ul></li></ul><h3>Global</h3><ul><li><a href="global.html#Normal">Normal</a></li><li><a href="global.html#cobylaCore">cobylaCore</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="w-optimization.html">w-optimization</a><ul class='methods'><li data-type='method'><a href="w-optimization.html#.arrBinarySearch">arrBinarySearch</a></li><li data-type='method'><a href="w-optimization.html#.arrBinarySearchClosest">arrBinarySearchClosest</a></li><li data-type='method'><a href="w-optimization.html#.binarySearch">binarySearch</a></li><li data-type='method'><a href="w-optimization.html#.cobyla">cobyla</a></li><li data-type='method'><a href="w-optimization.html#.goldenSection">goldenSection</a></li><li data-type='method'><a href="w-optimization.html#.goldenSectionLiberate">goldenSectionLiberate</a></li><li data-type='method'><a href="w-optimization.html#.limitBFGS">limitBFGS</a></li><li data-type='method'><a href="w-optimization.html#.nelderMead">nelderMead</a></li><li data-type='method'><a href="w-optimization.html#.omlACO">omlACO</a></li><li data-type='method'><a href="w-optimization.html#.omlDE">omlDE</a></li><li data-type='method'><a href="w-optimization.html#.omlHS">omlHS</a></li><li data-type='method'><a href="w-optimization.html#.omlPSO">omlPSO</a></li><li data-type='method'><a href="w-optimization.html#.omlRGA">omlRGA</a></li><li data-type='method'><a href="w-optimization.html#.omlSA">omlSA</a></li><li data-type='method'><a href="w-optimization.html#.omlTA">omlTA</a></li><li data-type='method'><a href="w-optimization.html#.sdm">sdm</a></li><li data-type='method'><a href="w-optimization.html#.setpBracket">setpBracket</a></li></ul></li></ul><h3>Global</h3><ul><li><a href="global.html#Normal">Normal</a></li><li><a href="global.html#cobylaCore">cobylaCore</a></li></ul>
     
 </nav>
 
@@ -45,12 +45,10 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>import get from 'lodash-es/get.js'
-import isNumber from 'lodash-es/isNumber.js'
-import isnum from 'wsemi/src/isnum.mjs'
-import isfun from 'wsemi/src/isfun.mjs'
+            <pre class="prettyprint source linenums"><code>import isNumber from 'lodash-es/isNumber.js'
 import ispm from 'wsemi/src/ispm.mjs'
-import cdbl from 'wsemi/src/cdbl.mjs'
+import { kFun, kNum, chkParams } from './_checkParam.mjs'
+import { declGoldenSection } from './_optDecl.mjs'
 
 
 /**
@@ -60,13 +58,13 @@ import cdbl from 'wsemi/src/cdbl.mjs'
  *
  * Unit Test: {@link https://github.com/yuda-lyu/w-optimization/blob/master/test/goldenSection.test.js Github}
  * @memberOf w-optimization
- * @param {Function} fun 輸入適應函數，將傳入變數x，需回傳適應函數值，以求解最小值所在起訖範圍為目標
- * @param {Number} xL 輸入初始最小值數字
- * @param {Number} xU 輸入初始最大值數字
- * @param {Object} [opt={}] 輸入設定物件，預設{}
- * @param {Number} [opt.minTolerance=1e-8] 輸入最小收斂門檻值數字，預設1e-8
- * @param {Number} [opt.maxIterations=100] 輸入最大迭代次數整數，預設100
- * @returns {Promise} 回傳Promise，resolve為求解後結果物件，含鍵值x,y，x為求解後變數組，y為最優適應函數值，reject為失敗訊息
+ * @param {Function} fun 輸入適應函數，將傳入變數x，需回傳適應函數值，以求解最小值所在起訖範圍為目標。種類：函數，必給
+ * @param {Number|String} xL 輸入初始最小值數字或數字字串。種類：有效數字，必給，數字字串轉換後使用，'-'、'NP'、''等非數字字串與null、布林、NaN、Infinity皆為無效
+ * @param {Number|String} xU 輸入初始最大值數字或數字字串。種類：有效數字，必給，處置同xL
+ * @param {Object} [opt={}] 輸入設定物件，預設{}。種類：一般物件，undefined或null視為未給，其餘非一般物件為無效；未宣告之鍵忽略；各鍵給了而不符種類即為無效，不改用預設
+ * @param {Number|String} [opt.minTolerance=1e-8] 輸入最小收斂門檻值，預設1e-8。種類：有效數字，正數
+ * @param {Number|String} [opt.maxIterations=100] 輸入最大迭代次數，預設100。種類：有效數字，正整數
+ * @returns {Promise} 回傳Promise，resolve為求解後結果物件，含鍵值x,y，x為求解後變數組，y為最優適應函數值；輸入無效時reject字串，格式為`invalid &lt;名稱>: must be &lt;種類描述>`，不含輸入值
  * @example
  *
  * async function test() {
@@ -89,34 +87,15 @@ import cdbl from 'wsemi/src/cdbl.mjs'
  */
 async function goldenSection(fun, xL, xU, opt = {}) {
 
-    //check fun
-    if (!isfun(fun)) {
-        return Promise.reject('invalid fun')
+    //check, 一般參數與opt先於任何適應函數呼叫檢測, 檢測之值即使用之值(數字字串已轉換)
+    let c = chkParams([[fun, 'fun', kFun], [xL, 'xL', kNum], [xU, 'xU', kNum]], opt, declGoldenSection)
+    if (c.err !== '') {
+        return Promise.reject(c.err)
     }
-
-    //check xL
-    if (!isnum(xL)) {
-        return Promise.reject('xL is not a number')
-    }
-
-    //check xU
-    if (!isnum(xU)) {
-        return Promise.reject('xU is not a number')
-    }
-
-    //minTolerance
-    let minTolerance = get(opt, 'minTolerance')
-    if (!isnum(minTolerance)) {
-        minTolerance = 1e-8
-    }
-    minTolerance = cdbl(minTolerance)
-
-    //maxIterations
-    let maxIterations = get(opt, 'maxIterations')
-    if (!isnum(maxIterations)) {
-        maxIterations = 100
-    }
-    maxIterations = cdbl(maxIterations)
+    xL = c.vs[1]
+    xU = c.vs[2]
+    let minTolerance = c.o.minTolerance
+    let maxIterations = c.o.maxIterations
 
     //countCalc
     let countCalc = 0
@@ -218,7 +197,7 @@ export default goldenSection
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.5</a> on Sun Oct 25 2026 23:18:14 GMT+0800 (台北標準時間) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.5</a> on Sat Oct 31 2026 02:04:29 GMT+0800 (台北標準時間) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>
