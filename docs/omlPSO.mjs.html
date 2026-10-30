@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>omlPSO.mjs - Documentation</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="w-optimization.html">w-optimization</a><ul class='methods'><li data-type='method'><a href="w-optimization.html#.arrBinarySearch">arrBinarySearch</a></li><li data-type='method'><a href="w-optimization.html#.arrBinarySearchClosest">arrBinarySearchClosest</a></li><li data-type='method'><a href="w-optimization.html#.binarySearch">binarySearch</a></li><li data-type='method'><a href="w-optimization.html#.cobyla">cobyla</a></li><li data-type='method'><a href="w-optimization.html#.goldenSection">goldenSection</a></li><li data-type='method'><a href="w-optimization.html#.goldenSectionLiberate">goldenSectionLiberate</a></li><li data-type='method'><a href="w-optimization.html#.limitBFGS">limitBFGS</a></li><li data-type='method'><a href="w-optimization.html#.nelderMead">nelderMead</a></li><li data-type='method'><a href="w-optimization.html#.omlACO">omlACO</a></li><li data-type='method'><a href="w-optimization.html#.omlDE">omlDE</a></li><li data-type='method'><a href="w-optimization.html#.omlHS">omlHS</a></li><li data-type='method'><a href="w-optimization.html#.omlPSO">omlPSO</a></li><li data-type='method'><a href="w-optimization.html#.omlRGA">omlRGA</a></li><li data-type='method'><a href="w-optimization.html#.omlSA">omlSA</a></li><li data-type='method'><a href="w-optimization.html#.omlTA">omlTA</a></li><li data-type='method'><a href="w-optimization.html#.sdm">sdm</a></li><li data-type='method'><a href="w-optimization.html#.setpBracket">setpBracket</a></li></ul></li></ul><h3>Global</h3><ul><li><a href="global.html#Normal">Normal</a></li><li><a href="global.html#cobylaCore">cobylaCore</a></li></ul>
+    
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">omlPSO.mjs</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import size from 'lodash-es/size.js'
+import map from 'lodash-es/map.js'
+import sortBy from 'lodash-es/sortBy.js'
+import cloneDeep from 'lodash-es/cloneDeep.js'
+import isestr from 'wsemi/src/isestr.mjs'
+import isfun from 'wsemi/src/isfun.mjs'
+import ispm from 'wsemi/src/ispm.mjs'
+import randomIntRange from 'wsemi/src/randomIntRange.mjs'
+import { kNum, kPint, kBol, kFun, chkParams } from './_checkParam.mjs'
+import { kModeOutLimit, kLocalSearchMethod } from './_optDecl.mjs'
+import { kDps } from './_validateDps.mjs'
+import _genSolution from './_genSolution.mjs'
+import _modifyParameter from './_modifyParameter.mjs'
+import _isSameSolution from './_isSameSolution.mjs'
+import _dynamicValue from './_dynamicValue.mjs'
+import _localSearch from './_localSearch.mjs'
+
+
+/**
+ * 粒子群最佳化(Particle Swarm Optimization)
+ *
+ * Unit Test: {@link https://github.com/yuda-lyu/w-optimization/blob/master/test/p4.omlPSO.test.mjs Github}
+ * @memberOf w-optimization
+ * @param {Array} dps 輸入設計變數陣列，各元素為{ values: [可用值], n: 可用值數量 }。種類：非空陣列，必給；元素為一般物件，values為非空陣列(元素為可用值，任意值，由funFit自行解讀，不檢)，n為有效數字，正整數(數字字串轉換後使用)且須等於values長度；不改寫呼叫端之陣列
+ * @param {Function} funFit 輸入適應函數，將傳入各設計變數所取之值陣列，需回傳適應函數值，以求解最小值為目標。種類：函數，必給
+ * @param {Object} [opt={}] 輸入設定物件，預設{}。種類：一般物件，undefined或null視為未給，其餘非一般物件為無效；未宣告之鍵忽略；各鍵給了而不符種類即為無效，不改用預設
+ * @param {Number|String} [opt.Nl=10000] 輸入最大總迴圈數，預設10000。種類：有效數字，正整數
+ * @param {Number|String} [opt.Np=40] 輸入粒子數，預設40。種類：有效數字，正整數
+ * @param {Number|String} [opt.NContiguous=100] 輸入最大最佳解連續未更新次數，預設100。種類：有效數字，正整數
+ * @param {Number|String} [opt.NRepeat=1] 輸入最大再搜尋次數，預設1。種類：有效數字，正整數
+ * @param {Number|String} [opt.NCore=1000000] 輸入最大核心執行次數，預設1000000。種類：有效數字，正整數
+ * @param {String} [opt.ModeOutLimit='Mapping'] 輸入設計變數指標超過範圍之處理方式，預設'Mapping'。種類：列舉字串，'Mapping'、'Limit'、'Random'
+ * @param {Boolean} [opt.UseRepeat=true] 輸入是否使用再搜尋策略，預設true。種類：布林，只收true或false('true'、'n'、1等皆為無效)
+ * @param {Boolean} [opt.UseImmigration=true] 輸入是否使用移民策略，預設true。種類：布林，說明同opt.UseRepeat
+ * @param {String} [opt.LocalSearchMethod='NelderMead'] 輸入局部搜尋方法，預設'NelderMead'。種類：列舉字串，'None'(不做局部搜尋)、'Neighbor'、'TA'、'SA'、'OneGold'、'Gold'、'NelderMead'
+ * @param {Function} [opt.funGetBetter] 輸入有更優解出現時呼叫之函數，將傳入(最佳解,迴圈序號)。種類：函數
+ * @param {Function} [opt.funEndLoop] 輸入每次主迴圈結束後呼叫之函數。種類：函數
+ * @param {Function} [opt.funGenerationBefore] 輸入每代開頭之自適應接口，將傳入{ params }，可回傳{ params: { 覆寫之鍵 } }以覆寫本代超參數(回傳值不檢測)。種類：函數
+ * @param {Function} [opt.funGenerationAfter] 輸入每代結束後之自適應回饋接口，將傳入{ params, childrenBestFitness }，不需回傳。種類：函數
+ * @param {Number|String} [opt.psoC1Start=2] 輸入初始C1(個體經驗權重)，預設2。種類：有效數字
+ * @param {Number|String} [opt.psoC1End=2] 輸入最終C1，預設2。種類：有效數字
+ * @param {Number|String} [opt.psoC1Dynamic=0] 輸入動態C1，預設0。種類：有效數字
+ * @param {Number|String} [opt.psoC2Start=2] 輸入初始C2(全域經驗權重)，預設2。種類：有效數字
+ * @param {Number|String} [opt.psoC2End=2] 輸入最終C2，預設2。種類：有效數字
+ * @param {Number|String} [opt.psoC2Dynamic=0] 輸入動態C2，預設0。種類：有效數字
+ * @param {Number|String} [opt.psoBeta=0.9] 輸入慣性衰減係數(每代inertia*=Beta)，預設0.9。種類：有效數字
+ * @param {Number|String} [opt.psoGamma=0.5] 輸入最大速度比例(Vmax=Gamma*(n-1))，預設0.5。種類：有效數字
+ * @param {Number|String} [opt.psoInertiaMin=0.4] 輸入慣性下限，預設0.4。種類：有效數字
+ * @returns {Promise} 回傳Promise，resolve為結果物件，含鍵值bestSolution,hists,stopMode,stopNl,stopExecutions；輸入無效時reject字串，格式為`invalid &lt;名稱>: must be &lt;種類描述>`，不含輸入值
+ */
+async function omlPSO(dps, funFit, opt = {}) {
+    //Particle Swarm Optimization, 粒子群最佳化
+
+    //check, 一般參數與opt先於任何適應函數呼叫檢測, 檢測之值即使用之值
+    let c = chkParams([[dps, 'dps', kDps], [funFit, 'funFit', kFun]], opt, {
+        Nl: [kPint, 10000], //最大總迴圈數
+        Np: [kPint, 40], //粒子數
+        NContiguous: [kPint, 100], //最大最佳解連續未更新次數
+        NRepeat: [kPint, 1], //最大再搜尋次數
+        NCore: [kPint, 1000000], //最大核心執行次數
+        ModeOutLimit: [kModeOutLimit, 'Mapping'], //設計變數指標超過範圍之處理方式
+        UseRepeat: [kBol, true], //是否使用再搜尋策略
+        UseImmigration: [kBol, true], //是否使用移民策略
+        LocalSearchMethod: [kLocalSearchMethod, 'NelderMead'], //局部搜尋方法 ('None' = 不做局部搜尋)
+        funGetBetter: [kFun, undefined], //當有更優解出現時呼叫函數
+        funEndLoop: [kFun, undefined], //每次主迴圈結束後呼叫函數
+        funGenerationBefore: [kFun, undefined], //每代開頭之自適應接口(可覆寫本代要用的超參數)
+        funGenerationAfter: [kFun, undefined], //每代結束後之自適應回饋接口
+        psoC1Start: [kNum, 2.0], //初始C1 (個體經驗權重)
+        psoC1End: [kNum, 2.0], //最終C1
+        psoC1Dynamic: [kNum, 0], //動態C1
+        psoC2Start: [kNum, 2.0], //初始C2 (全域經驗權重)
+        psoC2End: [kNum, 2.0], //最終C2
+        psoC2Dynamic: [kNum, 0], //動態C2
+        psoBeta: [kNum, 0.9], //慣性衰減係數 (每代 inertia *= Beta)
+        psoGamma: [kNum, 0.5], //最大速度比例 (Vmax = Gamma * (n-1))
+        psoInertiaMin: [kNum, 0.4], //慣性下限
+    })
+    if (c.err !== '') {
+        return Promise.reject(c.err)
+    }
+    dps = c.vs[0]
+    let {
+        Nl, Np, NContiguous, NRepeat, NCore, ModeOutLimit, UseRepeat, UseImmigration, LocalSearchMethod,
+        funGetBetter, funEndLoop, funGenerationBefore, funGenerationAfter,
+        psoC1Start, psoC1End, psoC1Dynamic,
+        psoC2Start, psoC2End, psoC2Dynamic,
+        psoBeta, psoGamma, psoInertiaMin,
+    } = c.o
+
+    //Nd, 設計變數總數
+    let Nd = size(dps)
+
+    //funGenerationBefore, 每代開頭之自適應接口(可覆寫本代要用的超參數)
+    //收 { params }, 可回傳 { params: { ... 覆寫的 keys } } 或 undefined
+    //params 預設為 _dynamicValue 算出來的 psoC1 / psoC2 加上 psoBeta / psoGamma / psoInertiaMin / ModeOutLimit / LocalSearchMethod
+
+    //funGenerationAfter, 每代結束後之自適應回饋接口
+    //收 { params, childrenBestFitness }, 不需回傳
+    //  params:              本代實際使用之超參數(已含 funGenerationBefore 之覆寫)
+    //  childrenBestFitness: 本代所有 strategy(Immigration + LS)跑完後 particles[0].fitness
+    //                       對齊 .bas history(i) 語意, 反映本代 params 全部影響(含 LS)
+
+    let iRepeat = 0 //初始化再搜尋次數
+    let iContinue = 0 //初始化現在連續未更新次數
+    let iExecute = 0 //初始化核心分析次數
+
+    //calcFitness
+    let calcFitness = async (_s, from) => {
+        iExecute++
+        let _ps = map(_s.ps, 'value')
+        let f = funFit(_ps)
+        if (ispm(f)) {
+            f = await f
+        }
+        let s = {
+            ps: _s.ps,
+            fitness: f,
+        }
+        return s
+    }
+
+    //genParticle, 產生一個新粒子(含位置, 速度, 慣性, BS)
+    let genParticle = async (from) => {
+
+        //隨機位置
+        let _s = _genSolution(dps)
+        let s = await calcFitness(_s, from)
+
+        //初始速度: 各設計變數於 [-(n-1), n-1] 內隨機整數轉double
+        let velocity = []
+        for (let i = 0; i &lt; Nd; i++) {
+            let n = dps[i].n
+            velocity.push(randomIntRange(-(n - 1), n - 1))
+        }
+
+        //初始慣性: (1+Rnd) * InertiaMin, 範圍 [InertiaMin, 2*InertiaMin]
+        let inertia = (1 + Math.random()) * psoInertiaMin
+
+        let particle = {
+            ps: s.ps,
+            fitness: s.fitness,
+            bs: cloneDeep(s), //個體歷史最佳, 初始 = 當前
+            velocity,
+            inertia,
+        }
+        return particle
+    }
+
+    let bestSolution = null //最佳解
+    let hists = [] //求解最佳解之紀錄清單
+    let stopMode = '' //觸發停止之機制
+    let stopNl = 0 //停止時迴圈數
+    let stopExecutions = 0 //停止時核心分析次數
+
+    let particles = []
+    let gs = null //全域歷史最佳 (Group Best)
+
+    //初始化粒子群
+    if (true) {
+
+        for (let k = 0; k &lt; Np; k++) {
+            let p = await genParticle('init')
+            particles.push(p)
+        }
+
+        //sortBy fitness
+        particles = sortBy(particles, 'fitness')
+
+        //gs = 當前最佳粒子之 ps + fitness
+        gs = { ps: cloneDeep(particles[0].ps), fitness: particles[0].fitness }
+
+        //push
+        hists.push(cloneDeep(particles[0]))
+
+        //bestSolution
+        bestSolution = { ps: cloneDeep(particles[0].ps), fitness: particles[0].fitness }
+
+    }
+
+    //runEvolution, 對應AE_PSO_Evolution: 更新每粒子之速度/慣性/位置
+    let runEvolution = async (psoC1, psoC2) => {
+
+        //Constriction Factor
+        let psoPhi = psoC1 + psoC2
+        let psoK
+        if (psoPhi > 4) {
+            psoK = 2 / Math.abs(2 - psoPhi - Math.sqrt(psoPhi * psoPhi - 4 * psoPhi))
+        }
+        else {
+            psoK = 1
+        }
+
+        for (let k = 0; k &lt; Np; k++) {
+
+            let particle = particles[k]
+            let rGamma1 = Math.random()
+            let rGamma2 = Math.random()
+
+            //New Velocity
+            for (let i = 0; i &lt; Nd; i++) {
+
+                let v = 0
+                v += particle.inertia * particle.velocity[i]
+                v += psoC1 * rGamma1 * (particle.bs.ps[i].ind - particle.ps[i].ind)
+                v += psoC2 * rGamma2 * (gs.ps[i].ind - particle.ps[i].ind)
+
+                //Constriction
+                v = psoK * v
+
+                //Vmax / Vmin
+                let vMax = psoGamma * (dps[i].n - 1)
+                let vMin = -vMax
+
+                //clamp
+                particle.velocity[i] = Math.max(Math.min(v, vMax), vMin)
+            }
+
+            //New Inertia
+            let newInertia = psoBeta * particle.inertia
+            particle.inertia = Math.max(Math.min(newInertia, 10000), psoInertiaMin)
+
+            //New Position
+            for (let i = 0; i &lt; Nd; i++) {
+                let j = Math.round(particle.ps[i].ind + particle.velocity[i])
+                j = _modifyParameter(j, dps[i].n - 1, ModeOutLimit)
+                particle.ps[i].ind = j
+                particle.ps[i].value = dps[i].values[j]
+            }
+
+            //calcFitness
+            let s = await calcFitness(particle, 'evolution')
+            particle.fitness = s.fitness
+
+            //更新個體歷史最佳 BS
+            if (particle.bs.fitness > particle.fitness) {
+                particle.bs = { ps: cloneDeep(particle.ps), fitness: particle.fitness }
+            }
+
+            //更新全域歷史最佳 GS
+            if (gs.fitness > particle.fitness) {
+                gs = { ps: cloneDeep(particle.ps), fitness: particle.fitness }
+            }
+        }
+    }
+
+    //搜尋
+    let i = -1
+    while (true) {
+        i++
+
+        //params: 本代要用的超參數, 預設由 _dynamicValue + opt 提供, 外部可透過 funGenerationBefore 覆寫
+        let params = {
+            psoC1: _dynamicValue(psoC1Start, psoC1End, psoC1Dynamic, iContinue, NContiguous),
+            psoC2: _dynamicValue(psoC2Start, psoC2End, psoC2Dynamic, iContinue, NContiguous),
+            psoBeta,
+            psoGamma,
+            psoInertiaMin,
+            ModeOutLimit,
+            LocalSearchMethod,
+        }
+
+        //funGenerationBefore: 自適應接口, 讓外部覆寫本代要用的超參數
+        if (isfun(funGenerationBefore)) {
+            let r = await funGenerationBefore({
+                params: cloneDeep(params),
+            })
+            if (r &amp;&amp; r.params) {
+                params = { ...params, ...r.params }
+            }
+        }
+
+        //把覆寫後的 params 賦值回 closure 變數(讓既有 runEvolution / genParticle / strategyLocalSearch 自動讀)
+        psoBeta = params.psoBeta
+        psoGamma = params.psoGamma
+        psoInertiaMin = params.psoInertiaMin
+        ModeOutLimit = params.ModeOutLimit
+        LocalSearchMethod = params.LocalSearchMethod
+        let psoC1 = params.psoC1
+        let psoC2 = params.psoC2
+
+        //Evolution
+        await runEvolution(psoC1, psoC2)
+
+        //sortBy particles by fitness
+        particles = sortBy(particles, 'fitness')
+
+        //strategyImmigration, 移民策略 (對齊 .bas 順序: 排在 hists / bestSolution 之前, 改善立即反映)
+        //VB原碼 AE_PSO_QuickSort 開頭 Exit Sub 讓排序被 disable, 此處修正為先 sortBy 再比鄰
+        let strategyImmigration = async () => {
+
+            //由後往前處理, 不變更當前最佳粒子particles[0], 故k是從Np-1至1
+            for (let k = Np - 1; k >= 1; k--) {
+                if (_isSameSolution(particles[k - 1], particles[k])) {
+                    let p = await genParticle('strategyImmigration')
+                    particles[k] = p
+                }
+            }
+
+            //sortBy
+            particles = sortBy(particles, 'fitness')
+
+            //同步 gs: Immigration 重產隨機個體後 particles[0] 可能比 gs 好, 必須同步避免下代 runEvolution 用到 stale gs
+            if (gs.fitness > particles[0].fitness) {
+                gs = { ps: cloneDeep(particles[0].ps), fitness: particles[0].fitness }
+            }
+
+        }
+        if (UseImmigration) {
+            await strategyImmigration()
+        }
+
+        //strategyLocalSearch, 局部搜尋策略 (對齊 .bas 順序: 排在 hists / bestSolution 之前, 改善立即反映)
+        let strategyLocalSearch = async () => {
+
+            //依LocalSearchMethod分派局部搜尋(只傳 particles[0] 的 ps+fitness, 不傳整個 particle)
+            let currentBest = { ps: cloneDeep(particles[0].ps), fitness: particles[0].fitness }
+            let s = await _localSearch(LocalSearchMethod, currentBest, dps, funFit, calcFitness, ModeOutLimit)
+
+            //check
+            if (s.fitness >= particles[0].fitness) {
+                return
+            }
+
+            //update particle[0] 之 ps + fitness (velocity / inertia / bs 保留)
+            particles[0].ps = s.ps
+            particles[0].fitness = s.fitness
+
+            //同步更新 gs
+            if (gs.fitness > s.fitness) {
+                gs = { ps: cloneDeep(s.ps), fitness: s.fitness }
+            }
+
+        }
+        await strategyLocalSearch()
+
+        //push history (對齊 .bas: hists 記錄 strategy 後之 final particles[0])
+        hists.push(cloneDeep(particles[0]))
+
+        //bestSolution (對齊 .bas: bestSolution / iContinue 反映 strategy 後之 final particles[0])
+        if (bestSolution.fitness > particles[0].fitness) {
+
+            //update
+            bestSolution = { ps: cloneDeep(particles[0].ps), fitness: particles[0].fitness }
+
+            //funGetBetter
+            if (isfun(funGetBetter)) {
+                funGetBetter(cloneDeep(bestSolution), i)
+            }
+
+            iContinue = 0
+        }
+        else {
+            iContinue += 1
+        }
+
+        //strategyRepeat, 再搜尋策略 (對齊 .bas 順序: 排在 bestSolution 更新後, 改善留到下代 evolution 才反映)
+        let strategyRepeat = async () => {
+
+            //由前往後處理, 不變更當前最佳粒子particles[0], 故k是從1至Np-1
+            for (let k = 1; k &lt;= Np - 1; k++) {
+                let p = await genParticle('strategyRepeat')
+                particles[k] = p
+            }
+
+            //sortBy
+            particles = sortBy(particles, 'fitness')
+
+            //重產非最佳解未必會有更優最佳解, 仍須重置iContinue避免再搜尋策略弱化
+            iContinue = 0
+
+            //次數增加
+            iRepeat += 1
+
+        }
+        if (UseRepeat &amp;&amp; iContinue >= NContiguous &amp;&amp; iRepeat &lt; NRepeat) {
+            await strategyRepeat()
+        }
+
+        //stopMode
+        if (i >= Nl) {
+            stopMode = `stop by Nl[${Nl}]`
+        }
+        else if (iContinue >= NContiguous) {
+            stopMode = `stop by iContinue[${iContinue}] >= NContiguous[${NContiguous}]`
+        }
+        else if (iExecute >= NCore) {
+            stopMode = `stop by iExecute[${iExecute}] >= NCore[${NCore}]`
+        }
+
+        //funGenerationAfter, 自適應回饋接口
+        //放在 stop 判斷之前, 確保末代 suggest() 也有配對 feedback()
+        if (isfun(funGenerationAfter)) {
+            await funGenerationAfter({
+                params: cloneDeep(params),
+                childrenBestFitness: particles[0].fitness,
+            })
+        }
+
+        //stop
+        if (isestr(stopMode)) {
+            stopNl = i
+            stopExecutions = iExecute
+            break
+        }
+
+        //funEndLoop
+        if (isfun(funEndLoop)) {
+            funEndLoop(cloneDeep(particles), cloneDeep(bestSolution), i)
+        }
+
+    }
+
+    //r
+    let r = {
+        bestSolution,
+        hists,
+        stopMode,
+        stopNl,
+        stopIteration: stopNl, //跨演算法通用別名 (omlDE/RGA: stopNg / omlHS: stopNi / omlPSO/ACO: stopNl)
+        stopExecutions,
+    }
+
+    return r
+}
+
+
+export default omlPSO
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.5</a> on Sat Oct 31 2026 02:04:29 GMT+0800 (台北標準時間) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+
+
+</body>
+</html>

@@ -1,174 +1,105 @@
-import get from 'lodash-es/get.js'
 import size from 'lodash-es/size.js'
 import map from 'lodash-es/map.js'
 import sortBy from 'lodash-es/sortBy.js'
 import cloneDeep from 'lodash-es/cloneDeep.js'
-import isnum from 'wsemi/src/isnum.mjs'
 import isestr from 'wsemi/src/isestr.mjs'
-import ispint from 'wsemi/src/ispint.mjs'
-import isbol from 'wsemi/src/isbol.mjs'
 import isfun from 'wsemi/src/isfun.mjs'
 import ispm from 'wsemi/src/ispm.mjs'
-import cint from 'wsemi/src/cint.mjs'
-import cdbl from 'wsemi/src/cdbl.mjs'
-import arrHas from 'wsemi/src/arrHas.mjs'
 import randomIntRange from 'wsemi/src/randomIntRange.mjs'
+import { kNum, kPint, kBol, kFun, chkParams } from './_checkParam.mjs'
+import { kModeOutLimit, kLocalSearchMethod } from './_optDecl.mjs'
+import { kDps } from './_validateDps.mjs'
 import _genSolution from './_genSolution.mjs'
 import _modifyParameter from './_modifyParameter.mjs'
 import _isSameSolution from './_isSameSolution.mjs'
 import _dynamicValue from './_dynamicValue.mjs'
 import _localSearch from './_localSearch.mjs'
-import _validateDps from './_validateDps.mjs'
 
 
+/**
+ * 粒子群最佳化(Particle Swarm Optimization)
+ *
+ * Unit Test: {@link https://github.com/yuda-lyu/w-optimization/blob/master/test/p4.omlPSO.test.mjs Github}
+ * @memberOf w-optimization
+ * @param {Array} dps 輸入設計變數陣列，各元素為{ values: [可用值], n: 可用值數量 }。種類：非空陣列，必給；元素為一般物件，values為非空陣列(元素為可用值，任意值，由funFit自行解讀，不檢)，n為有效數字，正整數(數字字串轉換後使用)且須等於values長度；不改寫呼叫端之陣列
+ * @param {Function} funFit 輸入適應函數，將傳入各設計變數所取之值陣列，需回傳適應函數值，以求解最小值為目標。種類：函數，必給
+ * @param {Object} [opt={}] 輸入設定物件，預設{}。種類：一般物件，undefined或null視為未給，其餘非一般物件為無效；未宣告之鍵忽略；各鍵給了而不符種類即為無效，不改用預設
+ * @param {Number|String} [opt.Nl=10000] 輸入最大總迴圈數，預設10000。種類：有效數字，正整數
+ * @param {Number|String} [opt.Np=40] 輸入粒子數，預設40。種類：有效數字，正整數
+ * @param {Number|String} [opt.NContiguous=100] 輸入最大最佳解連續未更新次數，預設100。種類：有效數字，正整數
+ * @param {Number|String} [opt.NRepeat=1] 輸入最大再搜尋次數，預設1。種類：有效數字，正整數
+ * @param {Number|String} [opt.NCore=1000000] 輸入最大核心執行次數，預設1000000。種類：有效數字，正整數
+ * @param {String} [opt.ModeOutLimit='Mapping'] 輸入設計變數指標超過範圍之處理方式，預設'Mapping'。種類：列舉字串，'Mapping'、'Limit'、'Random'
+ * @param {Boolean} [opt.UseRepeat=true] 輸入是否使用再搜尋策略，預設true。種類：布林，只收true或false('true'、'n'、1等皆為無效)
+ * @param {Boolean} [opt.UseImmigration=true] 輸入是否使用移民策略，預設true。種類：布林，說明同opt.UseRepeat
+ * @param {String} [opt.LocalSearchMethod='NelderMead'] 輸入局部搜尋方法，預設'NelderMead'。種類：列舉字串，'None'(不做局部搜尋)、'Neighbor'、'TA'、'SA'、'OneGold'、'Gold'、'NelderMead'
+ * @param {Function} [opt.funGetBetter] 輸入有更優解出現時呼叫之函數，將傳入(最佳解,迴圈序號)。種類：函數
+ * @param {Function} [opt.funEndLoop] 輸入每次主迴圈結束後呼叫之函數。種類：函數
+ * @param {Function} [opt.funGenerationBefore] 輸入每代開頭之自適應接口，將傳入{ params }，可回傳{ params: { 覆寫之鍵 } }以覆寫本代超參數(回傳值不檢測)。種類：函數
+ * @param {Function} [opt.funGenerationAfter] 輸入每代結束後之自適應回饋接口，將傳入{ params, childrenBestFitness }，不需回傳。種類：函數
+ * @param {Number|String} [opt.psoC1Start=2] 輸入初始C1(個體經驗權重)，預設2。種類：有效數字
+ * @param {Number|String} [opt.psoC1End=2] 輸入最終C1，預設2。種類：有效數字
+ * @param {Number|String} [opt.psoC1Dynamic=0] 輸入動態C1，預設0。種類：有效數字
+ * @param {Number|String} [opt.psoC2Start=2] 輸入初始C2(全域經驗權重)，預設2。種類：有效數字
+ * @param {Number|String} [opt.psoC2End=2] 輸入最終C2，預設2。種類：有效數字
+ * @param {Number|String} [opt.psoC2Dynamic=0] 輸入動態C2，預設0。種類：有效數字
+ * @param {Number|String} [opt.psoBeta=0.9] 輸入慣性衰減係數(每代inertia*=Beta)，預設0.9。種類：有效數字
+ * @param {Number|String} [opt.psoGamma=0.5] 輸入最大速度比例(Vmax=Gamma*(n-1))，預設0.5。種類：有效數字
+ * @param {Number|String} [opt.psoInertiaMin=0.4] 輸入慣性下限，預設0.4。種類：有效數字
+ * @returns {Promise} 回傳Promise，resolve為結果物件，含鍵值bestSolution,hists,stopMode,stopNl,stopExecutions；輸入無效時reject字串，格式為`invalid <名稱>: must be <種類描述>`，不含輸入值
+ */
 async function omlPSO(dps, funFit, opt = {}) {
     //Particle Swarm Optimization, 粒子群最佳化
 
-    //_validateDps
-    _validateDps(dps)
-
-    //Nl, 最大總迴圈數
-    let Nl = get(opt, 'Nl', '')
-    if (!ispint(Nl)) {
-        Nl = 10000
+    //check, 一般參數與opt先於任何適應函數呼叫檢測, 檢測之值即使用之值
+    let c = chkParams([[dps, 'dps', kDps], [funFit, 'funFit', kFun]], opt, {
+        Nl: [kPint, 10000], //最大總迴圈數
+        Np: [kPint, 40], //粒子數
+        NContiguous: [kPint, 100], //最大最佳解連續未更新次數
+        NRepeat: [kPint, 1], //最大再搜尋次數
+        NCore: [kPint, 1000000], //最大核心執行次數
+        ModeOutLimit: [kModeOutLimit, 'Mapping'], //設計變數指標超過範圍之處理方式
+        UseRepeat: [kBol, true], //是否使用再搜尋策略
+        UseImmigration: [kBol, true], //是否使用移民策略
+        LocalSearchMethod: [kLocalSearchMethod, 'NelderMead'], //局部搜尋方法 ('None' = 不做局部搜尋)
+        funGetBetter: [kFun, undefined], //當有更優解出現時呼叫函數
+        funEndLoop: [kFun, undefined], //每次主迴圈結束後呼叫函數
+        funGenerationBefore: [kFun, undefined], //每代開頭之自適應接口(可覆寫本代要用的超參數)
+        funGenerationAfter: [kFun, undefined], //每代結束後之自適應回饋接口
+        psoC1Start: [kNum, 2.0], //初始C1 (個體經驗權重)
+        psoC1End: [kNum, 2.0], //最終C1
+        psoC1Dynamic: [kNum, 0], //動態C1
+        psoC2Start: [kNum, 2.0], //初始C2 (全域經驗權重)
+        psoC2End: [kNum, 2.0], //最終C2
+        psoC2Dynamic: [kNum, 0], //動態C2
+        psoBeta: [kNum, 0.9], //慣性衰減係數 (每代 inertia *= Beta)
+        psoGamma: [kNum, 0.5], //最大速度比例 (Vmax = Gamma * (n-1))
+        psoInertiaMin: [kNum, 0.4], //慣性下限
+    })
+    if (c.err !== '') {
+        return Promise.reject(c.err)
     }
-    Nl = cint(Nl)
-
-    //Np, 粒子數
-    let Np = get(opt, 'Np', '')
-    if (!ispint(Np)) {
-        Np = 40
-    }
-    Np = cint(Np)
+    dps = c.vs[0]
+    let {
+        Nl, Np, NContiguous, NRepeat, NCore, ModeOutLimit, UseRepeat, UseImmigration, LocalSearchMethod,
+        funGetBetter, funEndLoop, funGenerationBefore, funGenerationAfter,
+        psoC1Start, psoC1End, psoC1Dynamic,
+        psoC2Start, psoC2End, psoC2Dynamic,
+        psoBeta, psoGamma, psoInertiaMin,
+    } = c.o
 
     //Nd, 設計變數總數
     let Nd = size(dps)
 
-    //NContiguous, 最大最佳解連續未更新次數
-    let NContiguous = get(opt, 'NContiguous', '')
-    if (!ispint(NContiguous)) {
-        NContiguous = 100
-    }
-    NContiguous = cint(NContiguous)
-
-    //NRepeat, 最大再搜尋次數
-    let NRepeat = get(opt, 'NRepeat', '')
-    if (!ispint(NRepeat)) {
-        NRepeat = 1
-    }
-    NRepeat = cint(NRepeat)
-
-    //NCore, 最大核心執行次數
-    let NCore = get(opt, 'NCore', '')
-    if (!ispint(NCore)) {
-        NCore = 1000000
-    }
-    NCore = cint(NCore)
-
-    //ModeOutLimit, 設計變數指標超過範圍之處理方式
-    let ModeOutLimit = get(opt, 'ModeOutLimit', '')
-    if (!arrHas(ModeOutLimit, ['Mapping', 'Limit', 'Random'])) {
-        ModeOutLimit = 'Mapping'
-    }
-
-    //UseRepeat, 是否使用再搜尋策略
-    let UseRepeat = get(opt, 'UseRepeat', '')
-    if (!isbol(UseRepeat)) {
-        UseRepeat = true
-    }
-
-    //UseImmigration, 是否使用移民策略
-    let UseImmigration = get(opt, 'UseImmigration', '')
-    if (!isbol(UseImmigration)) {
-        UseImmigration = true
-    }
-
-    //LocalSearchMethod, 局部搜尋方法 ('None' = 不做局部搜尋)
-    let LocalSearchMethod = get(opt, 'LocalSearchMethod', '')
-    if (!arrHas(LocalSearchMethod, ['None', 'Neighbor', 'TA', 'SA', 'OneGold', 'Gold', 'NelderMead'])) {
-        LocalSearchMethod = 'NelderMead'
-    }
-
-    //funGetBetter, 當有更優解出現時呼叫函數
-    let funGetBetter = get(opt, 'funGetBetter')
-
-    //funEndLoop, 每次主迴圈結束後呼叫函數
-    let funEndLoop = get(opt, 'funEndLoop')
-
     //funGenerationBefore, 每代開頭之自適應接口(可覆寫本代要用的超參數)
     //收 { params }, 可回傳 { params: { ... 覆寫的 keys } } 或 undefined
     //params 預設為 _dynamicValue 算出來的 psoC1 / psoC2 加上 psoBeta / psoGamma / psoInertiaMin / ModeOutLimit / LocalSearchMethod
-    let funGenerationBefore = get(opt, 'funGenerationBefore')
 
     //funGenerationAfter, 每代結束後之自適應回饋接口
     //收 { params, childrenBestFitness }, 不需回傳
     //  params:              本代實際使用之超參數(已含 funGenerationBefore 之覆寫)
     //  childrenBestFitness: 本代所有 strategy(Immigration + LS)跑完後 particles[0].fitness
     //                       對齊 .bas history(i) 語意, 反映本代 params 全部影響(含 LS)
-    let funGenerationAfter = get(opt, 'funGenerationAfter')
-
-    //psoC1Start, 初始C1 (個體經驗權重)
-    let psoC1Start = get(opt, 'psoC1Start', '')
-    if (!isnum(psoC1Start)) {
-        psoC1Start = 2.0
-    }
-    psoC1Start = cdbl(psoC1Start)
-
-    //psoC1End, 最終C1
-    let psoC1End = get(opt, 'psoC1End', '')
-    if (!isnum(psoC1End)) {
-        psoC1End = 2.0
-    }
-    psoC1End = cdbl(psoC1End)
-
-    //psoC1Dynamic, 動態C1
-    let psoC1Dynamic = get(opt, 'psoC1Dynamic', '')
-    if (!isnum(psoC1Dynamic)) {
-        psoC1Dynamic = 0
-    }
-    psoC1Dynamic = cdbl(psoC1Dynamic)
-
-    //psoC2Start, 初始C2 (全域經驗權重)
-    let psoC2Start = get(opt, 'psoC2Start', '')
-    if (!isnum(psoC2Start)) {
-        psoC2Start = 2.0
-    }
-    psoC2Start = cdbl(psoC2Start)
-
-    //psoC2End, 最終C2
-    let psoC2End = get(opt, 'psoC2End', '')
-    if (!isnum(psoC2End)) {
-        psoC2End = 2.0
-    }
-    psoC2End = cdbl(psoC2End)
-
-    //psoC2Dynamic, 動態C2
-    let psoC2Dynamic = get(opt, 'psoC2Dynamic', '')
-    if (!isnum(psoC2Dynamic)) {
-        psoC2Dynamic = 0
-    }
-    psoC2Dynamic = cdbl(psoC2Dynamic)
-
-    //psoBeta, 慣性衰減係數 (每代 inertia *= Beta)
-    let psoBeta = get(opt, 'psoBeta', '')
-    if (!isnum(psoBeta)) {
-        psoBeta = 0.9
-    }
-    psoBeta = cdbl(psoBeta)
-
-    //psoGamma, 最大速度比例 (Vmax = Gamma * (n-1))
-    let psoGamma = get(opt, 'psoGamma', '')
-    if (!isnum(psoGamma)) {
-        psoGamma = 0.5
-    }
-    psoGamma = cdbl(psoGamma)
-
-    //psoInertiaMin, 慣性下限
-    let psoInertiaMin = get(opt, 'psoInertiaMin', '')
-    if (!isnum(psoInertiaMin)) {
-        psoInertiaMin = 0.4
-    }
-    psoInertiaMin = cdbl(psoInertiaMin)
 
     let iRepeat = 0 //初始化再搜尋次數
     let iContinue = 0 //初始化現在連續未更新次數

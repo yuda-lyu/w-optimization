@@ -1,7 +1,6 @@
-import get from 'lodash-es/get.js'
-import isnum from 'wsemi/src/isnum.mjs'
-import cdbl from 'wsemi/src/cdbl.mjs'
 import randomIntRange from 'wsemi/src/randomIntRange.mjs'
+import { kNum, kObj, kFit, chkParams } from './_checkParam.mjs'
+import { kSchema } from './_validateDps.mjs'
 import _pickByWeights from './_pickByWeights.mjs'
 
 
@@ -27,21 +26,23 @@ import _pickByWeights from './_pickByWeights.mjs'
 //  feedback(params, fitness)     —用 fitness 強化 params 對應之 pheromone 位置
 //  getPheromones()               —讀目前 pheromone 二維陣列 (除錯/觀察用)
 //  getSchema()                   —讀目前 schema (除錯/觀察用)
+//
+//種類(dspec 輸入參數之檢測機制), 輸入無效時同步 throw Error(訊息格式 `invalid <名稱>: must be <種類描述>`, 不含輸入值):
+//  schema                 非空陣列, 元素為一般物件 { name, values }: name 為非空字串且不得重複, values 為非空陣列(候選值, 任意值)
+//  opt                    一般物件, undefined 或 null 視為未給; 各鍵給了而不符種類即無效, 不改用預設
+//  opt.acoExploitationRate, opt.acoAlpha   有效數字(數字字串轉換後使用)
+//  feedback(params, fitness)  params 為一般物件; fitness 為適應函數值(數字或數字字串, 轉換後使用, 另收 +-Infinity 作為懲罰值)
 function _adapterACO(schema, opt = {}) {
 
-    //acoExploitationRate
-    let acoExploitationRate = get(opt, 'acoExploitationRate', '')
-    if (!isnum(acoExploitationRate)) {
-        acoExploitationRate = 0.8
+    //check, 檢測之值即使用之值
+    let c = chkParams([[schema, 'schema', kSchema]], opt, {
+        acoExploitationRate: [kNum, 0.8],
+        acoAlpha: [kNum, 0.1],
+    })
+    if (c.err !== '') {
+        throw new Error(c.err)
     }
-    acoExploitationRate = cdbl(acoExploitationRate)
-
-    //acoAlpha
-    let acoAlpha = get(opt, 'acoAlpha', '')
-    if (!isnum(acoAlpha)) {
-        acoAlpha = 0.1
-    }
-    acoAlpha = cdbl(acoAlpha)
+    let { acoExploitationRate, acoAlpha } = c.o
 
     //對每個 schema item 維護 pheromone 陣列(長度 = values 陣列長度)
     let pheromones = schema.map((s) => {
@@ -116,6 +117,13 @@ function _adapterACO(schema, opt = {}) {
 
         //feedback, 用本次 fitness 強化 params 對應之 pheromone(對應 omlACO 之 pheromoneUpdate)
         feedback(params, fitness) {
+
+            //check, 檢測之值即使用之值
+            let cf = chkParams([[params, 'params', kObj], [fitness, 'fitness', kFit]])
+            if (cf.err !== '') {
+                throw new Error(cf.err)
+            }
+            fitness = cf.vs[1]
 
             //rPheromone: fitness 越小, pheromone 強化越大
             let rPheromone

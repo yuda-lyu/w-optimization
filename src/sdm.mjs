@@ -1,14 +1,12 @@
-import get from 'lodash-es/get.js'
 import map from 'lodash-es/map.js'
 import cloneDeep from 'lodash-es/cloneDeep.js'
-import isnum from 'wsemi/src/isnum.mjs'
-import isearr from 'wsemi/src/isearr.mjs'
 import isfun from 'wsemi/src/isfun.mjs'
 import ispm from 'wsemi/src/ispm.mjs'
-import arrHas from 'wsemi/src/arrHas.mjs'
+import { kFun, kEnum, chkParams } from './_checkParam.mjs'
+import { kModeOutLimit } from './_optDecl.mjs'
+import { kDps, kInitSolution } from './_validateDps.mjs'
 import _genSolution from './_genSolution.mjs'
 import _modifyParameter from './_modifyParameter.mjs'
-import _validateDps from './_validateDps.mjs'
 
 
 //sdmNeighbor, 對每變數試 ±1, 選最大改善方向作為下一步, 對應VB之AE_SDM_Neighbor
@@ -283,6 +281,22 @@ async function sdmGold(sOriginal, dps, calcFitness) {
 }
 
 
+/**
+ * 最陡下降法(Steepest Descent Method)
+ *
+ * 此版本同時支援「主演算法」與「LocalSearch helper」雙用途
+ *
+ * Unit Test: {@link https://github.com/yuda-lyu/w-optimization/blob/master/test/p2.sdm.test.mjs Github}
+ * @memberOf w-optimization
+ * @param {Array} dps 輸入設計變數陣列，各元素為{ values: [可用值], n: 可用值數量 }。種類：非空陣列，必給；元素為一般物件，values為非空陣列(元素為可用值，任意值，由funFit自行解讀，不檢)，n為有效數字，正整數(數字字串轉換後使用)且須等於values長度；不改寫呼叫端之陣列
+ * @param {Function} funFit 輸入適應函數，將傳入各設計變數所取之值陣列，需回傳適應函數值，以求解最小值為目標。種類：函數，必給
+ * @param {Object} [opt={}] 輸入設定物件，預設{}。種類：一般物件，undefined或null視為未給，其餘非一般物件為無效；未宣告之鍵忽略；各鍵給了而不符種類即為無效，不改用預設
+ * @param {String} [opt.sdmMode='Neighbor'] 輸入求解模式，預設'Neighbor'。種類：列舉字串，'Neighbor'(對每變數試±1選最大改善方向，反覆至無改善)、'OneGold'(做一次梯度加黃金比加二分搜尋)、'Gold'(重複OneGold至fitness不變)
+ * @param {String} [opt.ModeOutLimit='Mapping'] 輸入設計變數指標超過範圍之處理方式，預設'Mapping'。種類：列舉字串，'Mapping'、'Limit'、'Random'
+ * @param {Function} [opt.calcFitness] 輸入計算適應度之函數，供LocalSearch模式共享呼叫次數計數，將傳入(解物件,來源字串)，需回傳{ ps, fitness }。種類：函數
+ * @param {Object} [opt.initSolution] 輸入初始解(LocalSearch模式)，不給則隨機初始化。種類：一般物件，ps為非空陣列(元素為本套件內部結構，不逐一檢測)，fitness為適應函數值(數字或數字字串，轉換後使用，另收+-Infinity作為懲罰值)
+ * @returns {Promise} 回傳Promise，resolve為結果物件，含鍵值bestSolution,stopExecutions；輸入無效時reject字串，格式為`invalid <名稱>: must be <種類描述>`，不含輸入值
+ */
 async function sdm(dps, funFit, opt = {}) {
     //Steepest Descent Method, 最陡下降法
     //此版本同時支援「主演算法」與「LocalSearch helper」雙用途
@@ -292,26 +306,29 @@ async function sdm(dps, funFit, opt = {}) {
     //  - 'OneGold':  做一次梯度+黃金比+二分搜尋
     //  - 'Gold':     重複 OneGold 直到 fitness 不變
 
-    //_validateDps
-    _validateDps(dps)
+    //check, 一般參數與opt先於任何適應函數呼叫檢測, 檢測之值即使用之值
+    let c = chkParams([[dps, 'dps', kDps], [funFit, 'funFit', kFun]], opt, {
+        sdmMode: [kEnum(['Neighbor', 'OneGold', 'Gold']), 'Neighbor'],
+        ModeOutLimit: [kModeOutLimit, 'Mapping'],
+        calcFitness: [kFun, undefined],
+        initSolution: [kInitSolution, undefined],
+    })
+    if (c.err !== '') {
+        return Promise.reject(c.err)
+    }
+    dps = c.vs[0]
 
     //sdmMode
-    let sdmMode = get(opt, 'sdmMode', '')
-    if (!arrHas(sdmMode, ['Neighbor', 'OneGold', 'Gold'])) {
-        sdmMode = 'Neighbor'
-    }
+    let sdmMode = c.o.sdmMode
 
     //ModeOutLimit
-    let ModeOutLimit = get(opt, 'ModeOutLimit', '')
-    if (!arrHas(ModeOutLimit, ['Mapping', 'Limit', 'Random'])) {
-        ModeOutLimit = 'Mapping'
-    }
+    let ModeOutLimit = c.o.ModeOutLimit
 
     //iExecute
     let iExecute = 0
 
     //calcFitness
-    let calcFitness = get(opt, 'calcFitness')
+    let calcFitness = c.o.calcFitness
     if (!isfun(calcFitness)) {
         calcFitness = async (_s, from) => {
             iExecute++
@@ -328,9 +345,9 @@ async function sdm(dps, funFit, opt = {}) {
     }
 
     //初始solution
-    let initSolution = get(opt, 'initSolution')
+    let initSolution = c.o.initSolution
     let s
-    if (initSolution && isearr(initSolution.ps) && isnum(initSolution.fitness)) {
+    if (initSolution) {
         s = cloneDeep(initSolution)
     }
     else {

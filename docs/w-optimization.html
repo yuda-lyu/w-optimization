@@ -29,7 +29,7 @@
 <nav >
     
     
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="w-optimization.html">w-optimization</a><ul class='methods'><li data-type='method'><a href="w-optimization.html#.arrBinarySearch">arrBinarySearch</a></li><li data-type='method'><a href="w-optimization.html#.arrBinarySearchClosest">arrBinarySearchClosest</a></li><li data-type='method'><a href="w-optimization.html#.binarySearch">binarySearch</a></li><li data-type='method'><a href="w-optimization.html#.cobyla">cobyla</a></li><li data-type='method'><a href="w-optimization.html#.goldenSection">goldenSection</a></li><li data-type='method'><a href="w-optimization.html#.goldenSectionLiberate">goldenSectionLiberate</a></li><li data-type='method'><a href="w-optimization.html#.limitBFGS">limitBFGS</a></li><li data-type='method'><a href="w-optimization.html#.nelderMead">nelderMead</a></li><li data-type='method'><a href="w-optimization.html#.setpBracket">setpBracket</a></li></ul></li></ul><h3>Global</h3><ul><li><a href="global.html#Normal">Normal</a></li><li><a href="global.html#cobylaCore">cobylaCore</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="w-optimization.html">w-optimization</a><ul class='methods'><li data-type='method'><a href="w-optimization.html#.arrBinarySearch">arrBinarySearch</a></li><li data-type='method'><a href="w-optimization.html#.arrBinarySearchClosest">arrBinarySearchClosest</a></li><li data-type='method'><a href="w-optimization.html#.binarySearch">binarySearch</a></li><li data-type='method'><a href="w-optimization.html#.cobyla">cobyla</a></li><li data-type='method'><a href="w-optimization.html#.goldenSection">goldenSection</a></li><li data-type='method'><a href="w-optimization.html#.goldenSectionLiberate">goldenSectionLiberate</a></li><li data-type='method'><a href="w-optimization.html#.limitBFGS">limitBFGS</a></li><li data-type='method'><a href="w-optimization.html#.nelderMead">nelderMead</a></li><li data-type='method'><a href="w-optimization.html#.omlACO">omlACO</a></li><li data-type='method'><a href="w-optimization.html#.omlDE">omlDE</a></li><li data-type='method'><a href="w-optimization.html#.omlHS">omlHS</a></li><li data-type='method'><a href="w-optimization.html#.omlPSO">omlPSO</a></li><li data-type='method'><a href="w-optimization.html#.omlRGA">omlRGA</a></li><li data-type='method'><a href="w-optimization.html#.omlSA">omlSA</a></li><li data-type='method'><a href="w-optimization.html#.omlTA">omlTA</a></li><li data-type='method'><a href="w-optimization.html#.sdm">sdm</a></li><li data-type='method'><a href="w-optimization.html#.setpBracket">setpBracket</a></li></ul></li></ul><h3>Global</h3><ul><li><a href="global.html#Normal">Normal</a></li><li><a href="global.html#cobylaCore">cobylaCore</a></li></ul>
     
 </nav>
 
@@ -184,7 +184,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="arrBinarySearch.mjs.html">arrBinarySearch.mjs</a>, <a href="arrBinarySearch.mjs.html#line33">line 33</a>
+        <a href="arrBinarySearch.mjs.html">arrBinarySearch.mjs</a>, <a href="arrBinarySearch.mjs.html#line28">line 28</a>
     </li></ul></dd>
     
 
@@ -294,7 +294,7 @@
                 </td>
             
 
-            <td class="description last"><p>輸入數據陣列</p></td>
+            <td class="description last"><p>輸入數據陣列，元素為數字或數字字串。種類：資料陣列，必給，元素為廣義數字：數字與數字字串(轉換後使用)參與搜尋，非數字字串(如'-'、'NP'、'')為標記字串，原樣保留於原位置、不參與搜尋、不算錯，null、布林、NaN、Infinity、BigInt、物件等其餘元素為無效，訊息帶元素索引；空陣列或無數字元素時回傳null</p></td>
         </tr>
 
     
@@ -308,6 +308,9 @@
             
                 
 <span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
 
 
 
@@ -330,7 +333,7 @@
                 </td>
             
 
-            <td class="description last"><p>輸入尋找數字</p></td>
+            <td class="description last"><p>輸入尋找數字或數字字串。種類：有效數字，必給，數字字串轉換後使用，'-'、'NP'、''等非數字字串與null、布林、NaN、Infinity皆為無效</p></td>
         </tr>
 
     
@@ -370,7 +373,7 @@
                 </td>
             
 
-            <td class="description last"><p>輸入設定物件，預設{}</p>
+            <td class="description last"><p>輸入設定物件，預設{}。種類：一般物件，undefined或null視為未給，其餘非一般物件為無效；未宣告之鍵忽略；各鍵給了而不符種類即為無效，不改用預設</p>
                 <h6>Properties</h6>
                 
 
@@ -433,7 +436,7 @@
                 </td>
             
 
-            <td class="description last"><p>輸入陣列arr是否已經排序，若陣列已排序可加快速度，預設為false</p></td>
+            <td class="description last"><p>輸入陣列arr是否已經排序，若陣列已排序可加快速度，預設為false。種類：布林，只收true或false('true'、'n'、1等皆為無效)</p></td>
         </tr>
 
     
@@ -466,7 +469,7 @@
 
         
 <div class="param-desc">
-    <p>回傳求解後結果物件，含鍵值x,y，x為求解後變數組，y為最優適應函數值</p>
+    <p>回傳求解後結果物件，含鍵值ind(於原陣列之索引),indSorted(於排序後數字陣列之索引),value(值)，找不到時回傳null；輸入無效時同步throw Error，訊息格式為<code>invalid &lt;名稱&gt;: must be &lt;種類描述&gt;</code>，不含輸入值</p>
 </div>
 
 
@@ -510,7 +513,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="arrBinarySearchClosest.mjs.html">arrBinarySearchClosest.mjs</a>, <a href="arrBinarySearchClosest.mjs.html#line36">line 36</a>
+        <a href="arrBinarySearchClosest.mjs.html">arrBinarySearchClosest.mjs</a>, <a href="arrBinarySearchClosest.mjs.html#line31">line 31</a>
     </li></ul></dd>
     
 
@@ -620,7 +623,7 @@
                 </td>
             
 
-            <td class="description last"><p>輸入數據陣列</p></td>
+            <td class="description last"><p>輸入數據陣列，元素為數字或數字字串。種類：資料陣列，必給，元素為廣義數字：數字與數字字串(轉換後使用)參與搜尋，非數字字串(如'-'、'NP'、'')為標記字串，原樣保留於原位置、不參與搜尋、不算錯，null、布林、NaN、Infinity、BigInt、物件等其餘元素為無效，訊息帶元素索引；空陣列或無數字元素時回傳null</p></td>
         </tr>
 
     
@@ -634,6 +637,9 @@
             
                 
 <span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
 
 
 
@@ -656,7 +662,7 @@
                 </td>
             
 
-            <td class="description last"><p>輸入尋找數字</p></td>
+            <td class="description last"><p>輸入尋找數字或數字字串。種類：有效數字，必給，數字字串轉換後使用，'-'、'NP'、''等非數字字串與null、布林、NaN、Infinity皆為無效</p></td>
         </tr>
 
     
@@ -696,7 +702,7 @@
                 </td>
             
 
-            <td class="description last"><p>輸入設定物件，預設{}</p>
+            <td class="description last"><p>輸入設定物件，預設{}。種類：一般物件，undefined或null視為未給，其餘非一般物件為無效；未宣告之鍵忽略；各鍵給了而不符種類即為無效，不改用預設</p>
                 <h6>Properties</h6>
                 
 
@@ -759,7 +765,7 @@
                 </td>
             
 
-            <td class="description last"><p>輸入陣列arr是否已經排序，若陣列已排序可加快速度，預設為false</p></td>
+            <td class="description last"><p>輸入陣列arr是否已經排序，若陣列已排序可加快速度，預設為false。種類：布林，只收true或false('true'、'n'、1等皆為無效)</p></td>
         </tr>
 
     
@@ -792,7 +798,7 @@
 
         
 <div class="param-desc">
-    <p>回傳求解後最接近值物件，含鍵值x,y，x為求解後變數組，y為最優適應函數值</p>
+    <p>回傳求解後最接近值物件，含鍵值ind(於原陣列之索引),indSorted(於排序後數字陣列之索引),value(最接近值),diff(與x之差值絕對值)；無數字可搜尋時回傳null；輸入無效時同步throw Error，訊息格式為<code>invalid &lt;名稱&gt;: must be &lt;種類描述&gt;</code>，不含輸入值</p>
 </div>
 
 
@@ -819,7 +825,7 @@
 
     
 
-    <h4 class="name" id=".binarySearch"><span class="type-signature type-signature-static">(static) </span>binarySearch<span class="signature">(fun, xMin, xMax, delta, opt<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Object}</span></h4>
+    <h4 class="name" id=".binarySearch"><span class="type-signature type-signature-static">(static) </span>binarySearch<span class="signature">(fun, xMin, xMax, opt<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Object}</span></h4>
 
     
 
@@ -836,7 +842,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="binarySearch.mjs.html">binarySearch.mjs</a>, <a href="binarySearch.mjs.html#line36">line 36</a>
+        <a href="binarySearch.mjs.html">binarySearch.mjs</a>, <a href="binarySearch.mjs.html#line33">line 33</a>
     </li></ul></dd>
     
 
@@ -946,7 +952,7 @@
                 </td>
             
 
-            <td class="description last"><p>輸入適應函數，將傳入變數組params，需回傳適應函數值，以求解最小值為目標</p></td>
+            <td class="description last"><p>輸入適應函數，將傳入變數x，需回傳適應函數值，以求解最小值為目標。種類：函數，必給</p></td>
         </tr>
 
     
@@ -960,6 +966,9 @@
             
                 
 <span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
 
 
 
@@ -982,7 +991,7 @@
                 </td>
             
 
-            <td class="description last"><p>輸入初始搜尋範圍最小值數字</p></td>
+            <td class="description last"><p>輸入初始搜尋範圍最小值數字或數字字串。種類：有效數字，必給，數字字串轉換後使用，'-'、'NP'、''等非數字字串與null、布林、NaN、Infinity皆為無效</p></td>
         </tr>
 
     
@@ -996,6 +1005,9 @@
             
                 
 <span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
 
 
 
@@ -1018,43 +1030,7 @@
                 </td>
             
 
-            <td class="description last"><p>輸入初始搜尋範圍最大值數字</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>delta</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Number</span>
-
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last"><p>輸入步長數字</p></td>
+            <td class="description last"><p>輸入初始搜尋範圍最大值數字或數字字串。種類：有效數字，必給，處置同xMin</p></td>
         </tr>
 
     
@@ -1094,7 +1070,7 @@
                 </td>
             
 
-            <td class="description last"><p>輸入設定物件，預設{}</p>
+            <td class="description last"><p>輸入設定物件，預設{}。種類：一般物件，undefined或null視為未給，其餘非一般物件為無效；未宣告之鍵忽略；各鍵給了而不符種類即為無效，不改用預設</p>
                 <h6>Properties</h6>
                 
 
@@ -1124,6 +1100,49 @@
 
         <tr>
             
+                <td class="name"><code>delta</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>0.1</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入步長，預設0.1。種類：有效數字，正數(現行演算法未使用此值，僅檢測)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
                 <td class="name"><code>maxIterations</code></td>
             
 
@@ -1131,6 +1150,9 @@
             
                 
 <span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
 
 
 
@@ -1157,7 +1179,7 @@
                 </td>
             
 
-            <td class="description last"><p>輸入最大搜尋次數整數，預設100</p></td>
+            <td class="description last"><p>輸入最大搜尋次數，預設100。種類：有效數字，正整數</p></td>
         </tr>
 
     
@@ -1190,7 +1212,7 @@
 
         
 <div class="param-desc">
-    <p>回傳求解後結果物件，含鍵值x,y，x為求解後變數組，y為最優適應函數值</p>
+    <p>回傳求解後結果物件，含鍵值x,y，x為求解後變數組，y為最優適應函數值；輸入無效時同步throw Error，訊息格式為<code>invalid &lt;名稱&gt;: must be &lt;種類描述&gt;</code>，不含輸入值</p>
 </div>
 
 
@@ -1236,7 +1258,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="cobyla.mjs.html">cobyla.mjs</a>, <a href="cobyla.mjs.html#line1308">line 1308</a>
+        <a href="cobyla.mjs.html">cobyla.mjs</a>, <a href="cobyla.mjs.html#line1299">line 1299</a>
     </li></ul></dd>
     
 
@@ -1367,7 +1389,7 @@ test()
                 </td>
             
 
-            <td class="description last"><p>輸入適應函數，將傳入變數組params，需回傳適應函數值，以求解最小值為目標</p></td>
+            <td class="description last"><p>輸入適應函數，將傳入變數組params，需回傳適應函數值，以求解最小值為目標。種類：函數，必給</p></td>
         </tr>
 
     
@@ -1403,7 +1425,7 @@ test()
                 </td>
             
 
-            <td class="description last"><p>輸入初始變數組，若適應函數fun需輸入3參數，則就需輸入[a,b,c]陣列作為初始值</p></td>
+            <td class="description last"><p>輸入初始變數組，若適應函數fun需輸入3參數，則就需輸入[a,b,c]陣列作為初始值。種類：資料陣列，必給，非空陣列，元素為有效數字：數字或數字字串(轉換後使用)，'-'、'NP'、''等非數字字串與null、布林、NaN、Infinity皆為無效，訊息帶元素索引；不改寫呼叫端之陣列</p></td>
         </tr>
 
     
@@ -1443,7 +1465,7 @@ test()
                 </td>
             
 
-            <td class="description last"><p>輸入設定物件，預設{}</p>
+            <td class="description last"><p>輸入設定物件，預設{}。種類：一般物件，undefined或null視為未給，其餘非一般物件為無效；未宣告之鍵忽略；各鍵給了而不符種類即為無效，不改用預設</p>
                 <h6>Properties</h6>
                 
 
@@ -1480,6 +1502,9 @@ test()
             
                 
 <span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
 
 
 
@@ -1501,25 +1526,26 @@ test()
             
                 <td class="default">
                 
-                    <code>null</code>
-                
                 </td>
             
 
-            <td class="description last"><p>輸入最大迭代次數整數，若無則預設為變數組長度*200</p></td>
+            <td class="description last"><p>輸入最大迭代次數，若無則預設為變數組長度*2000。種類：有效數字，正整數</p></td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>delta</code></td>
+                <td class="name"><code>rhobeg</code></td>
             
 
             <td class="type">
             
                 
 <span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
 
 
 
@@ -1541,65 +1567,28 @@ test()
             
                 <td class="default">
                 
-                    <code>0.001</code>
+                    <code>10</code>
                 
                 </td>
             
 
-            <td class="description last"><p>輸入步長數字，預設0.001</p></td>
+            <td class="description last"><p>輸入初始單純形尺寸，預設10。種類：有效數字，正數</p></td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>minErrorDelta</code></td>
+                <td class="name"><code>rhoend</code></td>
             
 
             <td class="type">
             
                 
 <span class="param-type">Number</span>
+|
 
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    <code>1e-6</code>
-                
-                </td>
-            
-
-            <td class="description last"><p>輸入最小誤差步長數字，預設1e-6</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>minTolerance</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Number</span>
+<span class="param-type">String</span>
 
 
 
@@ -1626,167 +1615,7 @@ test()
                 </td>
             
 
-            <td class="description last"><p>輸入最小收斂門檻值數字，預設1e-5</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>rho</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Number</span>
-
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    <code>1</code>
-                
-                </td>
-            
-
-            <td class="description last"><p>輸入上輪第1節點權重數字，預設1</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>chi</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Number</span>
-
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    <code>2</code>
-                
-                </td>
-            
-
-            <td class="description last"><p>輸入上輪第2節點權重數字，預設2</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>psi</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Number</span>
-
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    <code>-0.5</code>
-                
-                </td>
-            
-
-            <td class="description last"><p>輸入下輪第1節點權重數字，預設-0.5</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>sigma</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Number</span>
-
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    <code>0.5</code>
-                
-                </td>
-            
-
-            <td class="description last"><p>輸入下輪第2節點權重數字，預設0.5</p></td>
+            <td class="description last"><p>輸入最終單純形尺寸(收斂門檻)，預設1e-5。種類：有效數字，正數</p></td>
         </tr>
 
     
@@ -1819,7 +1648,7 @@ test()
 
         
 <div class="param-desc">
-    <p>回傳Promise，resolve為求解後結果物件，含鍵值x,y，x為求解後變數組，y為最優適應函數值，reject為失敗訊息</p>
+    <p>回傳Promise，resolve為求解後結果物件，含鍵值x,y，x為求解後變數組，y為最優適應函數值；輸入無效時reject字串，格式為<code>invalid &lt;名稱&gt;: must be &lt;種類描述&gt;</code>，不含輸入值</p>
 </div>
 
 
@@ -1864,7 +1693,7 @@ test()
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="goldenSection.mjs.html">goldenSection.mjs</a>, <a href="goldenSection.mjs.html#line43">line 43</a>
+        <a href="goldenSection.mjs.html">goldenSection.mjs</a>, <a href="goldenSection.mjs.html#line41">line 41</a>
     </li></ul></dd>
     
 
@@ -1989,7 +1818,7 @@ test()
                 </td>
             
 
-            <td class="description last"><p>輸入適應函數，將傳入變數x，需回傳適應函數值，以求解最小值所在起訖範圍為目標</p></td>
+            <td class="description last"><p>輸入適應函數，將傳入變數x，需回傳適應函數值，以求解最小值所在起訖範圍為目標。種類：函數，必給</p></td>
         </tr>
 
     
@@ -2003,6 +1832,9 @@ test()
             
                 
 <span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
 
 
 
@@ -2025,7 +1857,7 @@ test()
                 </td>
             
 
-            <td class="description last"><p>輸入初始最小值數字</p></td>
+            <td class="description last"><p>輸入初始最小值數字或數字字串。種類：有效數字，必給，數字字串轉換後使用，'-'、'NP'、''等非數字字串與null、布林、NaN、Infinity皆為無效</p></td>
         </tr>
 
     
@@ -2039,6 +1871,9 @@ test()
             
                 
 <span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
 
 
 
@@ -2061,7 +1896,7 @@ test()
                 </td>
             
 
-            <td class="description last"><p>輸入初始最大值數字</p></td>
+            <td class="description last"><p>輸入初始最大值數字或數字字串。種類：有效數字，必給，處置同xL</p></td>
         </tr>
 
     
@@ -2101,7 +1936,7 @@ test()
                 </td>
             
 
-            <td class="description last"><p>輸入設定物件，預設{}</p>
+            <td class="description last"><p>輸入設定物件，預設{}。種類：一般物件，undefined或null視為未給，其餘非一般物件為無效；未宣告之鍵忽略；各鍵給了而不符種類即為無效，不改用預設</p>
                 <h6>Properties</h6>
                 
 
@@ -2138,6 +1973,9 @@ test()
             
                 
 <span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
 
 
 
@@ -2164,7 +2002,7 @@ test()
                 </td>
             
 
-            <td class="description last"><p>輸入最小收斂門檻值數字，預設1e-8</p></td>
+            <td class="description last"><p>輸入最小收斂門檻值，預設1e-8。種類：有效數字，正數</p></td>
         </tr>
 
     
@@ -2178,6 +2016,9 @@ test()
             
                 
 <span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
 
 
 
@@ -2204,7 +2045,7 @@ test()
                 </td>
             
 
-            <td class="description last"><p>輸入最大迭代次數整數，預設100</p></td>
+            <td class="description last"><p>輸入最大迭代次數，預設100。種類：有效數字，正整數</p></td>
         </tr>
 
     
@@ -2237,7 +2078,7 @@ test()
 
         
 <div class="param-desc">
-    <p>回傳Promise，resolve為求解後結果物件，含鍵值x,y，x為求解後變數組，y為最優適應函數值，reject為失敗訊息</p>
+    <p>回傳Promise，resolve為求解後結果物件，含鍵值x,y，x為求解後變數組，y為最優適應函數值；輸入無效時reject字串，格式為<code>invalid &lt;名稱&gt;: must be &lt;種類描述&gt;</code>，不含輸入值</p>
 </div>
 
 
@@ -2264,7 +2105,7 @@ test()
 
     
 
-    <h4 class="name" id=".goldenSectionLiberate"><span class="type-signature type-signature-async, static">(async, static) </span>goldenSectionLiberate<span class="signature">(fun, opt<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
+    <h4 class="name" id=".goldenSectionLiberate"><span class="type-signature type-signature-async, static">(async, static) </span>goldenSectionLiberate<span class="signature">(fun, x, opt<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
 
     
 
@@ -2282,7 +2123,7 @@ test()
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="goldenSectionLiberate.mjs.html">goldenSectionLiberate.mjs</a>, <a href="goldenSectionLiberate.mjs.html#line42">line 42</a>
+        <a href="goldenSectionLiberate.mjs.html">goldenSectionLiberate.mjs</a>, <a href="goldenSectionLiberate.mjs.html#line46">line 46</a>
     </li></ul></dd>
     
 
@@ -2407,7 +2248,46 @@ test()
                 </td>
             
 
-            <td class="description last"><p>輸入適應函數，將傳入變數x，需回傳適應函數值，以求解最小值所在起訖範圍為目標</p></td>
+            <td class="description last"><p>輸入適應函數，將傳入變數x，需回傳適應函數值，以求解最小值所在起訖範圍為目標。種類：函數，必給</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>x</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入初始值數字或數字字串。種類：有效數字，必給，數字字串轉換後使用，'-'、'NP'、''等非數字字串與null、布林、NaN、Infinity皆為無效</p></td>
         </tr>
 
     
@@ -2447,7 +2327,7 @@ test()
                 </td>
             
 
-            <td class="description last"><p>輸入設定物件，預設{}</p>
+            <td class="description last"><p>輸入設定物件，預設{}。種類：一般物件，undefined或null視為未給，其餘非一般物件為無效；未宣告之鍵忽略；各鍵給了而不符種類即為無效，不改用預設</p>
                 <h6>Properties</h6>
                 
 
@@ -2477,6 +2357,174 @@ test()
 
         <tr>
             
+                <td class="name"><code>min</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入搜尋範圍最小值，與opt.max皆給時直接作為求解範圍，否則由setpBracket求範圍並以給定者作為其搜尋界限。種類：有效數字</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>max</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入搜尋範圍最大值，說明同opt.min。種類：有效數字</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>delta</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>0.1</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>轉傳setpBracket之步長，預設0.1。種類：有效數字，正數</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>dxR</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>2</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>轉傳setpBracket之步長增長比，預設2。種類：有效數字，正數，或列舉字串'speed'</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
                 <td class="name"><code>minTolerance</code></td>
             
 
@@ -2484,6 +2532,9 @@ test()
             
                 
 <span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
 
 
 
@@ -2510,7 +2561,7 @@ test()
                 </td>
             
 
-            <td class="description last"><p>輸入最小收斂門檻值數字，預設1e-8</p></td>
+            <td class="description last"><p>輸入最小收斂門檻值，預設1e-8。種類：有效數字，正數</p></td>
         </tr>
 
     
@@ -2524,6 +2575,9 @@ test()
             
                 
 <span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
 
 
 
@@ -2550,7 +2604,7 @@ test()
                 </td>
             
 
-            <td class="description last"><p>輸入最大迭代次數整數，預設100</p></td>
+            <td class="description last"><p>輸入最大迭代次數，預設100。種類：有效數字，正整數</p></td>
         </tr>
 
     
@@ -2583,7 +2637,7 @@ test()
 
         
 <div class="param-desc">
-    <p>回傳Promise，resolve為求解後結果物件，含鍵值x,y，x為求解後變數組，y為最優適應函數值，reject為失敗訊息</p>
+    <p>回傳Promise，resolve為求解後結果物件，含鍵值x,y，x為求解後變數組，y為最優適應函數值；輸入無效時reject字串，格式為<code>invalid &lt;名稱&gt;: must be &lt;種類描述&gt;</code>，不含輸入值</p>
 </div>
 
 
@@ -2629,7 +2683,7 @@ Fork: <a href="https://github.com/yanceyou/bfgs-algorithm/blob/master/lib/BFGSAl
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="limitBFGS.mjs.html">limitBFGS.mjs</a>, <a href="limitBFGS.mjs.html#line105">line 105</a>
+        <a href="limitBFGS.mjs.html">limitBFGS.mjs</a>, <a href="limitBFGS.mjs.html#line102">line 102</a>
     </li></ul></dd>
     
 
@@ -2760,7 +2814,7 @@ test()
                 </td>
             
 
-            <td class="description last"><p>輸入適應函數，將傳入變數組params，需回傳適應函數值，以求解最小值為目標</p></td>
+            <td class="description last"><p>輸入適應函數，將傳入變數組params，需回傳適應函數值，以求解最小值為目標。種類：函數，必給</p></td>
         </tr>
 
     
@@ -2796,7 +2850,7 @@ test()
                 </td>
             
 
-            <td class="description last"><p>輸入初始變數組，若適應函數fun需輸入3參數，則就需輸入[a,b,c]陣列作為初始值</p></td>
+            <td class="description last"><p>輸入初始變數組，若適應函數fun需輸入3參數，則就需輸入[a,b,c]陣列作為初始值。種類：資料陣列，必給，非空陣列，元素為有效數字：數字或數字字串(轉換後使用)，'-'、'NP'、''等非數字字串與null、布林、NaN、Infinity皆為無效，訊息帶元素索引；不改寫呼叫端之陣列</p></td>
         </tr>
 
     
@@ -2836,7 +2890,7 @@ test()
                 </td>
             
 
-            <td class="description last"><p>輸入設定物件，預設{}</p>
+            <td class="description last"><p>輸入設定物件，預設{}。種類：一般物件，undefined或null視為未給，其餘非一般物件為無效；未宣告之鍵忽略；各鍵給了而不符種類即為無效，不改用預設</p>
                 <h6>Properties</h6>
                 
 
@@ -2873,6 +2927,9 @@ test()
             
                 
 <span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
 
 
 
@@ -2899,7 +2956,7 @@ test()
                 </td>
             
 
-            <td class="description last"><p>輸入最大迭代次數整數，預設200</p></td>
+            <td class="description last"><p>輸入最大迭代次數，預設200。種類：有效數字，正整數</p></td>
         </tr>
 
     
@@ -2913,6 +2970,9 @@ test()
             
                 
 <span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
 
 
 
@@ -2939,7 +2999,7 @@ test()
                 </td>
             
 
-            <td class="description last"><p>輸入最小收斂門檻值數字，預設1e-6</p></td>
+            <td class="description last"><p>輸入最小收斂門檻值，預設1e-6。種類：有效數字，正數</p></td>
         </tr>
 
     
@@ -2953,6 +3013,9 @@ test()
             
                 
 <span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
 
 
 
@@ -2979,7 +3042,7 @@ test()
                 </td>
             
 
-            <td class="description last"><p>輸求解近似梯度時步長數字，預設1e-5</p></td>
+            <td class="description last"><p>輸入求解近似梯度時步長，預設1e-5。種類：有效數字，正數</p></td>
         </tr>
 
     
@@ -3012,7 +3075,7 @@ test()
 
         
 <div class="param-desc">
-    <p>回傳Promise，resolve為求解後結果物件，含鍵值x,y，x為求解後變數組，y為最優適應函數值，reject為失敗訊息</p>
+    <p>回傳Promise，resolve為求解後結果物件，含鍵值x,y，x為求解後變數組，y為最優適應函數值；輸入無效時reject字串，格式為<code>invalid &lt;名稱&gt;: must be &lt;種類描述&gt;</code>，不含輸入值</p>
 </div>
 
 
@@ -3058,7 +3121,7 @@ test()
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="nelderMead.mjs.html">nelderMead.mjs</a>, <a href="nelderMead.mjs.html#line241">line 241</a>
+        <a href="nelderMead.mjs.html">nelderMead.mjs</a>, <a href="nelderMead.mjs.html#line238">line 238</a>
     </li></ul></dd>
     
 
@@ -3361,7 +3424,7 @@ test3()
                 </td>
             
 
-            <td class="description last"><p>輸入適應函數，將傳入變數組params，需回傳適應函數值，以求解最小值為目標</p></td>
+            <td class="description last"><p>輸入適應函數，將傳入變數組params，需回傳適應函數值，以求解最小值為目標。種類：函數，必給</p></td>
         </tr>
 
     
@@ -3397,7 +3460,7 @@ test3()
                 </td>
             
 
-            <td class="description last"><p>輸入初始變數組，若適應函數fun需輸入3參數，則就需輸入[a,b,c]陣列作為初始值</p></td>
+            <td class="description last"><p>輸入初始變數組，若適應函數fun需輸入3參數，則就需輸入[a,b,c]陣列作為初始值。種類：資料陣列，必給，非空陣列，元素為有效數字：數字或數字字串(轉換後使用)，'-'、'NP'、''等非數字字串與null、布林、NaN、Infinity皆為無效，訊息帶元素索引；不改寫呼叫端之陣列</p></td>
         </tr>
 
     
@@ -3437,7 +3500,7 @@ test3()
                 </td>
             
 
-            <td class="description last"><p>輸入設定物件，預設{}</p>
+            <td class="description last"><p>輸入設定物件，預設{}。種類：一般物件，undefined或null視為未給，其餘非一般物件為無效；未宣告之鍵忽略；各鍵給了而不符種類即為無效，不改用預設</p>
                 <h6>Properties</h6>
                 
 
@@ -3474,6 +3537,9 @@ test3()
             
                 
 <span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
 
 
 
@@ -3495,12 +3561,53 @@ test3()
             
                 <td class="default">
                 
-                    <code>null</code>
+                </td>
+            
+
+            <td class="description last"><p>輸入最大迭代次數，若無則預設為變數組長度*200。種類：有效數字，正整數</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>nonZeroDelta</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
                 
                 </td>
             
 
-            <td class="description last"><p>輸入最大迭代次數整數，若無則預設為變數組長度*200</p></td>
+            
+                <td class="default">
+                
+                    <code>1.05</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入初始單純形各非零變數之放大倍率，預設1.05。種類：有效數字</p></td>
         </tr>
 
     
@@ -3514,6 +3621,9 @@ test3()
             
                 
 <span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
 
 
 
@@ -3540,7 +3650,7 @@ test3()
                 </td>
             
 
-            <td class="description last"><p>輸入步長數字，預設0.001</p></td>
+            <td class="description last"><p>輸入步長(初始單純形中零值變數之位移)，預設0.001。種類：有效數字，正數</p></td>
         </tr>
 
     
@@ -3554,6 +3664,9 @@ test3()
             
                 
 <span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
 
 
 
@@ -3580,7 +3693,7 @@ test3()
                 </td>
             
 
-            <td class="description last"><p>輸入最小誤差步長數字，預設1e-6</p></td>
+            <td class="description last"><p>輸入最小誤差步長，預設1e-6。種類：有效數字，正數</p></td>
         </tr>
 
     
@@ -3594,6 +3707,9 @@ test3()
             
                 
 <span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
 
 
 
@@ -3620,7 +3736,7 @@ test3()
                 </td>
             
 
-            <td class="description last"><p>輸入最小收斂門檻值數字，預設1e-5</p></td>
+            <td class="description last"><p>輸入最小收斂門檻值，預設1e-5。種類：有效數字，正數</p></td>
         </tr>
 
     
@@ -3634,6 +3750,9 @@ test3()
             
                 
 <span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
 
 
 
@@ -3660,7 +3779,7 @@ test3()
                 </td>
             
 
-            <td class="description last"><p>輸入上輪第1節點權重數字，預設1</p></td>
+            <td class="description last"><p>輸入上輪第1節點權重，預設1。種類：有效數字</p></td>
         </tr>
 
     
@@ -3674,6 +3793,9 @@ test3()
             
                 
 <span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
 
 
 
@@ -3700,7 +3822,7 @@ test3()
                 </td>
             
 
-            <td class="description last"><p>輸入上輪第2節點權重數字，預設2</p></td>
+            <td class="description last"><p>輸入上輪第2節點權重，預設2。種類：有效數字</p></td>
         </tr>
 
     
@@ -3714,6 +3836,9 @@ test3()
             
                 
 <span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
 
 
 
@@ -3740,7 +3865,7 @@ test3()
                 </td>
             
 
-            <td class="description last"><p>輸入下輪第1節點權重數字，預設-0.5</p></td>
+            <td class="description last"><p>輸入下輪第1節點權重，預設-0.5。種類：有效數字</p></td>
         </tr>
 
     
@@ -3754,6 +3879,9 @@ test3()
             
                 
 <span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
 
 
 
@@ -3780,7 +3908,7 @@ test3()
                 </td>
             
 
-            <td class="description last"><p>輸入下輪第2節點權重數字，預設0.5</p></td>
+            <td class="description last"><p>輸入下輪第2節點權重，預設0.5。種類：有效數字</p></td>
         </tr>
 
     
@@ -3813,7 +3941,7696 @@ test3()
 
         
 <div class="param-desc">
-    <p>回傳Promise，resolve為求解後結果物件，含鍵值x,y，x為求解後變數組，y為最優適應函數值，reject為失敗訊息</p>
+    <p>回傳Promise，resolve為求解後結果物件，含鍵值x,y，x為求解後變數組，y為最優適應函數值；輸入無效時reject字串，格式為<code>invalid &lt;名稱&gt;: must be &lt;種類描述&gt;</code>，不含輸入值</p>
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id=".omlACO"><span class="type-signature type-signature-async, static">(async, static) </span>omlACO<span class="signature">(dps, funFit, opt<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>蟻群最佳化(Ant Colony Optimization)</p>
+<p>Unit Test: <a href="https://github.com/yuda-lyu/w-optimization/blob/master/test/p4.omlACO.test.mjs">Github</a></p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="omlACO.mjs.html">omlACO.mjs</a>, <a href="omlACO.mjs.html#line52">line 52</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>dps</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入設計變數陣列，各元素為{ values: [可用值], n: 可用值數量 }。種類：非空陣列，必給；元素為一般物件，values為非空陣列(元素為可用值，任意值，由funFit自行解讀，不檢)，n為有效數字，正整數(數字字串轉換後使用)且須等於values長度；不改寫呼叫端之陣列</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>funFit</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入適應函數，將傳入各設計變數所取之值陣列，需回傳適應函數值，以求解最小值為目標。種類：函數，必給</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opt</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>{}</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入設定物件，預設{}。種類：一般物件，undefined或null視為未給，其餘非一般物件為無效；未宣告之鍵忽略；各鍵給了而不符種類即為無效，不改用預設</p>
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>Nl</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>10000</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入最大總迴圈數，預設10000。種類：有效數字，正整數</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>Na</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>40</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入螞蟻數，預設40。種類：有效數字，正整數</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>NContiguous</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>100</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入最大最佳解連續未更新次數，預設100。種類：有效數字，正整數</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>NRepeat</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>1</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入最大再搜尋次數，預設1。種類：有效數字，正整數</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>NCore</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>1000000</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入最大核心執行次數，預設1000000。種類：有效數字，正整數</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>UseRepeat</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>true</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入是否使用再搜尋策略，預設true。種類：布林，只收true或false('true'、'n'、1等皆為無效)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>UseImmigration</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>true</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入是否使用移民策略，預設true。種類：布林，說明同opt.UseRepeat</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>LocalSearchMethod</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>'NelderMead'</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入局部搜尋方法，預設'NelderMead'。種類：列舉字串，'None'(不做局部搜尋)、'Neighbor'、'TA'、'SA'、'OneGold'、'Gold'、'NelderMead'</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>ModeOutLimit</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>'Mapping'</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入設計變數指標超過範圍之處理方式，預設'Mapping'。種類：列舉字串，'Mapping'、'Limit'、'Random'</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>UseForcedExplore</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>true</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入是否每代強制重產後半族群，預設true。種類：布林，說明同opt.UseRepeat</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>funGetBetter</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入有更優解出現時呼叫之函數，將傳入(最佳解,迴圈序號)。種類：函數</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>funEndLoop</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入每次主迴圈結束後呼叫之函數。種類：函數</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>funGenerationBefore</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入每代開頭之自適應接口，將傳入{ params }，可回傳{ params: { 覆寫之鍵 } }以覆寫本代超參數(回傳值不檢測)。種類：函數</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>funGenerationAfter</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入每代結束後之自適應回饋接口，將傳入{ params, childrenBestFitness }，不需回傳。種類：函數</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>acoExploitationRateStart</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>0.8</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入初始開發率(小為開發，大為探索)，預設0.8。種類：有效數字</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>acoExploitationRateEnd</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>0.8</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入最終開發率，預設0.8。種類：有效數字</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>acoExploitationRateDynamic</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>0</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入動態開發率，預設0。種類：有效數字</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>acoAlphaStart</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>0.1</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入初始全域費洛蒙更新係數，預設0.1。種類：有效數字</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>acoAlphaEnd</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>0.1</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入最終全域費洛蒙更新係數，預設0.1。種類：有效數字</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>acoAlphaDynamic</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>0</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入動態全域費洛蒙更新係數，預設0。種類：有效數字</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>acoRoStart</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>0.1</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入初始區域費洛蒙更新係數，預設0.1。種類：有效數字</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>acoRoEnd</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>0.1</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入最終區域費洛蒙更新係數，預設0.1。種類：有效數字</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>acoRoDynamic</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>0</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入動態區域費洛蒙更新係數，預設0。種類：有效數字</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5 class="h5-returns">Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>回傳Promise，resolve為結果物件，含鍵值bestSolution,hists,stopMode,stopNl,stopExecutions；輸入無效時reject字串，格式為<code>invalid &lt;名稱&gt;: must be &lt;種類描述&gt;</code>，不含輸入值</p>
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id=".omlDE"><span class="type-signature type-signature-async, static">(async, static) </span>omlDE<span class="signature">(dps, funFit, opt<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>差分演化法(Differential Evolution)</p>
+<p>Unit Test: <a href="https://github.com/yuda-lyu/w-optimization/blob/master/test/p4.omlDE.test.mjs">Github</a></p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="omlDE.mjs.html">omlDE.mjs</a>, <a href="omlDE.mjs.html#line54">line 54</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>dps</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入設計變數陣列，各元素為{ values: [可用值], n: 可用值數量 }。種類：非空陣列，必給；元素為一般物件，values為非空陣列(元素為可用值，任意值，由funFit自行解讀，不檢)，n為有效數字，正整數(數字字串轉換後使用)且須等於values長度；不改寫呼叫端之陣列</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>funFit</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入適應函數，將傳入各設計變數所取之值陣列，需回傳適應函數值，以求解最小值為目標。種類：函數，必給</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opt</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>{}</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入設定物件，預設{}。種類：一般物件，undefined或null視為未給，其餘非一般物件為無效；未宣告之鍵忽略；各鍵給了而不符種類即為無效，不改用預設</p>
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>Ng</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>10000</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入總世代數，預設10000。種類：有效數字，正整數</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>Np</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>40</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入族群個體數，預設40。種類：有效數字，正整數，且不得小於opt.deMutation所需之最小個體數('1R2RR'為3，'1B2RR'與'1R2BR'為2，'1R4RRRR'為5，'1B4RRRR'、'1R4BRRR'與'1S4BSRR'為4)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>NContiguous</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>100</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入最大最佳解連續未更新次數，預設100。種類：有效數字，正整數</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>NRepeat</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>1</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入最大再搜尋次數，預設1。種類：有效數字，正整數</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>NCore</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>1000000</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入最大核心執行次數，預設1000000。種類：有效數字，正整數</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>ModeOutLimit</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>'Mapping'</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入設計變數指標超過範圍之處理方式，預設'Mapping'。種類：列舉字串，'Mapping'、'Limit'、'Random'</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>UseRepeat</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>true</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入是否使用再搜尋策略，預設true。種類：布林，只收true或false('true'、'n'、1等皆為無效)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>UseImmigration</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>true</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入是否使用移民策略，預設true。種類：布林，說明同opt.UseRepeat</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>LocalSearchMethod</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>'NelderMead'</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入局部搜尋方法，預設'NelderMead'。種類：列舉字串，'None'(不做局部搜尋)、'Neighbor'、'TA'、'SA'、'OneGold'、'Gold'、'NelderMead'</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>funGetBetter</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入有更優解出現時呼叫之函數，將傳入(最佳解,世代序號)。種類：函數</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>funGenerationBefore</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入每代開頭之自適應接口，將傳入{ params }，可回傳{ params: { 覆寫之鍵 } }以覆寫本代超參數(回傳值不檢測)。種類：函數</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>funGenerationAfter</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入每代結束後之自適應回饋接口，將傳入{ params, childrenBestFitness }，不需回傳。種類：函數</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>deCrossoverFactorStart</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>0.6</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入初始交配因子，預設0.6。種類：有效數字</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>deCrossoverFactorEnd</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>0.6</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入最終交配因子，預設0.6。種類：有效數字</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>deCrossoverFactorDynamic</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>0</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入動態交配因子，預設0。種類：有效數字</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>deFStart</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>0</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入初始縮放因子F，預設0。種類：有效數字</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>deFEnd</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>1</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入最終縮放因子F，預設1。種類：有效數字</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>deFDynamic</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>1</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入動態縮放因子F，預設1。種類：有效數字</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>deLandaStart</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>0</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入初始縮放因子Landa，預設0。種類：有效數字</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>deLandaEnd</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>0</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入最終縮放因子Landa，預設0。種類：有效數字</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>deLandaDynamic</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>0</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入動態縮放因子Landa，預設0。種類：有效數字</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>deMutation</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>'1B2RR'</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入突變運算子，預設'1B2RR'。種類：列舉字串，'1R2RR'、'1B2RR'、'1R2BR'、'1R4RRRR'、'1B4RRRR'、'1R4BRRR'、'1S4BSRR'</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5 class="h5-returns">Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>回傳Promise，resolve為結果物件，含鍵值bestSolution,hists,stopMode,stopNg,stopExecutions；輸入無效時reject字串，格式為<code>invalid &lt;名稱&gt;: must be &lt;種類描述&gt;</code>，不含輸入值</p>
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id=".omlHS"><span class="type-signature type-signature-async, static">(async, static) </span>omlHS<span class="signature">(dps, funFit, opt<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>和聲搜尋演算法(Harmony Search)</p>
+<p>Unit Test: <a href="https://github.com/yuda-lyu/w-optimization/blob/master/test/p4.omlHS.test.mjs">Github</a></p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="omlHS.mjs.html">omlHS.mjs</a>, <a href="omlHS.mjs.html#line50">line 50</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>dps</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入設計變數陣列，各元素為{ values: [可用值], n: 可用值數量 }。種類：非空陣列，必給；元素為一般物件，values為非空陣列(元素為可用值，任意值，由funFit自行解讀，不檢)，n為有效數字，正整數(數字字串轉換後使用)且須等於values長度；不改寫呼叫端之陣列</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>funFit</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入適應函數，將傳入各設計變數所取之值陣列，需回傳適應函數值，以求解最小值為目標。種類：函數，必給</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opt</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>{}</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入設定物件，預設{}。種類：一般物件，undefined或null視為未給，其餘非一般物件為無效；未宣告之鍵忽略；各鍵給了而不符種類即為無效，不改用預設</p>
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>Ni</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>10000</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入最大Improvisation迭代次數，預設10000。種類：有效數字，正整數</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>Ns</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>20</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入Harmony Memory Size，預設20。種類：有效數字，正整數，且不得小於opt.hsHMC所需之最小個數('Original'為1，'2M Consideration'與'2MB Consideration'為2，'3M Consideration'與'3MB Consideration'為3，'4M Consideration'與'4MB Consideration'為4)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>NContiguous</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>100</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入最大最佳解連續未更新次數，預設100。種類：有效數字，正整數</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>NRepeat</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>1</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入最大再搜尋次數，預設1。種類：有效數字，正整數</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>NCore</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>1000000</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入最大核心執行次數，預設1000000。種類：有效數字，正整數</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>ModeOutLimit</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>'Mapping'</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入設計變數指標超過範圍之處理方式，預設'Mapping'。種類：列舉字串，'Mapping'、'Limit'、'Random'</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>UseRepeat</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>true</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入是否使用再搜尋策略，預設true。種類：布林，只收true或false('true'、'n'、1等皆為無效)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>UseImmigration</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>true</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入是否使用移民策略，預設true。種類：布林，說明同opt.UseRepeat</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>LocalSearchMethod</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>'NelderMead'</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入局部搜尋方法，預設'NelderMead'。種類：列舉字串，'None'(不做局部搜尋)、'Neighbor'、'TA'、'SA'、'OneGold'、'Gold'、'NelderMead'</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>funGetBetter</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入有更優解出現時呼叫之函數，將傳入(最佳解,迭代序號)。種類：函數</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>funGenerationBefore</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入每代開頭之自適應接口，將傳入{ params }，可回傳{ params: { 覆寫之鍵 } }以覆寫本代超參數(回傳值不檢測)。種類：函數</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>funGenerationAfter</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入每代結束後之自適應回饋接口，將傳入{ params, childrenBestFitness }，不需回傳。種類：函數</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>hsHMCRStart</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>0.9</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入初始HMCR(Harmony Memory Consideration Rate)，預設0.9。種類：有效數字</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>hsHMCREnd</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>0.9</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入最終HMCR，預設0.9。種類：有效數字</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>hsHMCRDynamic</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>0</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入動態HMCR，預設0。種類：有效數字</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>hsPARStart</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>0.5</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入初始PAR(Pitch Adjustment Rate)，預設0.5。種類：有效數字</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>hsPAREnd</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>0.5</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入最終PAR，預設0.5。種類：有效數字</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>hsPARDynamic</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>0</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入動態PAR，預設0。種類：有效數字</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>hsHMC</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>'Original'</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入Harmony Memory Consideration運算子，預設'Original'。種類：列舉字串，'Original'、'2M Consideration'、'2MB Consideration'、'3M Consideration'、'3MB Consideration'、'4M Consideration'、'4MB Consideration'</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>hsPA</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>'Linear0.1'</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入Pitch Adjustment運算子，預設'Linear0.1'。種類：列舉字串，'Constant1'、'Constant2'、'Constant3'、'Linear0.1'、'Linear0.2'、'Linear0.3'、'Exponent0.1'、'Exponent0.2'、'Exponent0.3'、'Global Space'、'Available Space'、'Modified Global Best'</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5 class="h5-returns">Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>回傳Promise，resolve為結果物件，含鍵值bestSolution,hists,stopMode,stopNi,stopExecutions；輸入無效時reject字串，格式為<code>invalid &lt;名稱&gt;: must be &lt;種類描述&gt;</code>，不含輸入值</p>
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id=".omlPSO"><span class="type-signature type-signature-async, static">(async, static) </span>omlPSO<span class="signature">(dps, funFit, opt<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>粒子群最佳化(Particle Swarm Optimization)</p>
+<p>Unit Test: <a href="https://github.com/yuda-lyu/w-optimization/blob/master/test/p4.omlPSO.test.mjs">Github</a></p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="omlPSO.mjs.html">omlPSO.mjs</a>, <a href="omlPSO.mjs.html#line51">line 51</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>dps</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入設計變數陣列，各元素為{ values: [可用值], n: 可用值數量 }。種類：非空陣列，必給；元素為一般物件，values為非空陣列(元素為可用值，任意值，由funFit自行解讀，不檢)，n為有效數字，正整數(數字字串轉換後使用)且須等於values長度；不改寫呼叫端之陣列</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>funFit</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入適應函數，將傳入各設計變數所取之值陣列，需回傳適應函數值，以求解最小值為目標。種類：函數，必給</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opt</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>{}</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入設定物件，預設{}。種類：一般物件，undefined或null視為未給，其餘非一般物件為無效；未宣告之鍵忽略；各鍵給了而不符種類即為無效，不改用預設</p>
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>Nl</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>10000</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入最大總迴圈數，預設10000。種類：有效數字，正整數</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>Np</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>40</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入粒子數，預設40。種類：有效數字，正整數</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>NContiguous</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>100</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入最大最佳解連續未更新次數，預設100。種類：有效數字，正整數</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>NRepeat</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>1</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入最大再搜尋次數，預設1。種類：有效數字，正整數</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>NCore</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>1000000</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入最大核心執行次數，預設1000000。種類：有效數字，正整數</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>ModeOutLimit</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>'Mapping'</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入設計變數指標超過範圍之處理方式，預設'Mapping'。種類：列舉字串，'Mapping'、'Limit'、'Random'</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>UseRepeat</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>true</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入是否使用再搜尋策略，預設true。種類：布林，只收true或false('true'、'n'、1等皆為無效)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>UseImmigration</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>true</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入是否使用移民策略，預設true。種類：布林，說明同opt.UseRepeat</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>LocalSearchMethod</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>'NelderMead'</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入局部搜尋方法，預設'NelderMead'。種類：列舉字串，'None'(不做局部搜尋)、'Neighbor'、'TA'、'SA'、'OneGold'、'Gold'、'NelderMead'</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>funGetBetter</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入有更優解出現時呼叫之函數，將傳入(最佳解,迴圈序號)。種類：函數</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>funEndLoop</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入每次主迴圈結束後呼叫之函數。種類：函數</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>funGenerationBefore</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入每代開頭之自適應接口，將傳入{ params }，可回傳{ params: { 覆寫之鍵 } }以覆寫本代超參數(回傳值不檢測)。種類：函數</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>funGenerationAfter</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入每代結束後之自適應回饋接口，將傳入{ params, childrenBestFitness }，不需回傳。種類：函數</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>psoC1Start</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>2</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入初始C1(個體經驗權重)，預設2。種類：有效數字</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>psoC1End</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>2</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入最終C1，預設2。種類：有效數字</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>psoC1Dynamic</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>0</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入動態C1，預設0。種類：有效數字</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>psoC2Start</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>2</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入初始C2(全域經驗權重)，預設2。種類：有效數字</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>psoC2End</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>2</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入最終C2，預設2。種類：有效數字</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>psoC2Dynamic</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>0</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入動態C2，預設0。種類：有效數字</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>psoBeta</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>0.9</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入慣性衰減係數(每代inertia*=Beta)，預設0.9。種類：有效數字</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>psoGamma</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>0.5</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入最大速度比例(Vmax=Gamma*(n-1))，預設0.5。種類：有效數字</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>psoInertiaMin</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>0.4</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入慣性下限，預設0.4。種類：有效數字</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5 class="h5-returns">Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>回傳Promise，resolve為結果物件，含鍵值bestSolution,hists,stopMode,stopNl,stopExecutions；輸入無效時reject字串，格式為<code>invalid &lt;名稱&gt;: must be &lt;種類描述&gt;</code>，不含輸入值</p>
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id=".omlRGA"><span class="type-signature type-signature-async, static">(async, static) </span>omlRGA<span class="signature">(dps, funFit, opt<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>實數編碼基因演算法(Real-coded Genetic Algorithm)</p>
+<p>Unit Test: <a href="https://github.com/yuda-lyu/w-optimization/blob/master/test/p4.omlRGA.test.mjs">Github</a></p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="omlRGA.mjs.html">omlRGA.mjs</a>, <a href="omlRGA.mjs.html#line70">line 70</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>dps</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入設計變數陣列，各元素為{ values: [可用值], n: 可用值數量 }。種類：非空陣列，必給；元素為一般物件，values為非空陣列(元素為可用值，任意值，由funFit自行解讀，不檢)，n為有效數字，正整數(數字字串轉換後使用)且須等於values長度；不改寫呼叫端之陣列</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>funFit</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入適應函數，將傳入各設計變數所取之值陣列，需回傳適應函數值，以求解最小值為目標。種類：函數，必給</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opt</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>{}</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入設定物件，預設{}。種類：一般物件，undefined或null視為未給，其餘非一般物件為無效；未宣告之鍵忽略；各鍵給了而不符種類即為無效，不改用預設</p>
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>Ng</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>10000</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入總世代數，預設10000。種類：有效數字，正整數</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>Np</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>40</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入族群個體數，預設40。種類：有效數字，正整數，且不得小於opt.rgaCrossover所需之最小個體數('DE2 Crossover'、'4P Crossover'與'4PB Crossover'為4，'DE1 Crossover'、'3P Crossover'與'3PB Crossover'為3，其餘為2)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>NContiguous</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>100</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入最大最佳解連續未更新次數，預設100。種類：有效數字，正整數</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>NRepeat</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>1</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入最大再搜尋次數，預設1。種類：有效數字，正整數</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>NCore</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>1000000</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入最大核心執行次數，預設1000000。種類：有效數字，正整數</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>ModeOutLimit</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>'Mapping'</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入設計變數指標超過範圍之處理方式，預設'Mapping'。種類：列舉字串，'Mapping'、'Limit'、'Random'</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>UseRepeat</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>true</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入是否使用再搜尋策略，預設true。種類：布林，只收true或false('true'、'n'、1等皆為無效)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>UseImmigration</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>true</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入是否使用移民策略，預設true。種類：布林，說明同opt.UseRepeat</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>LocalSearchMethod</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>'NelderMead'</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入局部搜尋方法，預設'NelderMead'。種類：列舉字串，'None'(不做局部搜尋)、'Neighbor'、'TA'、'SA'、'OneGold'、'Gold'、'NelderMead'</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>funGetBetter</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入有更優解出現時呼叫之函數，將傳入(最佳解,世代序號)。種類：函數</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>funGenerationBefore</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入每代開頭之自適應接口，將傳入{ params }，可回傳{ params: { 覆寫之鍵 } }以覆寫本代超參數(回傳值不檢測)。種類：函數</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>funGenerationAfter</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入每代結束後之自適應回饋接口，將傳入{ params, childrenBestFitness }，不需回傳。種類：函數</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>rgaMutationRateStart</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>0.05</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入初始突變率，預設0.05。種類：有效數字</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>rgaMutationRateEnd</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>0.05</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入最終突變率，預設0.05。種類：有效數字</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>rgaMutationRateDynamic</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>0</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入動態突變率，預設0。種類：有效數字</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>rgaSelection</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>'Tournament Selection'</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入選擇運算子，預設'Tournament Selection'。種類：列舉字串，'Roulette Wheel Selection'、'Tournament Selection'、'Ranking Selection'、'Uniform Selection'</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>rgaCrossover</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>'BLX-a Crossover'</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入交配運算子，預設'BLX-a Crossover'。種類：列舉字串，'Flat Crossover'、'BLX-a Crossover'、'Linear Crossover'、'Arithmetical Crossover'、'Chung Crossover'、'DE1 Crossover'、'3P Crossover'、'3PB Crossover'、'DE2 Crossover'、'4P Crossover'、'4PB Crossover'、'HS Crossover'、'Guiding Function'</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>rgaMutation</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>'Linear0.1'</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入突變運算子，預設'Linear0.1'。種類：列舉字串，'Constant1'、'Constant2'、'Constant3'、'Linear0.1'、'Linear0.2'、'Linear0.3'、'Exponent0.1'、'Exponent0.2'、'Exponent0.3'、'Global Space'</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>rgaElitism</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>'BestOne'</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入菁英策略，預設'BestOne'。種類：列舉字串，'None'、'BestOne'、'HalfPop'、'AllPop'</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5 class="h5-returns">Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>回傳Promise，resolve為結果物件，含鍵值bestSolution,hists,stopMode,stopNg,stopExecutions；輸入無效時reject字串，格式為<code>invalid &lt;名稱&gt;: must be &lt;種類描述&gt;</code>，不含輸入值</p>
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id=".omlSA"><span class="type-signature type-signature-async, static">(async, static) </span>omlSA<span class="signature">(dps, funFit, opt<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>模擬退火(Simulated Annealing)</p>
+<p>此版本同時支援「主演算法」與「LocalSearch helper」雙用途:
+主演算法不傳opt.initSolution，內部隨機初始化；LocalSearch傳opt.initSolution與opt.calcFitness(共享caller之iExecute counter)</p>
+<p>Unit Test: <a href="https://github.com/yuda-lyu/w-optimization/blob/master/test/p2.omlSA.test.mjs">Github</a></p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="omlSA.mjs.html">omlSA.mjs</a>, <a href="omlSA.mjs.html#line37">line 37</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>dps</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入設計變數陣列，各元素為{ values: [可用值], n: 可用值數量 }。種類：非空陣列，必給；元素為一般物件，values為非空陣列(元素為可用值，任意值，由funFit自行解讀，不檢)，n為有效數字，正整數(數字字串轉換後使用)且須等於values長度；不改寫呼叫端之陣列</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>funFit</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入適應函數，將傳入各設計變數所取之值陣列，需回傳適應函數值，以求解最小值為目標。種類：函數，必給</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opt</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>{}</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入設定物件，預設{}。種類：一般物件，undefined或null視為未給，其餘非一般物件為無效；未宣告之鍵忽略；各鍵給了而不符種類即為無效，不改用預設</p>
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>Nl</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>10000</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入最大總迴圈數，預設10000。種類：有效數字，正整數</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>NContiguous</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>200</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入最大最佳解連續未更新次數，預設200。種類：有效數字，正整數</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>NCore</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>1000000</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入最大核心執行次數，預設1000000。種類：有效數字，正整數</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>ModeOutLimit</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>'Mapping'</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入設計變數指標超過範圍之處理方式，預設'Mapping'。種類：列舉字串，'Mapping'、'Limit'、'Random'</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>saInitialTemperature</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>100</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入初始溫度，預設100。種類：有效數字</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>saAlpha</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>0.9</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入溫度衰減係數(改善時T=α*T，越小衰減越快)，預設0.9。種類：有效數字</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>UseHists</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>true</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入是否收集hists陣列，預設true。種類：布林，只收true或false('true'、'n'、1等皆為無效)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>funGetBetter</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入有更優解出現時呼叫之函數，將傳入(最佳解,迴圈序號)。種類：函數</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>funEndLoop</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入每次主迴圈結束後呼叫之函數，將傳入(現解,最佳解,迴圈序號)。種類：函數</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>calcFitness</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入計算適應度之函數，供LocalSearch模式共享呼叫次數計數，將傳入(解物件,來源字串)，需回傳{ ps, fitness }。種類：函數</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>initSolution</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入初始解(LocalSearch模式)，不給則隨機初始化。種類：一般物件，ps為非空陣列(元素為本套件內部結構，不逐一檢測)，fitness為適應函數值(數字或數字字串，轉換後使用，另收+-Infinity作為懲罰值)</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5 class="h5-returns">Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>回傳Promise，resolve為結果物件，含鍵值bestSolution,hists,stopMode,stopNl,stopExecutions；輸入無效時reject字串，格式為<code>invalid &lt;名稱&gt;: must be &lt;種類描述&gt;</code>，不含輸入值</p>
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id=".omlTA"><span class="type-signature type-signature-async, static">(async, static) </span>omlTA<span class="signature">(dps, funFit, opt<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>門檻接受法(Threshold Accepting，SA之確定性變體)</p>
+<p>此版本同時支援「主演算法」與「LocalSearch helper」雙用途:
+主演算法不傳opt.initSolution，內部隨機初始化；LocalSearch傳opt.initSolution與opt.calcFitness(共享caller之iExecute counter)</p>
+<p>Unit Test: <a href="https://github.com/yuda-lyu/w-optimization/blob/master/test/p2.omlTA.test.mjs">Github</a></p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="omlTA.mjs.html">omlTA.mjs</a>, <a href="omlTA.mjs.html#line91">line 91</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>dps</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入設計變數陣列，各元素為{ values: [可用值], n: 可用值數量 }。種類：非空陣列，必給；元素為一般物件，values為非空陣列(元素為可用值，任意值，由funFit自行解讀，不檢)，n為有效數字，正整數(數字字串轉換後使用)且須等於values長度；不改寫呼叫端之陣列</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>funFit</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入適應函數，將傳入各設計變數所取之值陣列，需回傳適應函數值，以求解最小值為目標。種類：函數，必給</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opt</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>{}</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入設定物件，預設{}。種類：一般物件，undefined或null視為未給，其餘非一般物件為無效；未宣告之鍵忽略；各鍵給了而不符種類即為無效，不改用預設</p>
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>Nl</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>10000</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入最大總迴圈數，預設10000。種類：有效數字，正整數</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>NContiguous</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>200</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入最大最佳解連續未更新次數，預設200。種類：有效數字，正整數</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>NCore</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>1000000</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入最大核心執行次數，預設1000000。種類：有效數字，正整數</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>ModeOutLimit</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>'Mapping'</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入設計變數指標超過範圍之處理方式，預設'Mapping'。種類：列舉字串，'Mapping'、'Limit'、'Random'</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>taThresholdType</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>'Geometric Series'</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入門檻數列型態，預設'Geometric Series'。種類：列舉字串，'Arithmetic Series'、'Geometric Series'、'Trapezoid Series'</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>taThresholdInitial</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>1</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入初始門檻，預設1。種類：有效數字</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>UseHists</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>true</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入是否收集hists陣列，預設true。種類：布林，只收true或false('true'、'n'、1等皆為無效)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>funGetBetter</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入有更優解出現時呼叫之函數，將傳入(最佳解,迴圈序號)。種類：函數</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>funEndLoop</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入每次主迴圈結束後呼叫之函數，將傳入(現解,最佳解,迴圈序號)。種類：函數</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>calcFitness</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入計算適應度之函數，供LocalSearch模式共享呼叫次數計數，將傳入(解物件,來源字串)，需回傳{ ps, fitness }。種類：函數</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>initSolution</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入初始解(LocalSearch模式)，不給則隨機初始化。種類：一般物件，ps為非空陣列(元素為本套件內部結構，不逐一檢測)，fitness為適應函數值(數字或數字字串，轉換後使用，另收+-Infinity作為懲罰值)</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5 class="h5-returns">Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>回傳Promise，resolve為結果物件，含鍵值bestSolution,hists,stopMode,stopNl,stopExecutions；輸入無效時reject字串，格式為<code>invalid &lt;名稱&gt;: must be &lt;種類描述&gt;</code>，不含輸入值</p>
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id=".sdm"><span class="type-signature type-signature-async, static">(async, static) </span>sdm<span class="signature">(dps, funFit, opt<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>最陡下降法(Steepest Descent Method)</p>
+<p>此版本同時支援「主演算法」與「LocalSearch helper」雙用途</p>
+<p>Unit Test: <a href="https://github.com/yuda-lyu/w-optimization/blob/master/test/p2.sdm.test.mjs">Github</a></p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="sdm.mjs.html">sdm.mjs</a>, <a href="sdm.mjs.html#line300">line 300</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>dps</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入設計變數陣列，各元素為{ values: [可用值], n: 可用值數量 }。種類：非空陣列，必給；元素為一般物件，values為非空陣列(元素為可用值，任意值，由funFit自行解讀，不檢)，n為有效數字，正整數(數字字串轉換後使用)且須等於values長度；不改寫呼叫端之陣列</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>funFit</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入適應函數，將傳入各設計變數所取之值陣列，需回傳適應函數值，以求解最小值為目標。種類：函數，必給</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opt</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>{}</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入設定物件，預設{}。種類：一般物件，undefined或null視為未給，其餘非一般物件為無效；未宣告之鍵忽略；各鍵給了而不符種類即為無效，不改用預設</p>
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>sdmMode</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>'Neighbor'</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入求解模式，預設'Neighbor'。種類：列舉字串，'Neighbor'(對每變數試±1選最大改善方向，反覆至無改善)、'OneGold'(做一次梯度加黃金比加二分搜尋)、'Gold'(重複OneGold至fitness不變)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>ModeOutLimit</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>'Mapping'</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入設計變數指標超過範圍之處理方式，預設'Mapping'。種類：列舉字串，'Mapping'、'Limit'、'Random'</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>calcFitness</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入計算適應度之函數，供LocalSearch模式共享呼叫次數計數，將傳入(解物件,來源字串)，需回傳{ ps, fitness }。種類：函數</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>initSolution</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入初始解(LocalSearch模式)，不給則隨機初始化。種類：一般物件，ps為非空陣列(元素為本套件內部結構，不逐一檢測)，fitness為適應函數值(數字或數字字串，轉換後使用，另收+-Infinity作為懲罰值)</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5 class="h5-returns">Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>回傳Promise，resolve為結果物件，含鍵值bestSolution,stopExecutions；輸入無效時reject字串，格式為<code>invalid &lt;名稱&gt;: must be &lt;種類描述&gt;</code>，不含輸入值</p>
 </div>
 
 
@@ -3858,7 +11675,7 @@ test3()
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="setpBracket.mjs.html">setpBracket.mjs</a>, <a href="setpBracket.mjs.html#line76">line 76</a>
+        <a href="setpBracket.mjs.html">setpBracket.mjs</a>, <a href="setpBracket.mjs.html#line75">line 75</a>
     </li></ul></dd>
     
 
@@ -4016,7 +11833,7 @@ test()
                 </td>
             
 
-            <td class="description last"><p>輸入適應函數，將傳入變數x，需回傳適應函數值，以求解最小值所在起訖範圍為目標</p></td>
+            <td class="description last"><p>輸入適應函數，將傳入變數x，需回傳適應函數值，以求解最小值所在起訖範圍為目標。種類：函數，必給</p></td>
         </tr>
 
     
@@ -4030,6 +11847,9 @@ test()
             
                 
 <span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
 
 
 
@@ -4052,7 +11872,7 @@ test()
                 </td>
             
 
-            <td class="description last"><p>輸入初始值數字</p></td>
+            <td class="description last"><p>輸入初始值數字或數字字串。種類：有效數字，必給，數字字串轉換後使用，'-'、'NP'、''等非數字字串與null、布林、NaN、Infinity皆為無效</p></td>
         </tr>
 
     
@@ -4092,7 +11912,7 @@ test()
                 </td>
             
 
-            <td class="description last"><p>輸入設定物件，預設{}</p>
+            <td class="description last"><p>輸入設定物件，預設{}。種類：一般物件，undefined或null視為未給，其餘非一般物件為無效；未宣告之鍵忽略；各鍵給了而不符種類即為無效，不改用預設</p>
                 <h6>Properties</h6>
                 
 
@@ -4129,6 +11949,9 @@ test()
             
                 
 <span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
 
 
 
@@ -4155,7 +11978,50 @@ test()
                 </td>
             
 
-            <td class="description last"><p>輸入步長數字，預設0.1</p></td>
+            <td class="description last"><p>輸入步長，預設0.1。種類：有效數字，正數</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>dxR</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>2</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入步長增長比，預設2。種類：有效數字，正數，或列舉字串'speed'(加速增長)</p></td>
         </tr>
 
     
@@ -4169,6 +12035,9 @@ test()
             
                 
 <span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
 
 
 
@@ -4195,7 +12064,7 @@ test()
                 </td>
             
 
-            <td class="description last"><p>輸入搜尋範圍最小值數字，預設-1e20</p></td>
+            <td class="description last"><p>輸入搜尋範圍最小值，預設-1e20。種類：有效數字</p></td>
         </tr>
 
     
@@ -4209,6 +12078,9 @@ test()
             
                 
 <span class="param-type">Number</span>
+|
+
+<span class="param-type">String</span>
 
 
 
@@ -4235,7 +12107,7 @@ test()
                 </td>
             
 
-            <td class="description last"><p>輸入搜尋範圍最大值數字，預設1e20</p></td>
+            <td class="description last"><p>輸入搜尋範圍最大值，預設1e20。種類：有效數字</p></td>
         </tr>
 
     
@@ -4268,7 +12140,7 @@ test()
 
         
 <div class="param-desc">
-    <p>回傳Promise，resolve為求解後結果物件，含鍵值x,y，x為求解後變數組，y為最優適應函數值，reject為失敗訊息</p>
+    <p>回傳Promise，resolve為求解後結果物件，含鍵值count,bounded,min,max,guess,fMin,fMax,fGuess；輸入無效時reject字串，格式為<code>invalid &lt;名稱&gt;: must be &lt;種類描述&gt;</code>，不含輸入值</p>
 </div>
 
 
@@ -4310,7 +12182,7 @@ test()
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.5</a> on Sun Oct 25 2026 23:18:14 GMT+0800 (台北標準時間) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.5</a> on Sat Oct 31 2026 02:04:29 GMT+0800 (台北標準時間) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>

@@ -1,10 +1,6 @@
-import get from 'lodash-es/get.js'
 import size from 'lodash-es/size.js'
-import isnum from 'wsemi/src/isnum.mjs'
-import isfun from 'wsemi/src/isfun.mjs'
-import isearr from 'wsemi/src/isearr.mjs'
 import ispm from 'wsemi/src/ispm.mjs'
-import cdbl from 'wsemi/src/cdbl.mjs'
+import { kFun, kPnum, kPint, kNumArr, chkParams } from './_checkParam.mjs'
 
 
 /*
@@ -1267,18 +1263,13 @@ async function cobylaCore(calcfc, n, m, x, rhobeg, rhoend, iprint, maxfun) {
  *
  * Unit Test: {@link https://github.com/yuda-lyu/w-optimization/blob/master/test/nelderMead.test.js Github}
  * @memberOf w-optimization
- * @param {Function} fun 輸入適應函數，將傳入變數組params，需回傳適應函數值，以求解最小值為目標
- * @param {Array} params 輸入初始變數組，若適應函數fun需輸入3參數，則就需輸入[a,b,c]陣列作為初始值
- * @param {Object} [opt={}] 輸入設定物件，預設{}
- * @param {Number} [opt.maxIterations=null] 輸入最大迭代次數整數，若無則預設為變數組長度*200
- * @param {Number} [opt.delta=0.001] 輸入步長數字，預設0.001
- * @param {Number} [opt.minErrorDelta=1e-6] 輸入最小誤差步長數字，預設1e-6
- * @param {Number} [opt.minTolerance=1e-5] 輸入最小收斂門檻值數字，預設1e-5
- * @param {Number} [opt.rho=1] 輸入上輪第1節點權重數字，預設1
- * @param {Number} [opt.chi=2] 輸入上輪第2節點權重數字，預設2
- * @param {Number} [opt.psi=-0.5] 輸入下輪第1節點權重數字，預設-0.5
- * @param {Number} [opt.sigma=0.5] 輸入下輪第2節點權重數字，預設0.5
- * @returns {Promise} 回傳Promise，resolve為求解後結果物件，含鍵值x,y，x為求解後變數組，y為最優適應函數值，reject為失敗訊息
+ * @param {Function} fun 輸入適應函數，將傳入變數組params，需回傳適應函數值，以求解最小值為目標。種類：函數，必給
+ * @param {Array} params 輸入初始變數組，若適應函數fun需輸入3參數，則就需輸入[a,b,c]陣列作為初始值。種類：資料陣列，必給，非空陣列，元素為有效數字：數字或數字字串(轉換後使用)，'-'、'NP'、''等非數字字串與null、布林、NaN、Infinity皆為無效，訊息帶元素索引；不改寫呼叫端之陣列
+ * @param {Object} [opt={}] 輸入設定物件，預設{}。種類：一般物件，undefined或null視為未給，其餘非一般物件為無效；未宣告之鍵忽略；各鍵給了而不符種類即為無效，不改用預設
+ * @param {Number|String} [opt.maxIterations] 輸入最大迭代次數，若無則預設為變數組長度*2000。種類：有效數字，正整數
+ * @param {Number|String} [opt.rhobeg=10] 輸入初始單純形尺寸，預設10。種類：有效數字，正數
+ * @param {Number|String} [opt.rhoend=1e-5] 輸入最終單純形尺寸(收斂門檻)，預設1e-5。種類：有效數字，正數
+ * @returns {Promise} 回傳Promise，resolve為求解後結果物件，含鍵值x,y，x為求解後變數組，y為最優適應函數值；輸入無效時reject字串，格式為`invalid <名稱>: must be <種類描述>`，不含輸入值
  * @example
  *
  * async function test() {
@@ -1307,39 +1298,31 @@ async function cobylaCore(calcfc, n, m, x, rhobeg, rhoend, iprint, maxfun) {
  */
 async function cobyla(fun, params, opt = {}) {
 
-    //check func
-    if (!isfun(fun)) {
-        return Promise.reject('invalid fun')
+    //check, 一般參數與opt先於任何適應函數呼叫檢測, 檢測之值即使用之值(params為轉換後之新陣列)
+    let c = chkParams([[fun, 'fun', kFun], [params, 'params', kNumArr]], opt, {
+        maxIterations: [kPint, undefined], //未給則為變數組長度*2000
+        rhobeg: [kPnum, 10.0],
+        rhoend: [kPnum, 1e-5],
+    })
+    if (c.err !== '') {
+        return Promise.reject(c.err)
     }
-
-    //check params
-    if (!isearr(params)) {
-        return Promise.reject('params is not an effective array')
-    }
+    params = c.vs[1]
 
     //n
     let n = size(params)
 
     //maxIterations
-    let maxIterations = get(opt, 'maxIterations')
-    if (!isnum(maxIterations)) {
+    let maxIterations = c.o.maxIterations
+    if (maxIterations === undefined) {
         maxIterations = n * 2000
     }
-    maxIterations = cdbl(maxIterations)
 
     //rhobeg
-    let rhobeg = get(opt, 'rhobeg')
-    if (!isnum(rhobeg)) {
-        rhobeg = 10.0
-    }
-    rhobeg = cdbl(rhobeg)
+    let rhobeg = c.o.rhobeg
 
     //rhoend
-    let rhoend = get(opt, 'rhoend')
-    if (!isnum(rhoend)) {
-        rhoend = 1e-5
-    }
-    rhoend = cdbl(rhoend)
+    let rhoend = c.o.rhoend
 
     //maxfun
     let maxfun = maxIterations

@@ -84,7 +84,7 @@ async function _localSearch(method, currentBest, dps, funFit, calcFitness, ModeO
         return r.bestSolution
     }
     else {
-        throw new Error(`invalid LocalSearchMethod[${method}]`)
+        throw new Error('invalid LocalSearchMethod: must be one of \'None\', \'Neighbor\', \'TA\', \'SA\', \'OneGold\', \'Gold\', \'NelderMead\'')
     }
 }
 

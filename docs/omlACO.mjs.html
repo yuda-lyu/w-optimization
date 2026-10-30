@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>omlACO.mjs - Documentation</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="w-optimization.html">w-optimization</a><ul class='methods'><li data-type='method'><a href="w-optimization.html#.arrBinarySearch">arrBinarySearch</a></li><li data-type='method'><a href="w-optimization.html#.arrBinarySearchClosest">arrBinarySearchClosest</a></li><li data-type='method'><a href="w-optimization.html#.binarySearch">binarySearch</a></li><li data-type='method'><a href="w-optimization.html#.cobyla">cobyla</a></li><li data-type='method'><a href="w-optimization.html#.goldenSection">goldenSection</a></li><li data-type='method'><a href="w-optimization.html#.goldenSectionLiberate">goldenSectionLiberate</a></li><li data-type='method'><a href="w-optimization.html#.limitBFGS">limitBFGS</a></li><li data-type='method'><a href="w-optimization.html#.nelderMead">nelderMead</a></li><li data-type='method'><a href="w-optimization.html#.omlACO">omlACO</a></li><li data-type='method'><a href="w-optimization.html#.omlDE">omlDE</a></li><li data-type='method'><a href="w-optimization.html#.omlHS">omlHS</a></li><li data-type='method'><a href="w-optimization.html#.omlPSO">omlPSO</a></li><li data-type='method'><a href="w-optimization.html#.omlRGA">omlRGA</a></li><li data-type='method'><a href="w-optimization.html#.omlSA">omlSA</a></li><li data-type='method'><a href="w-optimization.html#.omlTA">omlTA</a></li><li data-type='method'><a href="w-optimization.html#.sdm">sdm</a></li><li data-type='method'><a href="w-optimization.html#.setpBracket">setpBracket</a></li></ul></li></ul><h3>Global</h3><ul><li><a href="global.html#Normal">Normal</a></li><li><a href="global.html#cobylaCore">cobylaCore</a></li></ul>
+    
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">omlACO.mjs</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import size from 'lodash-es/size.js'
+import map from 'lodash-es/map.js'
+import sortBy from 'lodash-es/sortBy.js'
+import cloneDeep from 'lodash-es/cloneDeep.js'
+import isestr from 'wsemi/src/isestr.mjs'
+import isfun from 'wsemi/src/isfun.mjs'
+import ispm from 'wsemi/src/ispm.mjs'
+import randomIntRange from 'wsemi/src/randomIntRange.mjs'
+import { kNum, kPint, kBol, kFun, chkParams } from './_checkParam.mjs'
+import { kModeOutLimit, kLocalSearchMethod } from './_optDecl.mjs'
+import { kDps } from './_validateDps.mjs'
+import _genSolution from './_genSolution.mjs'
+import _isSameSolution from './_isSameSolution.mjs'
+import _dynamicValue from './_dynamicValue.mjs'
+import _pickByWeights from './_pickByWeights.mjs'
+import _localSearch from './_localSearch.mjs'
+
+
+/**
+ * 蟻群最佳化(Ant Colony Optimization)
+ *
+ * Unit Test: {@link https://github.com/yuda-lyu/w-optimization/blob/master/test/p4.omlACO.test.mjs Github}
+ * @memberOf w-optimization
+ * @param {Array} dps 輸入設計變數陣列，各元素為{ values: [可用值], n: 可用值數量 }。種類：非空陣列，必給；元素為一般物件，values為非空陣列(元素為可用值，任意值，由funFit自行解讀，不檢)，n為有效數字，正整數(數字字串轉換後使用)且須等於values長度；不改寫呼叫端之陣列
+ * @param {Function} funFit 輸入適應函數，將傳入各設計變數所取之值陣列，需回傳適應函數值，以求解最小值為目標。種類：函數，必給
+ * @param {Object} [opt={}] 輸入設定物件，預設{}。種類：一般物件，undefined或null視為未給，其餘非一般物件為無效；未宣告之鍵忽略；各鍵給了而不符種類即為無效，不改用預設
+ * @param {Number|String} [opt.Nl=10000] 輸入最大總迴圈數，預設10000。種類：有效數字，正整數
+ * @param {Number|String} [opt.Na=40] 輸入螞蟻數，預設40。種類：有效數字，正整數
+ * @param {Number|String} [opt.NContiguous=100] 輸入最大最佳解連續未更新次數，預設100。種類：有效數字，正整數
+ * @param {Number|String} [opt.NRepeat=1] 輸入最大再搜尋次數，預設1。種類：有效數字，正整數
+ * @param {Number|String} [opt.NCore=1000000] 輸入最大核心執行次數，預設1000000。種類：有效數字，正整數
+ * @param {Boolean} [opt.UseRepeat=true] 輸入是否使用再搜尋策略，預設true。種類：布林，只收true或false('true'、'n'、1等皆為無效)
+ * @param {Boolean} [opt.UseImmigration=true] 輸入是否使用移民策略，預設true。種類：布林，說明同opt.UseRepeat
+ * @param {String} [opt.LocalSearchMethod='NelderMead'] 輸入局部搜尋方法，預設'NelderMead'。種類：列舉字串，'None'(不做局部搜尋)、'Neighbor'、'TA'、'SA'、'OneGold'、'Gold'、'NelderMead'
+ * @param {String} [opt.ModeOutLimit='Mapping'] 輸入設計變數指標超過範圍之處理方式，預設'Mapping'。種類：列舉字串，'Mapping'、'Limit'、'Random'
+ * @param {Boolean} [opt.UseForcedExplore=true] 輸入是否每代強制重產後半族群，預設true。種類：布林，說明同opt.UseRepeat
+ * @param {Function} [opt.funGetBetter] 輸入有更優解出現時呼叫之函數，將傳入(最佳解,迴圈序號)。種類：函數
+ * @param {Function} [opt.funEndLoop] 輸入每次主迴圈結束後呼叫之函數。種類：函數
+ * @param {Function} [opt.funGenerationBefore] 輸入每代開頭之自適應接口，將傳入{ params }，可回傳{ params: { 覆寫之鍵 } }以覆寫本代超參數(回傳值不檢測)。種類：函數
+ * @param {Function} [opt.funGenerationAfter] 輸入每代結束後之自適應回饋接口，將傳入{ params, childrenBestFitness }，不需回傳。種類：函數
+ * @param {Number|String} [opt.acoExploitationRateStart=0.8] 輸入初始開發率(小為開發，大為探索)，預設0.8。種類：有效數字
+ * @param {Number|String} [opt.acoExploitationRateEnd=0.8] 輸入最終開發率，預設0.8。種類：有效數字
+ * @param {Number|String} [opt.acoExploitationRateDynamic=0] 輸入動態開發率，預設0。種類：有效數字
+ * @param {Number|String} [opt.acoAlphaStart=0.1] 輸入初始全域費洛蒙更新係數，預設0.1。種類：有效數字
+ * @param {Number|String} [opt.acoAlphaEnd=0.1] 輸入最終全域費洛蒙更新係數，預設0.1。種類：有效數字
+ * @param {Number|String} [opt.acoAlphaDynamic=0] 輸入動態全域費洛蒙更新係數，預設0。種類：有效數字
+ * @param {Number|String} [opt.acoRoStart=0.1] 輸入初始區域費洛蒙更新係數，預設0.1。種類：有效數字
+ * @param {Number|String} [opt.acoRoEnd=0.1] 輸入最終區域費洛蒙更新係數，預設0.1。種類：有效數字
+ * @param {Number|String} [opt.acoRoDynamic=0] 輸入動態區域費洛蒙更新係數，預設0。種類：有效數字
+ * @returns {Promise} 回傳Promise，resolve為結果物件，含鍵值bestSolution,hists,stopMode,stopNl,stopExecutions；輸入無效時reject字串，格式為`invalid &lt;名稱>: must be &lt;種類描述>`，不含輸入值
+ */
+async function omlACO(dps, funFit, opt = {}) {
+    //Ant Colony Optimization, 蟻群最佳化
+
+    //check, 一般參數與opt先於任何適應函數呼叫檢測, 檢測之值即使用之值
+    let c = chkParams([[dps, 'dps', kDps], [funFit, 'funFit', kFun]], opt, {
+        Nl: [kPint, 10000], //最大總迴圈數
+        Na: [kPint, 40], //螞蟻數
+        NContiguous: [kPint, 100], //最大最佳解連續未更新次數
+        NRepeat: [kPint, 1], //最大再搜尋次數
+        NCore: [kPint, 1000000], //最大核心執行次數
+        UseRepeat: [kBol, true], //是否使用再搜尋策略 (達門檻重產 1..Na-1)
+        UseImmigration: [kBol, true], //是否使用移民策略
+        LocalSearchMethod: [kLocalSearchMethod, 'NelderMead'], //局部搜尋方法 ('None' = 不做局部搜尋)
+        ModeOutLimit: [kModeOutLimit, 'Mapping'], //ACO本身原本沒有此opt, 因LocalSearch helper需要傳入故補上
+        UseForcedExplore: [kBol, true], //是否每代強制重產後半族群Na/2..Na-1 (ACO特有內建探索, VB原碼此分支always-on)
+        funGetBetter: [kFun, undefined], //當有更優解出現時呼叫函數
+        funEndLoop: [kFun, undefined], //每次主迴圈結束後呼叫函數
+        funGenerationBefore: [kFun, undefined], //每代開頭之自適應接口(可覆寫本代要用的超參數)
+        funGenerationAfter: [kFun, undefined], //每代結束後之自適應回饋接口
+        acoExploitationRateStart: [kNum, 0.8], //初始開發率 (小=開發, 大=探索)
+        acoExploitationRateEnd: [kNum, 0.8], //最終開發率
+        acoExploitationRateDynamic: [kNum, 0], //動態開發率
+        acoAlphaStart: [kNum, 0.1], //初始全域費洛蒙更新係數
+        acoAlphaEnd: [kNum, 0.1], //最終全域費洛蒙更新係數
+        acoAlphaDynamic: [kNum, 0], //動態全域費洛蒙更新係數
+        acoRoStart: [kNum, 0.1], //初始區域費洛蒙更新係數
+        acoRoEnd: [kNum, 0.1], //最終區域費洛蒙更新係數
+        acoRoDynamic: [kNum, 0], //動態區域費洛蒙更新係數
+    })
+    if (c.err !== '') {
+        return Promise.reject(c.err)
+    }
+    dps = c.vs[0]
+    let {
+        Nl, Na, NContiguous, NRepeat, NCore, UseRepeat, UseImmigration, LocalSearchMethod, ModeOutLimit, UseForcedExplore,
+        funGetBetter, funEndLoop, funGenerationBefore, funGenerationAfter,
+        acoExploitationRateStart, acoExploitationRateEnd, acoExploitationRateDynamic,
+        acoAlphaStart, acoAlphaEnd, acoAlphaDynamic,
+        acoRoStart, acoRoEnd, acoRoDynamic,
+    } = c.o
+
+    //Nd, 設計變數總數
+    let Nd = size(dps)
+
+    //funGenerationBefore, 每代開頭之自適應接口(可覆寫本代要用的超參數)
+    //收 { params }, 可回傳 { params: { ... 覆寫的 keys } } 或 undefined
+    //params 預設為 _dynamicValue 算出來的 acoExploitationRate / acoAlpha / acoRo 加上 ModeOutLimit / LocalSearchMethod
+
+    //funGenerationAfter, 每代結束後之自適應回饋接口
+    //收 { params, childrenBestFitness }, 不需回傳
+    //  params:              本代實際使用之超參數(已含 funGenerationBefore 之覆寫)
+    //  childrenBestFitness: 本代所有 strategy(Immigration + LS + Repeat/ForcedExplore)跑完後 ants[0].fitness
+    //                       對齊 .bas history(i) 語意, 反映本代 params 全部影響(含 LS)
+
+    let iRepeat = 0 //初始化再搜尋次數
+    let iContinue = 0 //初始化現在連續未更新次數
+    let iExecute = 0 //初始化核心分析次數
+
+    //calcFitness
+    let calcFitness = async (_s, from) => {
+        iExecute++
+        let _ps = map(_s.ps, 'value')
+        let f = funFit(_ps)
+        if (ispm(f)) {
+            f = await f
+        }
+        let s = {
+            ps: _s.ps,
+            fitness: f,
+        }
+        return s
+    }
+
+    let bestSolution = null //最佳解
+    let hists = [] //求解最佳解之紀錄清單
+    let stopMode = '' //觸發停止之機制
+    let stopNl = 0 //停止時迴圈數
+    let stopExecutions = 0 //停止時核心分析次數
+
+    let ants = []
+
+    //pheromone[i][j] = 第i個變數的第j個ind的費洛蒙值; 初始全0
+    let pheromone = []
+    for (let i = 0; i &lt; Nd; i++) {
+        pheromone.push(new Array(dps[i].n).fill(0))
+    }
+
+    //pheromoneUpdate, 對應AE_ACO_Pheromone_UpdatingRule, 更新ant[k]路徑上的費洛蒙
+    let pheromoneUpdate = (ant, rRatio) => {
+        //rPheromone: fitness越小, 費洛蒙越大
+        let rPheromone
+        if (ant.fitness >= 1) {
+            rPheromone = ant.fitness
+        }
+        else {
+            rPheromone = Math.exp(ant.fitness) / Math.exp(1)
+        }
+        rPheromone = 1 / rPheromone
+
+        for (let i = 0; i &lt; Nd; i++) {
+            let j = ant.ps[i].ind
+            pheromone[i][j] = (1 - rRatio) * pheromone[i][j] + rRatio * rPheromone
+        }
+    }
+
+    //初始化族群: 隨機產生Na隻螞蟻, 各做Local Updating Rule
+    if (true) {
+
+        for (let k = 0; k &lt; Na; k++) {
+            let _s = _genSolution(dps)
+            let s = await calcFitness(_s, 'init')
+            ants.push(s)
+            pheromoneUpdate(s, acoRoStart) //初始用acoRoStart當Local ratio
+        }
+
+        //sortBy
+        ants = sortBy(ants, 'fitness')
+
+        //Global Updating Rule (對最佳螞蟻路徑)
+        pheromoneUpdate(ants[0], acoAlphaStart)
+
+        //push
+        hists.push(cloneDeep(ants[0]))
+
+        //bestSolution
+        bestSolution = cloneDeep(ants[0])
+
+    }
+
+    //runBehavior, 對應AE_ACO_Behavior: 每隻螞蟻循費洛蒙產生新路徑
+    let runBehavior = async (acoExploitationRate, acoAlpha, acoRo) => {
+
+        for (let k = 0; k &lt; Na; k++) {
+
+            for (let i = 0; i &lt; Nd; i++) {
+
+                //計算沒費洛蒙的節點數
+                let pn = pheromone[i].length
+                let noPheromoneN = 0
+                for (let j = 0; j &lt; pn; j++) {
+                    if (pheromone[i][j] === 0) {
+                        noPheromoneN++
+                    }
+                }
+
+                let j
+
+                if (Math.random() &lt; acoExploitationRate) {
+                    //Exploitation 開發: 選有費洛蒙的節點(按權重)
+                    if (noPheromoneN === pn) {
+                        //全部都沒費洛蒙 → 隨機任一
+                        j = randomIntRange(0, pn - 1)
+                    }
+                    else {
+                        //至少有1點有費洛蒙 → 按權重加權挑選
+                        j = _pickByWeights(pheromone[i], Math.random())
+                    }
+                }
+                else {
+                    //Exploration 探索: 選沒費洛蒙的節點
+                    if (noPheromoneN === pn || noPheromoneN === 0) {
+                        //全部沒/全部有費洛蒙 → 隨機任一
+                        j = randomIntRange(0, pn - 1)
+                    }
+                    else {
+                        //收集沒費洛蒙的節點清單, 隨機選一
+                        let excList = []
+                        for (let jj = 0; jj &lt; pn; jj++) {
+                            if (pheromone[i][jj] === 0) {
+                                excList.push(jj)
+                            }
+                        }
+                        j = excList[randomIntRange(0, excList.length - 1)]
+                    }
+                }
+
+                ants[k].ps[i].ind = j
+                ants[k].ps[i].value = dps[i].values[j]
+            }
+
+            //calcFitness
+            let s = await calcFitness(ants[k], 'behavior')
+            ants[k] = s
+        }
+
+        //Local Updating Rule (對每隻螞蟻)
+        for (let k = 0; k &lt; Na; k++) {
+            pheromoneUpdate(ants[k], acoRo)
+        }
+
+        //Move Best Location
+        ants = sortBy(ants, 'fitness')
+
+        //Global Updating Rule (對最佳螞蟻)
+        pheromoneUpdate(ants[0], acoAlpha)
+    }
+
+    //搜尋
+    let i = -1
+    while (true) {
+        i++
+
+        //params: 本代要用的超參數, 預設由 _dynamicValue + opt 提供, 外部可透過 funGenerationBefore 覆寫
+        let params = {
+            acoExploitationRate: _dynamicValue(acoExploitationRateStart, acoExploitationRateEnd, acoExploitationRateDynamic, iContinue, NContiguous),
+            acoAlpha: _dynamicValue(acoAlphaStart, acoAlphaEnd, acoAlphaDynamic, iContinue, NContiguous),
+            acoRo: _dynamicValue(acoRoStart, acoRoEnd, acoRoDynamic, iContinue, NContiguous),
+            ModeOutLimit,
+            LocalSearchMethod,
+        }
+
+        //funGenerationBefore: 自適應接口, 讓外部覆寫本代要用的超參數
+        if (isfun(funGenerationBefore)) {
+            let r = await funGenerationBefore({
+                params: cloneDeep(params),
+            })
+            if (r &amp;&amp; r.params) {
+                params = { ...params, ...r.params }
+            }
+        }
+
+        //把覆寫後的 params 賦值回 closure 變數(讓既有 strategyImmigration / strategyLocalSearch / strategyRepeat / forcedExplore 自動讀)
+        ModeOutLimit = params.ModeOutLimit
+        LocalSearchMethod = params.LocalSearchMethod
+        let acoExploitationRate = params.acoExploitationRate
+        let acoAlpha = params.acoAlpha
+        let acoRo = params.acoRo
+
+        //Behavior
+        await runBehavior(acoExploitationRate, acoAlpha, acoRo)
+
+        //strategyImmigration, 移民策略 (對齊 .bas 順序: 排在 hists / bestSolution 之前, 改善立即反映)
+        //對應 AE_ACO_Strategy_Immigration
+        let strategyImmigration = async () => {
+
+            //由後往前處理, 不變更當前最佳螞蟻ants[0], 故k是從Na-1至1
+            for (let k = Na - 1; k >= 1; k--) {
+                if (_isSameSolution(ants[k - 1], ants[k])) {
+                    let _s = _genSolution(dps)
+                    let s = await calcFitness(_s, 'strategyImmigration')
+                    ants[k] = s
+                    pheromoneUpdate(s, acoRo)
+                }
+            }
+
+            //sortBy
+            ants = sortBy(ants, 'fitness')
+
+        }
+        if (UseImmigration) {
+            await strategyImmigration()
+        }
+
+        //strategyLocalSearch, 局部搜尋策略 (對齊 .bas 順序: 排在 hists / bestSolution 之前, 改善立即反映)
+        let strategyLocalSearch = async () => {
+
+            //依LocalSearchMethod分派局部搜尋
+            let s = await _localSearch(LocalSearchMethod, ants[0], dps, funFit, calcFitness, ModeOutLimit)
+
+            //check
+            if (s.fitness >= ants[0].fitness) {
+                return
+            }
+
+            //update
+            ants[0] = s
+
+        }
+        await strategyLocalSearch()
+
+        //push history (對齊 .bas: hists 記錄 strategy 後之 final ants[0])
+        hists.push(cloneDeep(ants[0]))
+
+        //bestSolution (對齊 .bas: bestSolution / iContinue 反映 strategy 後之 final ants[0])
+        if (bestSolution.fitness > ants[0].fitness) {
+
+            //update
+            bestSolution = cloneDeep(ants[0])
+
+            //funGetBetter
+            if (isfun(funGetBetter)) {
+                funGetBetter(cloneDeep(bestSolution), i)
+            }
+
+            iContinue = 0
+        }
+        else {
+            iContinue += 1
+        }
+
+        //strategyRepeat, 對應VB原碼Repeat雙分支
+        //達門檻: 重產 ant[1..Na-1] + 重置iContinue + iRepeat++
+        //否則: 重產 ant[Na/2..Na-1] (ACO特有強制探索, 可關)
+        if (UseRepeat &amp;&amp; iContinue >= NContiguous &amp;&amp; iRepeat &lt; NRepeat) {
+
+            for (let k = 1; k &lt;= Na - 1; k++) {
+                let _s = _genSolution(dps)
+                let s = await calcFitness(_s, 'strategyRepeat')
+                ants[k] = s
+                pheromoneUpdate(s, acoRo)
+            }
+            ants = sortBy(ants, 'fitness')
+            iContinue = 0
+            iRepeat += 1
+
+        }
+        else if (UseForcedExplore) {
+
+            //強制重產後半族群作為探索, 不重置iContinue
+            let kStart = Math.floor(Na / 2)
+            for (let k = kStart; k &lt;= Na - 1; k++) {
+                let _s = _genSolution(dps)
+                let s = await calcFitness(_s, 'strategyForcedExplore')
+                ants[k] = s
+                pheromoneUpdate(s, acoRo)
+            }
+            ants = sortBy(ants, 'fitness')
+
+        }
+
+        //stopMode
+        if (i >= Nl) {
+            stopMode = `stop by Nl[${Nl}]`
+        }
+        else if (iContinue >= NContiguous) {
+            stopMode = `stop by iContinue[${iContinue}] >= NContiguous[${NContiguous}]`
+        }
+        else if (iExecute >= NCore) {
+            stopMode = `stop by iExecute[${iExecute}] >= NCore[${NCore}]`
+        }
+
+        //funGenerationAfter, 自適應回饋接口
+        //放在 stop 判斷之前, 確保末代 suggest() 也有配對 feedback()
+        if (isfun(funGenerationAfter)) {
+            await funGenerationAfter({
+                params: cloneDeep(params),
+                childrenBestFitness: ants[0].fitness,
+            })
+        }
+
+        //stop
+        if (isestr(stopMode)) {
+            stopNl = i
+            stopExecutions = iExecute
+            break
+        }
+
+        //funEndLoop
+        if (isfun(funEndLoop)) {
+            funEndLoop(cloneDeep(ants), cloneDeep(bestSolution), i)
+        }
+
+    }
+
+    //r
+    let r = {
+        bestSolution,
+        hists,
+        stopMode,
+        stopNl,
+        stopIteration: stopNl, //跨演算法通用別名 (omlDE/RGA: stopNg / omlHS: stopNi / omlPSO/ACO: stopNl)
+        stopExecutions,
+    }
+
+    return r
+}
+
+
+export default omlACO
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.5</a> on Sat Oct 31 2026 02:04:29 GMT+0800 (台北標準時間) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+
+
+</body>
+</html>

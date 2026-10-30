@@ -1,88 +1,70 @@
-import get from 'lodash-es/get.js'
 import map from 'lodash-es/map.js'
 import cloneDeep from 'lodash-es/cloneDeep.js'
-import isnum from 'wsemi/src/isnum.mjs'
 import isestr from 'wsemi/src/isestr.mjs'
-import isearr from 'wsemi/src/isearr.mjs'
-import ispint from 'wsemi/src/ispint.mjs'
-import isbol from 'wsemi/src/isbol.mjs'
 import isfun from 'wsemi/src/isfun.mjs'
 import ispm from 'wsemi/src/ispm.mjs'
-import cint from 'wsemi/src/cint.mjs'
-import cdbl from 'wsemi/src/cdbl.mjs'
-import arrHas from 'wsemi/src/arrHas.mjs'
+import { kNum, kPint, kBol, kFun, chkParams } from './_checkParam.mjs'
+import { kModeOutLimit } from './_optDecl.mjs'
+import { kDps, kInitSolution } from './_validateDps.mjs'
 import _genSolution from './_genSolution.mjs'
 import _randPickNeighbor from './_randPickNeighbor.mjs'
-import _validateDps from './_validateDps.mjs'
 
 
+/**
+ * 模擬退火(Simulated Annealing)
+ *
+ * 此版本同時支援「主演算法」與「LocalSearch helper」雙用途:
+ * 主演算法不傳opt.initSolution，內部隨機初始化；LocalSearch傳opt.initSolution與opt.calcFitness(共享caller之iExecute counter)
+ *
+ * Unit Test: {@link https://github.com/yuda-lyu/w-optimization/blob/master/test/p2.omlSA.test.mjs Github}
+ * @memberOf w-optimization
+ * @param {Array} dps 輸入設計變數陣列，各元素為{ values: [可用值], n: 可用值數量 }。種類：非空陣列，必給；元素為一般物件，values為非空陣列(元素為可用值，任意值，由funFit自行解讀，不檢)，n為有效數字，正整數(數字字串轉換後使用)且須等於values長度；不改寫呼叫端之陣列
+ * @param {Function} funFit 輸入適應函數，將傳入各設計變數所取之值陣列，需回傳適應函數值，以求解最小值為目標。種類：函數，必給
+ * @param {Object} [opt={}] 輸入設定物件，預設{}。種類：一般物件，undefined或null視為未給，其餘非一般物件為無效；未宣告之鍵忽略；各鍵給了而不符種類即為無效，不改用預設
+ * @param {Number|String} [opt.Nl=10000] 輸入最大總迴圈數，預設10000。種類：有效數字，正整數
+ * @param {Number|String} [opt.NContiguous=200] 輸入最大最佳解連續未更新次數，預設200。種類：有效數字，正整數
+ * @param {Number|String} [opt.NCore=1000000] 輸入最大核心執行次數，預設1000000。種類：有效數字，正整數
+ * @param {String} [opt.ModeOutLimit='Mapping'] 輸入設計變數指標超過範圍之處理方式，預設'Mapping'。種類：列舉字串，'Mapping'、'Limit'、'Random'
+ * @param {Number|String} [opt.saInitialTemperature=100] 輸入初始溫度，預設100。種類：有效數字
+ * @param {Number|String} [opt.saAlpha=0.9] 輸入溫度衰減係數(改善時T=α*T，越小衰減越快)，預設0.9。種類：有效數字
+ * @param {Boolean} [opt.UseHists=true] 輸入是否收集hists陣列，預設true。種類：布林，只收true或false('true'、'n'、1等皆為無效)
+ * @param {Function} [opt.funGetBetter] 輸入有更優解出現時呼叫之函數，將傳入(最佳解,迴圈序號)。種類：函數
+ * @param {Function} [opt.funEndLoop] 輸入每次主迴圈結束後呼叫之函數，將傳入(現解,最佳解,迴圈序號)。種類：函數
+ * @param {Function} [opt.calcFitness] 輸入計算適應度之函數，供LocalSearch模式共享呼叫次數計數，將傳入(解物件,來源字串)，需回傳{ ps, fitness }。種類：函數
+ * @param {Object} [opt.initSolution] 輸入初始解(LocalSearch模式)，不給則隨機初始化。種類：一般物件，ps為非空陣列(元素為本套件內部結構，不逐一檢測)，fitness為適應函數值(數字或數字字串，轉換後使用，另收+-Infinity作為懲罰值)
+ * @returns {Promise} 回傳Promise，resolve為結果物件，含鍵值bestSolution,hists,stopMode,stopNl,stopExecutions；輸入無效時reject字串，格式為`invalid <名稱>: must be <種類描述>`，不含輸入值
+ */
 async function omlSA(dps, funFit, opt = {}) {
     //Simulated Annealing, 模擬退火
     //此版本同時支援「主演算法」與「LocalSearch helper」雙用途:
     //  - 主演算法: 不傳opt.initSolution, 內部隨機初始化
     //  - LocalSearch: 傳opt.initSolution + opt.calcFitness(共享caller之iExecute counter)
 
-    //_validateDps
-    _validateDps(dps)
-
-    //Nl, 最大總迴圈數
-    let Nl = get(opt, 'Nl', '')
-    if (!ispint(Nl)) {
-        Nl = 10000
+    //check, 一般參數與opt先於任何適應函數呼叫檢測, 檢測之值即使用之值
+    let c = chkParams([[dps, 'dps', kDps], [funFit, 'funFit', kFun]], opt, {
+        Nl: [kPint, 10000], //最大總迴圈數
+        NContiguous: [kPint, 200], //最大最佳解連續未更新次數
+        NCore: [kPint, 1000000], //最大核心執行次數(僅主演算法用; LocalSearch模式由caller自管)
+        ModeOutLimit: [kModeOutLimit, 'Mapping'], //設計變數指標超過範圍之處理方式
+        saInitialTemperature: [kNum, 100], //初始溫度
+        saAlpha: [kNum, 0.9], //溫度衰減係數 (改善時 T = α*T, 越小衰減越快)
+        UseHists: [kBol, true], //是否收集hists陣列(LocalSearch模式可關以省記憶體)
+        funGetBetter: [kFun, undefined], //當有更優解出現時呼叫函數
+        funEndLoop: [kFun, undefined], //每次主迴圈結束後呼叫函數
+        calcFitness: [kFun, undefined], //可由caller傳入以共享iExecute counter
+        initSolution: [kInitSolution, undefined], //可由caller傳入(LocalSearch模式)
+    })
+    if (c.err !== '') {
+        return Promise.reject(c.err)
     }
-    Nl = cint(Nl)
-
-    //NContiguous, 最大最佳解連續未更新次數
-    let NContiguous = get(opt, 'NContiguous', '')
-    if (!ispint(NContiguous)) {
-        NContiguous = 200
-    }
-    NContiguous = cint(NContiguous)
-
-    //NCore, 最大核心執行次數(僅主演算法用; LocalSearch模式由caller自管)
-    let NCore = get(opt, 'NCore', '')
-    if (!ispint(NCore)) {
-        NCore = 1000000
-    }
-    NCore = cint(NCore)
-
-    //ModeOutLimit, 設計變數指標超過範圍之處理方式
-    let ModeOutLimit = get(opt, 'ModeOutLimit', '')
-    if (!arrHas(ModeOutLimit, ['Mapping', 'Limit', 'Random'])) {
-        ModeOutLimit = 'Mapping'
-    }
-
-    //saInitialTemperature, 初始溫度
-    let saInitialTemperature = get(opt, 'saInitialTemperature', '')
-    if (!isnum(saInitialTemperature)) {
-        saInitialTemperature = 100
-    }
-    saInitialTemperature = cdbl(saInitialTemperature)
-
-    //saAlpha, 溫度衰減係數 (改善時 T = α*T, 越小衰減越快)
-    let saAlpha = get(opt, 'saAlpha', '')
-    if (!isnum(saAlpha)) {
-        saAlpha = 0.9
-    }
-    saAlpha = cdbl(saAlpha)
-
-    //UseHists, 是否收集hists陣列(LocalSearch模式可關以省記憶體)
-    let UseHists = get(opt, 'UseHists', '')
-    if (!isbol(UseHists)) {
-        UseHists = true
-    }
-
-    //funGetBetter, 當有更優解出現時呼叫函數
-    let funGetBetter = get(opt, 'funGetBetter')
-
-    //funEndLoop, 每次主迴圈結束後呼叫函數
-    let funEndLoop = get(opt, 'funEndLoop')
+    dps = c.vs[0]
+    let { Nl, NContiguous, NCore, ModeOutLimit, saInitialTemperature, saAlpha, UseHists, funGetBetter, funEndLoop } = c.o
 
     //iExecute, 核心分析次數(若caller傳calcFitness則由caller計, 此值僅作本地參考)
     let iExecute = 0
 
     //calcFitness, 可由caller傳入以共享iExecute counter
-    let calcFitness = get(opt, 'calcFitness')
+    let calcFitness = c.o.calcFitness
     if (!isfun(calcFitness)) {
         calcFitness = async (_s, from) => {
             iExecute++
@@ -99,9 +81,9 @@ async function omlSA(dps, funFit, opt = {}) {
     }
 
     //初始solution: 可由caller傳入(LocalSearch模式), 否則隨機產生(主演算法模式)
-    let initSolution = get(opt, 'initSolution')
+    let initSolution = c.o.initSolution
     let s
-    if (initSolution && isearr(initSolution.ps) && isnum(initSolution.fitness)) {
+    if (initSolution) {
         s = cloneDeep(initSolution)
     }
     else {

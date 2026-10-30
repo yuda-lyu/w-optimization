@@ -1,9 +1,7 @@
-import get from 'lodash-es/get.js'
 import isNumber from 'lodash-es/isNumber.js'
-import isnum from 'wsemi/src/isnum.mjs'
-import isfun from 'wsemi/src/isfun.mjs'
 import ispm from 'wsemi/src/ispm.mjs'
-import cdbl from 'wsemi/src/cdbl.mjs'
+import { kFun, kNum, chkParams } from './_checkParam.mjs'
+import { declGoldenSection } from './_optDecl.mjs'
 
 
 /**
@@ -13,13 +11,13 @@ import cdbl from 'wsemi/src/cdbl.mjs'
  *
  * Unit Test: {@link https://github.com/yuda-lyu/w-optimization/blob/master/test/goldenSection.test.js Github}
  * @memberOf w-optimization
- * @param {Function} fun 輸入適應函數，將傳入變數x，需回傳適應函數值，以求解最小值所在起訖範圍為目標
- * @param {Number} xL 輸入初始最小值數字
- * @param {Number} xU 輸入初始最大值數字
- * @param {Object} [opt={}] 輸入設定物件，預設{}
- * @param {Number} [opt.minTolerance=1e-8] 輸入最小收斂門檻值數字，預設1e-8
- * @param {Number} [opt.maxIterations=100] 輸入最大迭代次數整數，預設100
- * @returns {Promise} 回傳Promise，resolve為求解後結果物件，含鍵值x,y，x為求解後變數組，y為最優適應函數值，reject為失敗訊息
+ * @param {Function} fun 輸入適應函數，將傳入變數x，需回傳適應函數值，以求解最小值所在起訖範圍為目標。種類：函數，必給
+ * @param {Number|String} xL 輸入初始最小值數字或數字字串。種類：有效數字，必給，數字字串轉換後使用，'-'、'NP'、''等非數字字串與null、布林、NaN、Infinity皆為無效
+ * @param {Number|String} xU 輸入初始最大值數字或數字字串。種類：有效數字，必給，處置同xL
+ * @param {Object} [opt={}] 輸入設定物件，預設{}。種類：一般物件，undefined或null視為未給，其餘非一般物件為無效；未宣告之鍵忽略；各鍵給了而不符種類即為無效，不改用預設
+ * @param {Number|String} [opt.minTolerance=1e-8] 輸入最小收斂門檻值，預設1e-8。種類：有效數字，正數
+ * @param {Number|String} [opt.maxIterations=100] 輸入最大迭代次數，預設100。種類：有效數字，正整數
+ * @returns {Promise} 回傳Promise，resolve為求解後結果物件，含鍵值x,y，x為求解後變數組，y為最優適應函數值；輸入無效時reject字串，格式為`invalid <名稱>: must be <種類描述>`，不含輸入值
  * @example
  *
  * async function test() {
@@ -42,34 +40,15 @@ import cdbl from 'wsemi/src/cdbl.mjs'
  */
 async function goldenSection(fun, xL, xU, opt = {}) {
 
-    //check fun
-    if (!isfun(fun)) {
-        return Promise.reject('invalid fun')
+    //check, 一般參數與opt先於任何適應函數呼叫檢測, 檢測之值即使用之值(數字字串已轉換)
+    let c = chkParams([[fun, 'fun', kFun], [xL, 'xL', kNum], [xU, 'xU', kNum]], opt, declGoldenSection)
+    if (c.err !== '') {
+        return Promise.reject(c.err)
     }
-
-    //check xL
-    if (!isnum(xL)) {
-        return Promise.reject('xL is not a number')
-    }
-
-    //check xU
-    if (!isnum(xU)) {
-        return Promise.reject('xU is not a number')
-    }
-
-    //minTolerance
-    let minTolerance = get(opt, 'minTolerance')
-    if (!isnum(minTolerance)) {
-        minTolerance = 1e-8
-    }
-    minTolerance = cdbl(minTolerance)
-
-    //maxIterations
-    let maxIterations = get(opt, 'maxIterations')
-    if (!isnum(maxIterations)) {
-        maxIterations = 100
-    }
-    maxIterations = cdbl(maxIterations)
+    xL = c.vs[1]
+    xU = c.vs[2]
+    let minTolerance = c.o.minTolerance
+    let maxIterations = c.o.maxIterations
 
     //countCalc
     let countCalc = 0

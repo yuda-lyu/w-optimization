@@ -11,6 +11,42 @@ A tool for optimization algorithm.
 ## Documentation
 To view documentation or get support, visit [docs](https://yuda-lyu.github.io/w-optimization/global.html).
 
+## Breaking changes
+
+### Input parameters are checked strictly (no silent fallback)
+
+Every public function now checks its input parameters by kind, converts numeric strings once, and uses the converted value. Calls that used to be accepted silently (default substituted, garbage computed) now fail.
+
+* **Failure channel**: functions that return a Promise (`goldenSection`, `goldenSectionLiberate`, `setpBracket`, `nelderMead`, `cobyla`, `limitBFGS`, `sdm`, `omlSA`, `omlTA`, `omlDE`, `omlRGA`, `omlHS`, `omlPSO`, `omlACO`) **reject with a string**; synchronous functions (`binarySearch`, `arrBinarySearch`, `arrBinarySearchClosest`, `_adapterACO`, `_adapterHS`, `_adapterSA`, `_adapterTA` and their `feedback`) **throw an Error**. Message format: `invalid <name>: must be <kind>`, e.g. `invalid xL: must be a valid number`, `invalid params[1]: must be a valid number`, `invalid opt.UseRepeat: must be a boolean`. The message never contains the input value. (`sdm` and the `oml*` functions used to reject with an `Error` object for `dps` problems; they now reject with a string like the others.)
+* **Valid number** (end points, initial values, search target, array elements of `params`, coefficients): a finite number or a decimal numeric string such as `'12'`, `' 1.5 '`, `'-0.5'`, `'1.2e-5'`. A numeric string is converted and only the converted number is used, so `goldenSection(f, '1', '5')` equals `goldenSection(f, 1, 5)` (it used to return `{ x: '1', y: 4 }`). `'-'`, `'NP'`, `''`, `null`, `true`/`false`, `NaN`, `Infinity`, `'Infinity'`, `'0x10'`, BigInt and wrapped objects are invalid and are never treated as 0.
+* **Positive number** (tolerances, steps, radii) and **positive integer** (iteration and population counts): the same as valid number plus the range.
+* **Boolean options** accept only `true`/`false` (`'n'`, `'false'`, `1`, `0` are invalid), **enumerated options** accept only the listed strings (case sensitive), **callbacks** must be functions.
+* `opt` may be omitted (`undefined`/`null`); each key may be `undefined`/`null` (default is used). **A key that is given but invalid is an error and never falls back to the default.**
+
+Calls that change from silent to error:
+
+| Call | Before | Now |
+|---|---|---|
+| `goldenSection(f, 0, Infinity)`, any end point / initial value / target that is not a valid number | resolved a meaningless result (`NaN`/`null`) | rejects `invalid xU: must be a valid number` |
+| `nelderMead(f, ['NP'])`, `cobyla`, `limitBFGS` with a non-number in `params` | ran to the iteration limit and returned `{ x: ['NP'], y: null }` | rejects `invalid params[0]: must be a valid number` |
+| `{ minTolerance: 'abc' }`, `{ maxIterations: 0 }`, `{ Nl: -1 }`, `{ Np: 1.5 }`, `{ delta: 0 }` ... | default used | rejects `invalid opt.<key>: must be a positive number` / `a positive integer` / `a valid number` |
+| `{ UseRepeat: 'n' }`, `{ UseHists: 'false' }`, `{ sorted: 1 }` ... | default used (`'n'` still behaved as `true`) | rejects `invalid opt.<key>: must be a boolean` |
+| `{ ModeOutLimit: 'limit' }`, `{ LocalSearchMethod: ['None'] }`, `{ rgaCrossover: 'xxx' }` ... | default used | rejects `invalid opt.<key>: must be one of ...` |
+| `{ funGetBetter: 5 }`, `{ calcFitness: 'x' }` ... | ignored | rejects `invalid opt.<key>: must be a function` |
+| `opt` that is not a plain object (`'abc'`, `5`, `[]`) | ignored | `invalid opt: must be a plain object` |
+| `{ initSolution: ... }` of the wrong shape | ignored (random start) | rejects `invalid opt.initSolution...` |
+| `omlDE` / `omlHS` / `omlRGA` / `_adapterHS` with a too small `Np` / `Ns` for the chosen operator | error text contained the values | `invalid opt.Np: must be at least the minimum required by opt.deMutation` (and the like), no values |
+| `dps` with `n` as a numeric string | rejected (`n !== values.length`) | accepted, converted; your `dps` is not modified |
+| `arrBinarySearch(arr, x)` / `arrBinarySearchClosest` with a non-array `arr` | returned `null` | throws `invalid arr: must be an array` |
+| `arr` elements `null`, `true`, `NaN`, `Infinity`, objects | silently dropped | throws `invalid arr[i]: ...` |
+| `arr` marker strings (`'-'`, `'NP'`, `''`) | dropped, so `ind` was the index in the filtered array | kept in place and ignored by the search; `ind` is the index in your array |
+| `arrBinarySearch(arr, '3')` | never found (strict `===`) | the target is converted and found |
+| `arrBinarySearchClosest([], x)` / array without numbers | `null` or an object with `null` fields | `null` |
+| `setpBracket(f, x, { dxR: 3 })` | `dxR` was ignored | `dxR` (positive number, or `'speed'`) takes effect |
+| `_adapter*` with an invalid `schema`, `feedback(params, fitness)` with a non-number `fitness` | garbage or `TypeError` | throws `invalid schema...` / `invalid fitness: must be a number or numeric string` |
+
+Other changes: `nelderMead` no longer writes into the array you pass as `params`; `binarySearch` still validates `opt.delta` but does not use it (as before).
+
 ## Installation
 
 ### Using npm(ES6 module):

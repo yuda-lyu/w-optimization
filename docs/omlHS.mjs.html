@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>omlHS.mjs - Documentation</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="w-optimization.html">w-optimization</a><ul class='methods'><li data-type='method'><a href="w-optimization.html#.arrBinarySearch">arrBinarySearch</a></li><li data-type='method'><a href="w-optimization.html#.arrBinarySearchClosest">arrBinarySearchClosest</a></li><li data-type='method'><a href="w-optimization.html#.binarySearch">binarySearch</a></li><li data-type='method'><a href="w-optimization.html#.cobyla">cobyla</a></li><li data-type='method'><a href="w-optimization.html#.goldenSection">goldenSection</a></li><li data-type='method'><a href="w-optimization.html#.goldenSectionLiberate">goldenSectionLiberate</a></li><li data-type='method'><a href="w-optimization.html#.limitBFGS">limitBFGS</a></li><li data-type='method'><a href="w-optimization.html#.nelderMead">nelderMead</a></li><li data-type='method'><a href="w-optimization.html#.omlACO">omlACO</a></li><li data-type='method'><a href="w-optimization.html#.omlDE">omlDE</a></li><li data-type='method'><a href="w-optimization.html#.omlHS">omlHS</a></li><li data-type='method'><a href="w-optimization.html#.omlPSO">omlPSO</a></li><li data-type='method'><a href="w-optimization.html#.omlRGA">omlRGA</a></li><li data-type='method'><a href="w-optimization.html#.omlSA">omlSA</a></li><li data-type='method'><a href="w-optimization.html#.omlTA">omlTA</a></li><li data-type='method'><a href="w-optimization.html#.sdm">sdm</a></li><li data-type='method'><a href="w-optimization.html#.setpBracket">setpBracket</a></li></ul></li></ul><h3>Global</h3><ul><li><a href="global.html#Normal">Normal</a></li><li><a href="global.html#cobylaCore">cobylaCore</a></li></ul>
+    
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">omlHS.mjs</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import size from 'lodash-es/size.js'
+import map from 'lodash-es/map.js'
+import sortBy from 'lodash-es/sortBy.js'
+import cloneDeep from 'lodash-es/cloneDeep.js'
+import isestr from 'wsemi/src/isestr.mjs'
+import isfun from 'wsemi/src/isfun.mjs'
+import ispm from 'wsemi/src/ispm.mjs'
+import randomIntRange from 'wsemi/src/randomIntRange.mjs'
+import { kNum, kPint, kBol, kFun, kEnum, chkParams } from './_checkParam.mjs'
+import { kModeOutLimit, kLocalSearchMethod } from './_optDecl.mjs'
+import { kDps } from './_validateDps.mjs'
+import _defSolution from './_defSolution.mjs'
+import _genSolution from './_genSolution.mjs'
+import _modifyParameter from './_modifyParameter.mjs'
+import _isSameSolution from './_isSameSolution.mjs'
+import _dynamicValue from './_dynamicValue.mjs'
+import _localSearch from './_localSearch.mjs'
+
+
+/**
+ * 和聲搜尋演算法(Harmony Search)
+ *
+ * Unit Test: {@link https://github.com/yuda-lyu/w-optimization/blob/master/test/p4.omlHS.test.mjs Github}
+ * @memberOf w-optimization
+ * @param {Array} dps 輸入設計變數陣列，各元素為{ values: [可用值], n: 可用值數量 }。種類：非空陣列，必給；元素為一般物件，values為非空陣列(元素為可用值，任意值，由funFit自行解讀，不檢)，n為有效數字，正整數(數字字串轉換後使用)且須等於values長度；不改寫呼叫端之陣列
+ * @param {Function} funFit 輸入適應函數，將傳入各設計變數所取之值陣列，需回傳適應函數值，以求解最小值為目標。種類：函數，必給
+ * @param {Object} [opt={}] 輸入設定物件，預設{}。種類：一般物件，undefined或null視為未給，其餘非一般物件為無效；未宣告之鍵忽略；各鍵給了而不符種類即為無效，不改用預設
+ * @param {Number|String} [opt.Ni=10000] 輸入最大Improvisation迭代次數，預設10000。種類：有效數字，正整數
+ * @param {Number|String} [opt.Ns=20] 輸入Harmony Memory Size，預設20。種類：有效數字，正整數，且不得小於opt.hsHMC所需之最小個數('Original'為1，'2M Consideration'與'2MB Consideration'為2，'3M Consideration'與'3MB Consideration'為3，'4M Consideration'與'4MB Consideration'為4)
+ * @param {Number|String} [opt.NContiguous=100] 輸入最大最佳解連續未更新次數，預設100。種類：有效數字，正整數
+ * @param {Number|String} [opt.NRepeat=1] 輸入最大再搜尋次數，預設1。種類：有效數字，正整數
+ * @param {Number|String} [opt.NCore=1000000] 輸入最大核心執行次數，預設1000000。種類：有效數字，正整數
+ * @param {String} [opt.ModeOutLimit='Mapping'] 輸入設計變數指標超過範圍之處理方式，預設'Mapping'。種類：列舉字串，'Mapping'、'Limit'、'Random'
+ * @param {Boolean} [opt.UseRepeat=true] 輸入是否使用再搜尋策略，預設true。種類：布林，只收true或false('true'、'n'、1等皆為無效)
+ * @param {Boolean} [opt.UseImmigration=true] 輸入是否使用移民策略，預設true。種類：布林，說明同opt.UseRepeat
+ * @param {String} [opt.LocalSearchMethod='NelderMead'] 輸入局部搜尋方法，預設'NelderMead'。種類：列舉字串，'None'(不做局部搜尋)、'Neighbor'、'TA'、'SA'、'OneGold'、'Gold'、'NelderMead'
+ * @param {Function} [opt.funGetBetter] 輸入有更優解出現時呼叫之函數，將傳入(最佳解,迭代序號)。種類：函數
+ * @param {Function} [opt.funGenerationBefore] 輸入每代開頭之自適應接口，將傳入{ params }，可回傳{ params: { 覆寫之鍵 } }以覆寫本代超參數(回傳值不檢測)。種類：函數
+ * @param {Function} [opt.funGenerationAfter] 輸入每代結束後之自適應回饋接口，將傳入{ params, childrenBestFitness }，不需回傳。種類：函數
+ * @param {Number|String} [opt.hsHMCRStart=0.9] 輸入初始HMCR(Harmony Memory Consideration Rate)，預設0.9。種類：有效數字
+ * @param {Number|String} [opt.hsHMCREnd=0.9] 輸入最終HMCR，預設0.9。種類：有效數字
+ * @param {Number|String} [opt.hsHMCRDynamic=0] 輸入動態HMCR，預設0。種類：有效數字
+ * @param {Number|String} [opt.hsPARStart=0.5] 輸入初始PAR(Pitch Adjustment Rate)，預設0.5。種類：有效數字
+ * @param {Number|String} [opt.hsPAREnd=0.5] 輸入最終PAR，預設0.5。種類：有效數字
+ * @param {Number|String} [opt.hsPARDynamic=0] 輸入動態PAR，預設0。種類：有效數字
+ * @param {String} [opt.hsHMC='Original'] 輸入Harmony Memory Consideration運算子，預設'Original'。種類：列舉字串，'Original'、'2M Consideration'、'2MB Consideration'、'3M Consideration'、'3MB Consideration'、'4M Consideration'、'4MB Consideration'
+ * @param {String} [opt.hsPA='Linear0.1'] 輸入Pitch Adjustment運算子，預設'Linear0.1'。種類：列舉字串，'Constant1'、'Constant2'、'Constant3'、'Linear0.1'、'Linear0.2'、'Linear0.3'、'Exponent0.1'、'Exponent0.2'、'Exponent0.3'、'Global Space'、'Available Space'、'Modified Global Best'
+ * @returns {Promise} 回傳Promise，resolve為結果物件，含鍵值bestSolution,hists,stopMode,stopNi,stopExecutions；輸入無效時reject字串，格式為`invalid &lt;名稱>: must be &lt;種類描述>`，不含輸入值
+ */
+async function omlHS(dps, funFit, opt = {}) {
+    //Harmony Search, 和聲搜尋演算法
+
+    //check, 一般參數與opt先於任何適應函數呼叫檢測, 檢測之值即使用之值
+    let c = chkParams([[dps, 'dps', kDps], [funFit, 'funFit', kFun]], opt, {
+        Ni: [kPint, 10000], //最大Improvisation迭代次數
+        Ns: [kPint, 20], //Harmony Memory Size
+        NContiguous: [kPint, 100], //最大最佳解連續未更新次數
+        NRepeat: [kPint, 1], //最大再搜尋次數
+        NCore: [kPint, 1000000], //最大核心執行次數
+        ModeOutLimit: [kModeOutLimit, 'Mapping'], //設計變數指標超過範圍之處理方式
+        UseRepeat: [kBol, true], //是否使用再搜尋策略
+        UseImmigration: [kBol, true], //是否使用移民策略
+        LocalSearchMethod: [kLocalSearchMethod, 'NelderMead'], //局部搜尋方法 ('None' = 不做局部搜尋)
+        funGetBetter: [kFun, undefined], //當有更優解出現時呼叫函數
+        funGenerationBefore: [kFun, undefined], //每代開頭之自適應接口(可覆寫本代要用的超參數)
+        funGenerationAfter: [kFun, undefined], //每代結束後之自適應回饋接口
+        hsHMCRStart: [kNum, 0.9], //初始HMCR (Harmony Memory Consideration Rate)
+        hsHMCREnd: [kNum, 0.9], //最終HMCR
+        hsHMCRDynamic: [kNum, 0], //動態HMCR
+        hsPARStart: [kNum, 0.5], //初始PAR (Pitch Adjustment Rate)
+        hsPAREnd: [kNum, 0.5], //最終PAR
+        hsPARDynamic: [kNum, 0], //動態PAR
+        hsHMC: [kEnum([ //Harmony Memory Consideration運算子
+            'Original',
+            '2M Consideration',
+            '2MB Consideration',
+            '3M Consideration',
+            '3MB Consideration',
+            '4M Consideration',
+            '4MB Consideration',
+        ]), 'Original'],
+        hsPA: [kEnum([ //Pitch Adjustment運算子
+            'Constant1',
+            'Constant2',
+            'Constant3',
+            'Linear0.1',
+            'Linear0.2',
+            'Linear0.3',
+            'Exponent0.1',
+            'Exponent0.2',
+            'Exponent0.3',
+            'Global Space',
+            'Available Space',
+            'Modified Global Best',
+        ]), 'Linear0.1'],
+    })
+    if (c.err !== '') {
+        return Promise.reject(c.err)
+    }
+    dps = c.vs[0]
+    let {
+        Ni, Ns, NContiguous, NRepeat, NCore, ModeOutLimit, UseRepeat, UseImmigration, LocalSearchMethod,
+        funGetBetter, funGenerationBefore, funGenerationAfter,
+        hsHMCRStart, hsHMCREnd, hsHMCRDynamic,
+        hsPARStart, hsPAREnd, hsPARDynamic,
+        hsHMC, hsPA,
+    } = c.o
+
+    //Nd, 設計變數總數
+    let Nd = size(dps)
+
+    //funGenerationBefore, 每代開頭之自適應接口(可覆寫本代要用的超參數)
+    //收 { params }, 可回傳 { params: { ... 覆寫的 keys } } 或 undefined
+    //params 預設為 _dynamicValue 算出來的 hsHMCR/hsPAR 加上 hsHMC / hsPA / ModeOutLimit / LocalSearchMethod
+
+    //funGenerationAfter, 每代結束後之自適應回饋接口
+    //收 { params, childrenBestFitness }, 不需回傳
+    //  params:              本代實際使用之超參數(已含 funGenerationBefore 之覆寫)
+    //  childrenBestFitness: 本代所有 strategy(Immigration + LS, 每 Ns 代才跑)跑完後 memory[0].fitness
+    //                       對齊 .bas history(i) 語意, 反映本代 params 全部影響(含 LS, 只在 strategy 代生效)
+
+    //Ns最低需求檢查, 確保HMC內取memory index不會undefined
+    //2M/2MB需2個不重複, 3M/3MB需3個, 4M/4MB需4個
+    let hmcNsMin = {
+        'Original': 1,
+        '2M Consideration': 2,
+        '2MB Consideration': 2,
+        '3M Consideration': 3,
+        '3MB Consideration': 3,
+        '4M Consideration': 4,
+        '4MB Consideration': 4,
+    }
+    if (Ns &lt; hmcNsMin[hsHMC]) {
+        return Promise.reject('invalid opt.Ns: must be at least the minimum required by opt.hsHMC')
+    }
+
+    let iRepeat = 0 //初始化再搜尋次數
+    let iContinue = 0 //初始化現在連續未更新次數
+    let iExecute = 0 //初始化核心分析次數
+
+    //calcFitness
+    let calcFitness = async (_s, from) => {
+        iExecute++
+        let _ps = map(_s.ps, 'value')
+        let f = funFit(_ps)
+        if (ispm(f)) {
+            f = await f
+        }
+        let s = {
+            ps: _s.ps,
+            fitness: f,
+        }
+        return s
+    }
+
+    let bestSolution = null //最佳解
+    let hists = [] //求解最佳解之紀錄清單
+    let stopMode = '' //觸發停止之機制
+    let stopNi = 0 //停止時迭代次數
+    let stopExecutions = 0 //停止時核心分析次數
+
+    let memory = []
+
+    //初始化harmony memory
+    if (true) {
+
+        for (let k = 0; k &lt; Ns; k++) {
+
+            //_genSolution
+            let _s = _genSolution(dps)
+
+            //calcFitness
+            let s = await calcFitness(_s, 'init')
+
+            //push
+            memory.push(s)
+
+        }
+
+        //sortBy
+        memory = sortBy(memory, 'fitness')
+
+        //push
+        hists.push(cloneDeep(memory[0]))
+
+        //bestSolution
+        bestSolution = cloneDeep(memory[0])
+
+    }
+
+    //pickMemoryIdxDiff, 從memory抽一個不在excludes內之idx
+    let pickMemoryIdxDiff = (excludes = []) => {
+        let excSet = new Set(excludes)
+        let ia = randomIntRange(0, Ns - 1)
+        let safety = 0
+        while (excSet.has(ia)) {
+            ia = randomIntRange(0, Ns - 1)
+            safety++
+            if (safety > Ns * 10) {
+                //極端fallback, hmcNsMin已確保有足夠候選
+                break
+            }
+        }
+        return ia
+    }
+
+    //runHMCImpro, 即興一個新和聲, 對應AE_HS_HMC
+    let runHMCImpro = (hsHMCR, hsPAR) => {
+
+        let s = _defSolution(dps)
+
+        for (let i = 0; i &lt; Nd; i++) {
+
+            let j = 0
+            let n = dps[i].n
+
+            //HMCR
+            if (Math.random() &lt; hsHMCR) {
+
+                //從memory取ind, 依HMC模式
+                if (hsHMC === 'Original') {
+                    //隨機抽一個memory個體, 直接複製ind
+                    let k = randomIntRange(0, Ns - 1)
+                    j = memory[k].ps[i].ind
+                }
+                else if (hsHMC === '2M Consideration') {
+                    let ia = randomIntRange(0, Ns - 1)
+                    let ib = pickMemoryIdxDiff([ia])
+                    let indexa = memory[ia].ps[i].ind
+                    let indexb = memory[ib].ps[i].ind
+                    j = Math.round(0.6 * indexa + 0.6 * indexb)
+                }
+                else if (hsHMC === '2MB Consideration') {
+                    let ia = 0 //最佳(memory已sortBy)
+                    let ib = pickMemoryIdxDiff([ia])
+                    let indexa = memory[ia].ps[i].ind
+                    let indexb = memory[ib].ps[i].ind
+                    j = Math.round(0.6 * indexa + 0.6 * indexb)
+                }
+                else if (hsHMC === '3M Consideration') {
+                    let ia = randomIntRange(0, Ns - 1)
+                    let ib = pickMemoryIdxDiff([ia])
+                    let ic = pickMemoryIdxDiff([ia, ib])
+                    let indexa = memory[ia].ps[i].ind
+                    let indexb = memory[ib].ps[i].ind
+                    let indexc = memory[ic].ps[i].ind
+                    //修正VB原碼疑似typo: 去除冗餘的 +rRatiod*indexd (預設0皆未指定)
+                    j = Math.round(-0.4 * indexa + 0.5 * indexb + 0.7 * indexc)
+                }
+                else if (hsHMC === '3MB Consideration') {
+                    let ia = 0
+                    let ib = pickMemoryIdxDiff([ia])
+                    let ic = pickMemoryIdxDiff([ia, ib])
+                    let indexa = memory[ia].ps[i].ind
+                    let indexb = memory[ib].ps[i].ind
+                    let indexc = memory[ic].ps[i].ind
+                    j = Math.round(-0.4 * indexa + 0.5 * indexb + 0.7 * indexc)
+                }
+                else if (hsHMC === '4M Consideration') {
+                    let ia = randomIntRange(0, Ns - 1)
+                    let ib = pickMemoryIdxDiff([ia])
+                    let ic = pickMemoryIdxDiff([ia, ib])
+                    let id = pickMemoryIdxDiff([ia, ib, ic])
+                    let indexa = memory[ia].ps[i].ind
+                    let indexb = memory[ib].ps[i].ind
+                    let indexc = memory[ic].ps[i].ind
+                    let indexd = memory[id].ps[i].ind
+                    j = Math.round(0.2 * indexa - 0.6 * indexb + 0.5 * indexc + 0.7 * indexd)
+                }
+                else if (hsHMC === '4MB Consideration') {
+                    let ia = 0
+                    let ib = pickMemoryIdxDiff([ia])
+                    let ic = pickMemoryIdxDiff([ia, ib])
+                    let id = pickMemoryIdxDiff([ia, ib, ic])
+                    let indexa = memory[ia].ps[i].ind
+                    let indexb = memory[ib].ps[i].ind
+                    let indexc = memory[ic].ps[i].ind
+                    let indexd = memory[id].ps[i].ind
+                    j = Math.round(0.2 * indexa - 0.6 * indexb + 0.5 * indexc + 0.7 * indexd)
+                }
+                else {
+                    throw new Error(`invalid hsHMC[${hsHMC}]`)
+                }
+
+                //PAR, Pitch Adjustment
+                if (Math.random() &lt; hsPAR) {
+
+                    if (hsPA === 'Constant1') {
+                        let im = 1
+                        j = (Math.random() &lt; 0.5) ? j + im : j - im
+                    }
+                    else if (hsPA === 'Constant2') {
+                        let im = randomIntRange(1, 2)
+                        j = (Math.random() &lt; 0.5) ? j + im : j - im
+                    }
+                    else if (hsPA === 'Constant3') {
+                        let im = randomIntRange(1, 3)
+                        j = (Math.random() &lt; 0.5) ? j + im : j - im
+                    }
+                    else if (hsPA === 'Linear0.1') {
+                        let im = randomIntRange(1, Math.round(0.1 * n) + 1)
+                        j = (Math.random() &lt; 0.5) ? j + im : j - im
+                    }
+                    else if (hsPA === 'Linear0.2') {
+                        let im = randomIntRange(1, Math.round(0.2 * n) + 1)
+                        j = (Math.random() &lt; 0.5) ? j + im : j - im
+                    }
+                    else if (hsPA === 'Linear0.3') {
+                        let im = randomIntRange(1, Math.round(0.3 * n) + 1)
+                        j = (Math.random() &lt; 0.5) ? j + im : j - im
+                    }
+                    else if (hsPA === 'Exponent0.1') {
+                        let im = Math.floor(Math.pow(0.1 * n + 1, Math.random()))
+                        j = (Math.random() &lt; 0.5) ? j + im : j - im
+                    }
+                    else if (hsPA === 'Exponent0.2') {
+                        let im = Math.floor(Math.pow(0.2 * n + 1, Math.random()))
+                        j = (Math.random() &lt; 0.5) ? j + im : j - im
+                    }
+                    else if (hsPA === 'Exponent0.3') {
+                        let im = Math.floor(Math.pow(0.3 * n + 1, Math.random()))
+                        j = (Math.random() &lt; 0.5) ? j + im : j - im
+                    }
+                    else if (hsPA === 'Global Space') {
+                        j = randomIntRange(0, n - 1)
+                    }
+                    else if (hsPA === 'Available Space') {
+                        //從memory該變數ind的[min, max]範圍內隨機
+                        let iMax = memory[0].ps[i].ind
+                        let iMin = memory[0].ps[i].ind
+                        for (let k = 1; k &lt; Ns; k++) {
+                            if (iMax &lt; memory[k].ps[i].ind) iMax = memory[k].ps[i].ind
+                            if (iMin > memory[k].ps[i].ind) iMin = memory[k].ps[i].ind
+                        }
+                        //VB原碼假設j∈[iMin,iMax], 但HMC加權計算後j可能跑出範圍, 此處加swap防呆
+                        if (Math.random() &lt; 0.5) {
+                            let lo = Math.min(j, iMax)
+                            let hi = Math.max(j, iMax)
+                            j = randomIntRange(lo, hi)
+                        }
+                        else {
+                            let lo = Math.min(j, iMin)
+                            let hi = Math.max(j, iMin)
+                            j = randomIntRange(lo, hi)
+                        }
+                    }
+                    else if (hsPA === 'Modified Global Best') {
+                        //取目前最佳的該變數ind
+                        j = memory[0].ps[i].ind
+                    }
+                    else {
+                        throw new Error(`invalid hsPA[${hsPA}]`)
+                    }
+                }
+            }
+            else {
+                //1-HMCR: 完全隨機
+                j = randomIntRange(0, n - 1)
+            }
+
+            //Limit
+            j = _modifyParameter(j, n - 1, ModeOutLimit)
+
+            //update
+            s.ps[i].ind = j
+            s.ps[i].value = dps[i].values[j]
+        }
+
+        return s
+    }
+
+    //搜尋
+    let i = -1
+    while (true) {
+        i++
+
+        //params: 本代要用的超參數, 預設由 _dynamicValue + opt 提供, 外部可透過 funGenerationBefore 覆寫
+        let params = {
+            hsHMCR: _dynamicValue(hsHMCRStart, hsHMCREnd, hsHMCRDynamic, iContinue, NContiguous),
+            hsPAR: _dynamicValue(hsPARStart, hsPAREnd, hsPARDynamic, iContinue, NContiguous),
+            hsHMC,
+            hsPA,
+            ModeOutLimit,
+            LocalSearchMethod,
+        }
+
+        //funGenerationBefore: 自適應接口, 讓外部覆寫本代要用的超參數
+        if (isfun(funGenerationBefore)) {
+            let r = await funGenerationBefore({
+                params: cloneDeep(params),
+            })
+            if (r &amp;&amp; r.params) {
+                params = { ...params, ...r.params }
+            }
+        }
+
+        //把覆寫後的 params 賦值回 closure 變數(讓 runHMCImpro / strategyLocalSearch 自動讀)
+        hsHMC = params.hsHMC
+        hsPA = params.hsPA
+        ModeOutLimit = params.ModeOutLimit
+        LocalSearchMethod = params.LocalSearchMethod
+        let hsHMCR = params.hsHMCR
+        let hsPAR = params.hsPAR
+
+        //Improvisation, 產生1個新和聲
+        let _s = runHMCImpro(hsHMCR, hsPAR)
+
+        //calcFitness
+        let s = await calcFitness(_s, 'improvisation')
+
+        //Replace: 若新和聲比memory最差好, 替換memory[Ns-1]
+        if (memory[Ns - 1].fitness > s.fitness) {
+            memory[Ns - 1] = s
+            memory = sortBy(memory, 'fitness')
+        }
+
+        //strategyImmigration, 移民策略, 對應AE_HS_Strategy_Immigration
+        //(對齊 .bas 順序: 排在 hists / bestSolution 之前, 改善立即反映)
+        let strategyImmigration = async () => {
+
+            //由後往前處理, 不變更當前最佳解memory[0], 故k是從Ns-1至1
+            for (let k = Ns - 1; k >= 1; k--) {
+                if (_isSameSolution(memory[k - 1], memory[k])) {
+
+                    //_genSolution
+                    let _s = _genSolution(dps)
+
+                    //calcFitness
+                    let s = await calcFitness(_s, 'strategyImmigration')
+
+                    //update
+                    memory[k] = s
+
+                }
+            }
+
+            //sortBy
+            memory = sortBy(memory, 'fitness')
+
+        }
+
+        //strategyLocalSearch, 局部搜尋策略 (對齊 .bas 順序: 排在 hists / bestSolution 之前, 改善立即反映)
+        let strategyLocalSearch = async () => {
+
+            //依LocalSearchMethod分派局部搜尋
+            let s = await _localSearch(LocalSearchMethod, memory[0], dps, funFit, calcFitness, ModeOutLimit)
+
+            //check
+            if (s.fitness >= memory[0].fitness) {
+                return
+            }
+
+            //update
+            memory[0] = s
+
+        }
+
+        //Strategy: 每Ns次迭代跑一次(對應VB之 If i Mod Ns = 0)
+        if ((i + 1) % Ns === 0) {
+            if (UseImmigration) {
+                await strategyImmigration()
+            }
+            await strategyLocalSearch()
+        }
+
+        //push (對齊 .bas: hists 記錄 strategy 後之 final memory[0])
+        hists.push(cloneDeep(memory[0]))
+
+        //bestSolution (對齊 .bas: bestSolution / iContinue 反映 strategy 後之 final memory[0])
+        if (bestSolution.fitness > memory[0].fitness) {
+
+            //update
+            bestSolution = cloneDeep(memory[0])
+
+            //funGetBetter
+            if (isfun(funGetBetter)) {
+                funGetBetter(cloneDeep(bestSolution), i)
+            }
+
+            iContinue = 0
+        }
+        else {
+            iContinue += 1
+        }
+
+        //strategyRepeat, 再搜尋策略 (對齊 .bas 順序: 排在 bestSolution 更新後, 改善留到下代 evolution 才反映)
+        let strategyRepeat = async () => {
+
+            //由前往後處理, 不變更當前最佳解memory[0], 故k是從1至Ns-1
+            for (let k = 1; k &lt;= Ns - 1; k++) {
+
+                //_genSolution
+                let _s = _genSolution(dps)
+
+                //calcFitness
+                let s = await calcFitness(_s, 'strategyRepeat')
+
+                //update
+                memory[k] = s
+
+            }
+
+            //sortBy
+            memory = sortBy(memory, 'fitness')
+
+            //重產非最佳解未必會有更優最佳解, 仍須重置iContinue避免再搜尋策略弱化
+            iContinue = 0
+
+            //次數增加
+            iRepeat += 1
+
+        }
+        if (UseRepeat &amp;&amp; iContinue >= NContiguous &amp;&amp; iRepeat &lt; NRepeat) {
+            await strategyRepeat()
+        }
+
+        //stopMode
+        if (i >= Ni) {
+            stopMode = `stop by Ni[${Ni}]`
+        }
+        else if (iContinue >= NContiguous) {
+            stopMode = `stop by iContinue[${iContinue}] >= NContiguous[${NContiguous}]`
+        }
+        else if (iExecute >= NCore) {
+            stopMode = `stop by iExecute[${iExecute}] >= NCore[${NCore}]`
+        }
+
+        //funGenerationAfter, 自適應回饋接口
+        //放在 stop 判斷之前, 確保末代 suggest() 也有配對 feedback()
+        if (isfun(funGenerationAfter)) {
+            await funGenerationAfter({
+                params: cloneDeep(params),
+                childrenBestFitness: memory[0].fitness,
+            })
+        }
+
+        //stop
+        if (isestr(stopMode)) {
+            stopNi = i
+            stopExecutions = iExecute
+            break
+        }
+
+    }
+
+    //r
+    let r = {
+        bestSolution,
+        hists,
+        stopMode,
+        stopNi,
+        stopIteration: stopNi, //跨演算法通用別名 (omlDE/RGA: stopNg / omlHS: stopNi / omlPSO/ACO: stopNl)
+        stopExecutions,
+    }
+
+    return r
+}
+
+
+export default omlHS
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.5</a> on Sat Oct 31 2026 02:04:29 GMT+0800 (台北標準時間) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+
+
+</body>
+</html>

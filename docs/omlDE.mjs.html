@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>omlDE.mjs - Documentation</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="w-optimization.html">w-optimization</a><ul class='methods'><li data-type='method'><a href="w-optimization.html#.arrBinarySearch">arrBinarySearch</a></li><li data-type='method'><a href="w-optimization.html#.arrBinarySearchClosest">arrBinarySearchClosest</a></li><li data-type='method'><a href="w-optimization.html#.binarySearch">binarySearch</a></li><li data-type='method'><a href="w-optimization.html#.cobyla">cobyla</a></li><li data-type='method'><a href="w-optimization.html#.goldenSection">goldenSection</a></li><li data-type='method'><a href="w-optimization.html#.goldenSectionLiberate">goldenSectionLiberate</a></li><li data-type='method'><a href="w-optimization.html#.limitBFGS">limitBFGS</a></li><li data-type='method'><a href="w-optimization.html#.nelderMead">nelderMead</a></li><li data-type='method'><a href="w-optimization.html#.omlACO">omlACO</a></li><li data-type='method'><a href="w-optimization.html#.omlDE">omlDE</a></li><li data-type='method'><a href="w-optimization.html#.omlHS">omlHS</a></li><li data-type='method'><a href="w-optimization.html#.omlPSO">omlPSO</a></li><li data-type='method'><a href="w-optimization.html#.omlRGA">omlRGA</a></li><li data-type='method'><a href="w-optimization.html#.omlSA">omlSA</a></li><li data-type='method'><a href="w-optimization.html#.omlTA">omlTA</a></li><li data-type='method'><a href="w-optimization.html#.sdm">sdm</a></li><li data-type='method'><a href="w-optimization.html#.setpBracket">setpBracket</a></li></ul></li></ul><h3>Global</h3><ul><li><a href="global.html#Normal">Normal</a></li><li><a href="global.html#cobylaCore">cobylaCore</a></li></ul>
+    
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">omlDE.mjs</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import get from 'lodash-es/get.js'
+import size from 'lodash-es/size.js'
+import map from 'lodash-es/map.js'
+import sortBy from 'lodash-es/sortBy.js'
+import cloneDeep from 'lodash-es/cloneDeep.js'
+import isestr from 'wsemi/src/isestr.mjs'
+import isfun from 'wsemi/src/isfun.mjs'
+import ispm from 'wsemi/src/ispm.mjs'
+import randomIntsNdpRange from 'wsemi/src/randomIntsNdpRange.mjs'
+import randomIntRange from 'wsemi/src/randomIntRange.mjs'
+import { kNum, kPint, kBol, kFun, kEnum, chkParams } from './_checkParam.mjs'
+import { kModeOutLimit, kLocalSearchMethod } from './_optDecl.mjs'
+import { kDps } from './_validateDps.mjs'
+import _defSolution from './_defSolution.mjs'
+import _genSolution from './_genSolution.mjs'
+import _modifyParameter from './_modifyParameter.mjs'
+import _isSameSolution from './_isSameSolution.mjs'
+import _dynamicValue from './_dynamicValue.mjs'
+import _localSearch from './_localSearch.mjs'
+
+
+/**
+ * 差分演化法(Differential Evolution)
+ *
+ * Unit Test: {@link https://github.com/yuda-lyu/w-optimization/blob/master/test/p4.omlDE.test.mjs Github}
+ * @memberOf w-optimization
+ * @param {Array} dps 輸入設計變數陣列，各元素為{ values: [可用值], n: 可用值數量 }。種類：非空陣列，必給；元素為一般物件，values為非空陣列(元素為可用值，任意值，由funFit自行解讀，不檢)，n為有效數字，正整數(數字字串轉換後使用)且須等於values長度；不改寫呼叫端之陣列
+ * @param {Function} funFit 輸入適應函數，將傳入各設計變數所取之值陣列，需回傳適應函數值，以求解最小值為目標。種類：函數，必給
+ * @param {Object} [opt={}] 輸入設定物件，預設{}。種類：一般物件，undefined或null視為未給，其餘非一般物件為無效；未宣告之鍵忽略；各鍵給了而不符種類即為無效，不改用預設
+ * @param {Number|String} [opt.Ng=10000] 輸入總世代數，預設10000。種類：有效數字，正整數
+ * @param {Number|String} [opt.Np=40] 輸入族群個體數，預設40。種類：有效數字，正整數，且不得小於opt.deMutation所需之最小個體數('1R2RR'為3，'1B2RR'與'1R2BR'為2，'1R4RRRR'為5，'1B4RRRR'、'1R4BRRR'與'1S4BSRR'為4)
+ * @param {Number|String} [opt.NContiguous=100] 輸入最大最佳解連續未更新次數，預設100。種類：有效數字，正整數
+ * @param {Number|String} [opt.NRepeat=1] 輸入最大再搜尋次數，預設1。種類：有效數字，正整數
+ * @param {Number|String} [opt.NCore=1000000] 輸入最大核心執行次數，預設1000000。種類：有效數字，正整數
+ * @param {String} [opt.ModeOutLimit='Mapping'] 輸入設計變數指標超過範圍之處理方式，預設'Mapping'。種類：列舉字串，'Mapping'、'Limit'、'Random'
+ * @param {Boolean} [opt.UseRepeat=true] 輸入是否使用再搜尋策略，預設true。種類：布林，只收true或false('true'、'n'、1等皆為無效)
+ * @param {Boolean} [opt.UseImmigration=true] 輸入是否使用移民策略，預設true。種類：布林，說明同opt.UseRepeat
+ * @param {String} [opt.LocalSearchMethod='NelderMead'] 輸入局部搜尋方法，預設'NelderMead'。種類：列舉字串，'None'(不做局部搜尋)、'Neighbor'、'TA'、'SA'、'OneGold'、'Gold'、'NelderMead'
+ * @param {Function} [opt.funGetBetter] 輸入有更優解出現時呼叫之函數，將傳入(最佳解,世代序號)。種類：函數
+ * @param {Function} [opt.funGenerationBefore] 輸入每代開頭之自適應接口，將傳入{ params }，可回傳{ params: { 覆寫之鍵 } }以覆寫本代超參數(回傳值不檢測)。種類：函數
+ * @param {Function} [opt.funGenerationAfter] 輸入每代結束後之自適應回饋接口，將傳入{ params, childrenBestFitness }，不需回傳。種類：函數
+ * @param {Number|String} [opt.deCrossoverFactorStart=0.6] 輸入初始交配因子，預設0.6。種類：有效數字
+ * @param {Number|String} [opt.deCrossoverFactorEnd=0.6] 輸入最終交配因子，預設0.6。種類：有效數字
+ * @param {Number|String} [opt.deCrossoverFactorDynamic=0] 輸入動態交配因子，預設0。種類：有效數字
+ * @param {Number|String} [opt.deFStart=0] 輸入初始縮放因子F，預設0。種類：有效數字
+ * @param {Number|String} [opt.deFEnd=1] 輸入最終縮放因子F，預設1。種類：有效數字
+ * @param {Number|String} [opt.deFDynamic=1] 輸入動態縮放因子F，預設1。種類：有效數字
+ * @param {Number|String} [opt.deLandaStart=0] 輸入初始縮放因子Landa，預設0。種類：有效數字
+ * @param {Number|String} [opt.deLandaEnd=0] 輸入最終縮放因子Landa，預設0。種類：有效數字
+ * @param {Number|String} [opt.deLandaDynamic=0] 輸入動態縮放因子Landa，預設0。種類：有效數字
+ * @param {String} [opt.deMutation='1B2RR'] 輸入突變運算子，預設'1B2RR'。種類：列舉字串，'1R2RR'、'1B2RR'、'1R2BR'、'1R4RRRR'、'1B4RRRR'、'1R4BRRR'、'1S4BSRR'
+ * @returns {Promise} 回傳Promise，resolve為結果物件，含鍵值bestSolution,hists,stopMode,stopNg,stopExecutions；輸入無效時reject字串，格式為`invalid &lt;名稱>: must be &lt;種類描述>`，不含輸入值
+ */
+async function omlDE(dps, funFit, opt = {}) {
+    //Differential Evolution, 差分演化法
+
+    //check, 一般參數與opt先於任何適應函數呼叫檢測, 檢測之值即使用之值
+    let c = chkParams([[dps, 'dps', kDps], [funFit, 'funFit', kFun]], opt, {
+        Ng: [kPint, 10000], //總世代數
+        Np: [kPint, 40], //族群個體數
+        NContiguous: [kPint, 100], //最大最佳解連續未更新次數
+        NRepeat: [kPint, 1], //最大再搜尋次數
+        NCore: [kPint, 1000000], //最大核心執行次數
+        ModeOutLimit: [kModeOutLimit, 'Mapping'], //設計變數指標超過範圍之處理方式
+        UseRepeat: [kBol, true], //是否使用再搜尋策略
+        UseImmigration: [kBol, true], //是否使用移民策略
+        LocalSearchMethod: [kLocalSearchMethod, 'NelderMead'], //局部搜尋方法 ('None' = 不做局部搜尋)
+        funGetBetter: [kFun, undefined], //當有更優解出現時呼叫函數
+        funGenerationBefore: [kFun, undefined], //每代開頭之自適應接口(可覆寫本代要用的超參數)
+        funGenerationAfter: [kFun, undefined], //每代結束後之自適應回饋接口
+        deCrossoverFactorStart: [kNum, 0.6], //初始交配因子
+        deCrossoverFactorEnd: [kNum, 0.6], //最終交配因子
+        deCrossoverFactorDynamic: [kNum, 0], //動態交配因子
+        deFStart: [kNum, 0], //初始縮放因子F
+        deFEnd: [kNum, 1], //最終縮放因子F
+        deFDynamic: [kNum, 1], //動態縮放因子F
+        deLandaStart: [kNum, 0], //初始縮放因子Landa
+        deLandaEnd: [kNum, 0], //最終縮放因子Landa
+        deLandaDynamic: [kNum, 0], //動態縮放因子Landa
+        deMutation: [kEnum(['1R2RR', '1B2RR', '1R2BR', '1R4RRRR', '1B4RRRR', '1R4BRRR', '1S4BSRR']), '1B2RR'], //突變運算子
+    })
+    if (c.err !== '') {
+        return Promise.reject(c.err)
+    }
+    dps = c.vs[0]
+    let {
+        Ng, Np, NContiguous, NRepeat, NCore, ModeOutLimit, UseRepeat, UseImmigration, LocalSearchMethod,
+        funGetBetter, funGenerationBefore, funGenerationAfter,
+        deCrossoverFactorStart, deCrossoverFactorEnd, deCrossoverFactorDynamic,
+        deFStart, deFEnd, deFDynamic,
+        deLandaStart, deLandaEnd, deLandaDynamic,
+        deMutation,
+    } = c.o
+
+    //Nd, 設計變數總數
+    let Nd = size(dps)
+
+    //funGenerationBefore, 每代開頭之自適應接口(可覆寫本代要用的超參數)
+    //收 { params }, 可回傳 { params: { ... 覆寫的 keys } } 或 undefined
+    //params 預設為 _dynamicValue 算出來的 deCrossoverFactor / deF / deLanda 加上 deMutation / ModeOutLimit / LocalSearchMethod
+    //外部可基於 params 用 ACO / Bayesian / RL 等任意方法決定本代用什麼參數
+
+    //funGenerationAfter, 每代結束後之自適應回饋接口
+    //收 { params, childrenBestFitness }, 不需回傳
+    //  params:              本代實際使用之超參數(已含 funGenerationBefore 之覆寫)
+    //  childrenBestFitness: 本代所有 strategy(Immigration + LS)跑完後 children[0].fitness
+    //                       對齊 .bas history(i) 語意, 反映本代 params 全部影響(含 LS)
+
+    //Np最低需求檢查, 確保operCrossover內inds取值不會undefined
+    let mutationNpMin = {
+        '1R2RR': 3,
+        '1B2RR': 2,
+        '1R2BR': 2,
+        '1R4RRRR': 5,
+        '1B4RRRR': 4,
+        '1R4BRRR': 4,
+        '1S4BSRR': 4,
+    }
+    if (Np &lt; mutationNpMin[deMutation]) {
+        return Promise.reject('invalid opt.Np: must be at least the minimum required by opt.deMutation')
+    }
+
+    let iRepeat = 0 //初始化再搜尋次數
+    let iContinue = 0 //初始化現在連續世代數
+    let iExecute = 0 //初始化核心分析次數
+
+    //calcFitness
+    let calcFitness = async (_s, from) => {
+        iExecute++
+        let _ps = map(_s.ps, 'value')
+        let f = funFit(_ps)
+        if (ispm(f)) {
+            f = await f
+        }
+        let s = {
+            ps: _s.ps,
+            fitness: f,
+        }
+        return s
+    }
+
+    let bestSolution = null //最佳解
+    let hists = [] //求解最佳解之紀錄清單
+    let stopMode = '' //觸發停止之機制
+    let stopNg = 0 //停止時世代數
+    let stopExecutions = 0 //停止時核心分析次數
+
+    let parents = []
+    let children = []
+
+    //初始化族群
+    if (true) {
+
+        for (let k = 0; k &lt; Np; k++) {
+
+            //_genSolution
+            let _s = _genSolution(dps)
+
+            //calcFitness
+            let s = await calcFitness(_s, 'init')
+
+            //push
+            parents.push(s)
+
+        }
+
+        //sortBy
+        parents = sortBy(parents, 'fitness')
+
+        //push
+        hists.push(cloneDeep(parents[0]))
+
+        //bestSolution
+        bestSolution = cloneDeep(parents[0])
+
+    }
+
+    //operCrossover
+    let operCrossover = (dps, parents, k, opt = {}) => {
+
+        let deMutation = get(opt, 'deMutation', '')
+        let deCrossoverFactor = get(opt, 'deCrossoverFactor', '')
+        let deF = get(opt, 'deF', '')
+        let deLanda = get(opt, 'deLanda', '')
+        let ModeOutLimit = get(opt, 'ModeOutLimit', '')
+
+        let ir1 = null
+        let ir2 = null
+        let ir3 = null
+        let ir4 = null
+        let ir5 = null
+
+        //s
+        let s = _defSolution(dps)
+
+        //inds
+        let inds = randomIntsNdpRange(0, Np - 1, Np)
+
+        if (deMutation === '1R2RR') {
+            ir1 = inds[0]
+            ir2 = inds[1]
+            ir3 = inds[2]
+        }
+        else if (deMutation === '1B2RR') {
+            ir1 = 0
+            ir2 = inds[0]
+            ir3 = inds[1]
+        }
+        else if (deMutation === '1R2BR') {
+            ir1 = inds[0]
+            ir2 = 0
+            ir3 = inds[1]
+        }
+        else if (deMutation === '1R4RRRR') {
+            ir1 = inds[0]
+            ir2 = inds[1]
+            ir3 = inds[2]
+            ir4 = inds[3]
+            ir5 = inds[4]
+        }
+        else if (deMutation === '1B4RRRR') {
+            ir1 = 0
+            ir2 = inds[0]
+            ir3 = inds[1]
+            ir4 = inds[2]
+            ir5 = inds[3]
+        }
+        else if (deMutation === '1R4BRRR') {
+            ir1 = inds[0]
+            ir2 = 0
+            ir3 = inds[1]
+            ir4 = inds[2]
+            ir5 = inds[3]
+        }
+        else if (deMutation === '1S4BSRR') {
+            ir1 = k
+            ir2 = 0
+            ir3 = k
+            ir4 = inds[2]
+            ir5 = inds[3]
+        }
+        else {
+            throw new Error(`invalid deMutation[${deMutation}]`)
+        }
+
+        //cp
+        let cp = '3p'
+        if (size(deMutation) === 7) {
+            cp = '5p'
+        }
+
+        //ind
+        let ind = randomIntRange(0, Nd - 1)
+
+        //各設計變數
+        for (let i = 0; i &lt; Nd; i++) {
+
+            //crossover
+            if (Math.random() &lt; deCrossoverFactor || i === ind) {
+
+                //mutation j
+                let j = null
+                if (cp === '3p') {
+                    j = Math.round(
+                        parents[ir1].ps[i].ind +
+                        deF * (parents[ir2].ps[i].ind - parents[ir3].ps[i].ind)
+                    )
+                }
+                else {
+                    j = Math.round(
+                        parents[ir1].ps[i].ind +
+                        deF * (parents[ir2].ps[i].ind - parents[ir3].ps[i].ind) +
+                        deLanda * (parents[ir4].ps[i].ind - parents[ir5].ps[i].ind)
+                    )
+                }
+
+                //_modifyParameter
+                j = _modifyParameter(j, dps[i].n - 1, ModeOutLimit)
+
+                //update
+                s.ps[i].ind = j
+                s.ps[i].value = dps[i].values[j]
+
+            }
+            else {
+
+                //Parameter
+                s.ps[i].ind = parents[k].ps[i].ind
+                s.ps[i].value = parents[k].ps[i].value
+
+            }
+        }
+
+        return s
+    }
+
+    //搜尋
+    let i = -1
+    while (true) {
+        i++
+
+        //params: 本代要用的超參數, 預設由 _dynamicValue 算出, 外部可透過 funGenerationBefore 覆寫
+        let params = {
+            deCrossoverFactor: _dynamicValue(deCrossoverFactorStart, deCrossoverFactorEnd, deCrossoverFactorDynamic, iContinue, NContiguous),
+            deF: _dynamicValue(deFStart, deFEnd, deFDynamic, iContinue, NContiguous),
+            deLanda: _dynamicValue(deLandaStart, deLandaEnd, deLandaDynamic, iContinue, NContiguous),
+            deMutation,
+            ModeOutLimit,
+            LocalSearchMethod,
+        }
+
+        //funGenerationBefore: 自適應接口, 讓外部覆寫本代要用的超參數
+        if (isfun(funGenerationBefore)) {
+            let r = await funGenerationBefore({
+                params: cloneDeep(params),
+            })
+            if (r &amp;&amp; r.params) {
+                params = { ...params, ...r.params }
+            }
+        }
+
+        for (let k = 0; k &lt; Np; k++) {
+
+            //operCrossover
+            let _s = operCrossover(dps, parents, k, params)
+
+            //calcFitness
+            let s = await calcFitness(_s, 'operCrossover')
+
+
+            //update children[k]
+            if (parents[k].fitness > s.fitness) {
+                children[k] = s
+            }
+            else {
+                children[k] = cloneDeep(parents[k])
+            }
+
+        }
+
+        //sortBy
+        children = sortBy(children, 'fitness')
+
+        //strategyImmigration, 移民策略 (對齊 .bas 順序: 排在 hists / bestSolution 之前, 改善立即反映)
+        let strategyImmigration = async () => {
+
+            //由後往前處理, 不變更當前最佳解children[0], 故k是從Np-1至1, 因僅處理1次故仍有機率出現重複個體
+            //比對ind陣列是否相同(對齊VB AE_Compare), 而非僅比fitness — 後者過鬆會把fitness相同但ind不同之個體誤判
+            for (let k = Np - 1; k >= 1; k--) {
+                if (_isSameSolution(children[k - 1], children[k])) {
+
+                    //_genSolution
+                    let _s = _genSolution(dps)
+
+                    //calcFitness
+                    let s = await calcFitness(_s, 'strategyImmigration')
+
+                    //update
+                    children[k] = s
+
+                }
+
+            }
+
+            //sortBy
+            children = sortBy(children, 'fitness')
+
+        }
+        if (UseImmigration) {
+            await strategyImmigration()
+        }
+
+        //strategyLocalSearch, 局部搜尋策略 (對齊 .bas 順序: 排在 hists / bestSolution 之前, 改善立即反映)
+        let strategyLocalSearch = async () => {
+
+            //依LocalSearchMethod分派局部搜尋(用本代params, 可被funGenerationBefore覆寫)
+            let s = await _localSearch(params.LocalSearchMethod, children[0], dps, funFit, calcFitness, params.ModeOutLimit)
+
+            //check
+            if (s.fitness >= children[0].fitness) {
+                return
+            }
+
+            //update
+            children[0] = s
+
+        }
+        await strategyLocalSearch()
+
+        //push (對齊 .bas: hists 記錄 strategy 後之 final children[0])
+        hists.push(cloneDeep(children[0]))
+
+        //bestSolution (對齊 .bas: bestSolution / iContinue 反映 strategy 後之 final children[0])
+        if (bestSolution.fitness > children[0].fitness) {
+
+            //update
+            bestSolution = cloneDeep(children[0])
+
+            //funGetBetter
+            if (isfun(funGetBetter)) {
+                funGetBetter(cloneDeep(bestSolution), i)
+            }
+
+            iContinue = 0
+        }
+        else {
+            iContinue += 1
+        }
+
+        //strategyRepeat, 再搜尋策略 (對齊 .bas 順序: 排在 bestSolution 更新後, 改善留到下代 evolution 才反映)
+        let strategyRepeat = async() => {
+
+            //由前往後處理, 不變更當前最佳解children[0], 故k是從1至Np-1
+            for (let k = 1; k &lt;= Np - 1; k++) {
+
+                //_genSolution
+                let _s = _genSolution(dps)
+
+                //calcFitness
+                let s = await calcFitness(_s, 'strategyRepeat')
+
+                //update
+                children[k] = s
+
+            }
+
+            //sortBy
+            children = sortBy(children, 'fitness')
+
+            //重產非最佳解未必會有更優最佳解, 仍須重置iContinue避免再搜尋策略弱化
+            iContinue = 0
+
+            //次數增加
+            iRepeat += 1
+
+        }
+        if (UseRepeat &amp;&amp; iContinue >= NContiguous &amp;&amp; iRepeat &lt; NRepeat) {
+            await strategyRepeat()
+        }
+
+        //stopMode
+        if (i >= Ng) {
+            stopMode = `stop by Ng[${Ng}]`
+        }
+        else if (iContinue >= NContiguous) {
+            stopMode = `stop by iContinue[${iContinue}] >= NContiguous[${NContiguous}]`
+        }
+        else if (iExecute >= NCore) {
+            stopMode = `stop by iExecute[${iExecute}] >= NCore[${NCore}]`
+        }
+
+        //funGenerationAfter, 自適應回饋接口(收 ctx 含 params 與 childrenBestFitness)
+        //放在 stop 判斷之前, 確保末代 suggest() 也有配對 feedback()
+        if (isfun(funGenerationAfter)) {
+            await funGenerationAfter({
+                params: cloneDeep(params),
+                childrenBestFitness: children[0].fitness,
+            })
+        }
+
+        //stop
+        if (isestr(stopMode)) {
+            stopNg = i
+            stopExecutions = iExecute
+            break
+        }
+
+        //update parents
+        parents = cloneDeep(children)
+
+    }
+
+    //r
+    let r = {
+        bestSolution,
+        hists,
+        stopMode,
+        stopNg,
+        stopIteration: stopNg, //跨演算法通用別名 (omlDE/RGA: stopNg / omlHS: stopNi / omlPSO/ACO: stopNl)
+        stopExecutions,
+    }
+
+    return r
+}
+
+
+export default omlDE
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.5</a> on Sat Oct 31 2026 02:04:29 GMT+0800 (台北標準時間) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+
+
+</body>
+</html>

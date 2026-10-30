@@ -1,186 +1,123 @@
-import get from 'lodash-es/get.js'
 import size from 'lodash-es/size.js'
 import map from 'lodash-es/map.js'
 import sortBy from 'lodash-es/sortBy.js'
 import cloneDeep from 'lodash-es/cloneDeep.js'
-import isnum from 'wsemi/src/isnum.mjs'
 import isestr from 'wsemi/src/isestr.mjs'
-import ispint from 'wsemi/src/ispint.mjs'
-import isbol from 'wsemi/src/isbol.mjs'
 import isfun from 'wsemi/src/isfun.mjs'
 import ispm from 'wsemi/src/ispm.mjs'
-import cint from 'wsemi/src/cint.mjs'
-import cdbl from 'wsemi/src/cdbl.mjs'
-import arrHas from 'wsemi/src/arrHas.mjs'
 import randomIntRange from 'wsemi/src/randomIntRange.mjs'
+import { kNum, kPint, kBol, kFun, kEnum, chkParams } from './_checkParam.mjs'
+import { kModeOutLimit, kLocalSearchMethod } from './_optDecl.mjs'
+import { kDps } from './_validateDps.mjs'
 import _defSolution from './_defSolution.mjs'
 import _genSolution from './_genSolution.mjs'
 import _modifyParameter from './_modifyParameter.mjs'
 import _isSameSolution from './_isSameSolution.mjs'
 import _dynamicValue from './_dynamicValue.mjs'
 import _localSearch from './_localSearch.mjs'
-import _validateDps from './_validateDps.mjs'
 
 
+/**
+ * 和聲搜尋演算法(Harmony Search)
+ *
+ * Unit Test: {@link https://github.com/yuda-lyu/w-optimization/blob/master/test/p4.omlHS.test.mjs Github}
+ * @memberOf w-optimization
+ * @param {Array} dps 輸入設計變數陣列，各元素為{ values: [可用值], n: 可用值數量 }。種類：非空陣列，必給；元素為一般物件，values為非空陣列(元素為可用值，任意值，由funFit自行解讀，不檢)，n為有效數字，正整數(數字字串轉換後使用)且須等於values長度；不改寫呼叫端之陣列
+ * @param {Function} funFit 輸入適應函數，將傳入各設計變數所取之值陣列，需回傳適應函數值，以求解最小值為目標。種類：函數，必給
+ * @param {Object} [opt={}] 輸入設定物件，預設{}。種類：一般物件，undefined或null視為未給，其餘非一般物件為無效；未宣告之鍵忽略；各鍵給了而不符種類即為無效，不改用預設
+ * @param {Number|String} [opt.Ni=10000] 輸入最大Improvisation迭代次數，預設10000。種類：有效數字，正整數
+ * @param {Number|String} [opt.Ns=20] 輸入Harmony Memory Size，預設20。種類：有效數字，正整數，且不得小於opt.hsHMC所需之最小個數('Original'為1，'2M Consideration'與'2MB Consideration'為2，'3M Consideration'與'3MB Consideration'為3，'4M Consideration'與'4MB Consideration'為4)
+ * @param {Number|String} [opt.NContiguous=100] 輸入最大最佳解連續未更新次數，預設100。種類：有效數字，正整數
+ * @param {Number|String} [opt.NRepeat=1] 輸入最大再搜尋次數，預設1。種類：有效數字，正整數
+ * @param {Number|String} [opt.NCore=1000000] 輸入最大核心執行次數，預設1000000。種類：有效數字，正整數
+ * @param {String} [opt.ModeOutLimit='Mapping'] 輸入設計變數指標超過範圍之處理方式，預設'Mapping'。種類：列舉字串，'Mapping'、'Limit'、'Random'
+ * @param {Boolean} [opt.UseRepeat=true] 輸入是否使用再搜尋策略，預設true。種類：布林，只收true或false('true'、'n'、1等皆為無效)
+ * @param {Boolean} [opt.UseImmigration=true] 輸入是否使用移民策略，預設true。種類：布林，說明同opt.UseRepeat
+ * @param {String} [opt.LocalSearchMethod='NelderMead'] 輸入局部搜尋方法，預設'NelderMead'。種類：列舉字串，'None'(不做局部搜尋)、'Neighbor'、'TA'、'SA'、'OneGold'、'Gold'、'NelderMead'
+ * @param {Function} [opt.funGetBetter] 輸入有更優解出現時呼叫之函數，將傳入(最佳解,迭代序號)。種類：函數
+ * @param {Function} [opt.funGenerationBefore] 輸入每代開頭之自適應接口，將傳入{ params }，可回傳{ params: { 覆寫之鍵 } }以覆寫本代超參數(回傳值不檢測)。種類：函數
+ * @param {Function} [opt.funGenerationAfter] 輸入每代結束後之自適應回饋接口，將傳入{ params, childrenBestFitness }，不需回傳。種類：函數
+ * @param {Number|String} [opt.hsHMCRStart=0.9] 輸入初始HMCR(Harmony Memory Consideration Rate)，預設0.9。種類：有效數字
+ * @param {Number|String} [opt.hsHMCREnd=0.9] 輸入最終HMCR，預設0.9。種類：有效數字
+ * @param {Number|String} [opt.hsHMCRDynamic=0] 輸入動態HMCR，預設0。種類：有效數字
+ * @param {Number|String} [opt.hsPARStart=0.5] 輸入初始PAR(Pitch Adjustment Rate)，預設0.5。種類：有效數字
+ * @param {Number|String} [opt.hsPAREnd=0.5] 輸入最終PAR，預設0.5。種類：有效數字
+ * @param {Number|String} [opt.hsPARDynamic=0] 輸入動態PAR，預設0。種類：有效數字
+ * @param {String} [opt.hsHMC='Original'] 輸入Harmony Memory Consideration運算子，預設'Original'。種類：列舉字串，'Original'、'2M Consideration'、'2MB Consideration'、'3M Consideration'、'3MB Consideration'、'4M Consideration'、'4MB Consideration'
+ * @param {String} [opt.hsPA='Linear0.1'] 輸入Pitch Adjustment運算子，預設'Linear0.1'。種類：列舉字串，'Constant1'、'Constant2'、'Constant3'、'Linear0.1'、'Linear0.2'、'Linear0.3'、'Exponent0.1'、'Exponent0.2'、'Exponent0.3'、'Global Space'、'Available Space'、'Modified Global Best'
+ * @returns {Promise} 回傳Promise，resolve為結果物件，含鍵值bestSolution,hists,stopMode,stopNi,stopExecutions；輸入無效時reject字串，格式為`invalid <名稱>: must be <種類描述>`，不含輸入值
+ */
 async function omlHS(dps, funFit, opt = {}) {
     //Harmony Search, 和聲搜尋演算法
 
-    //_validateDps
-    _validateDps(dps)
-
-    //Ni, 最大Improvisation迭代次數
-    let Ni = get(opt, 'Ni', '')
-    if (!ispint(Ni)) {
-        Ni = 10000
+    //check, 一般參數與opt先於任何適應函數呼叫檢測, 檢測之值即使用之值
+    let c = chkParams([[dps, 'dps', kDps], [funFit, 'funFit', kFun]], opt, {
+        Ni: [kPint, 10000], //最大Improvisation迭代次數
+        Ns: [kPint, 20], //Harmony Memory Size
+        NContiguous: [kPint, 100], //最大最佳解連續未更新次數
+        NRepeat: [kPint, 1], //最大再搜尋次數
+        NCore: [kPint, 1000000], //最大核心執行次數
+        ModeOutLimit: [kModeOutLimit, 'Mapping'], //設計變數指標超過範圍之處理方式
+        UseRepeat: [kBol, true], //是否使用再搜尋策略
+        UseImmigration: [kBol, true], //是否使用移民策略
+        LocalSearchMethod: [kLocalSearchMethod, 'NelderMead'], //局部搜尋方法 ('None' = 不做局部搜尋)
+        funGetBetter: [kFun, undefined], //當有更優解出現時呼叫函數
+        funGenerationBefore: [kFun, undefined], //每代開頭之自適應接口(可覆寫本代要用的超參數)
+        funGenerationAfter: [kFun, undefined], //每代結束後之自適應回饋接口
+        hsHMCRStart: [kNum, 0.9], //初始HMCR (Harmony Memory Consideration Rate)
+        hsHMCREnd: [kNum, 0.9], //最終HMCR
+        hsHMCRDynamic: [kNum, 0], //動態HMCR
+        hsPARStart: [kNum, 0.5], //初始PAR (Pitch Adjustment Rate)
+        hsPAREnd: [kNum, 0.5], //最終PAR
+        hsPARDynamic: [kNum, 0], //動態PAR
+        hsHMC: [kEnum([ //Harmony Memory Consideration運算子
+            'Original',
+            '2M Consideration',
+            '2MB Consideration',
+            '3M Consideration',
+            '3MB Consideration',
+            '4M Consideration',
+            '4MB Consideration',
+        ]), 'Original'],
+        hsPA: [kEnum([ //Pitch Adjustment運算子
+            'Constant1',
+            'Constant2',
+            'Constant3',
+            'Linear0.1',
+            'Linear0.2',
+            'Linear0.3',
+            'Exponent0.1',
+            'Exponent0.2',
+            'Exponent0.3',
+            'Global Space',
+            'Available Space',
+            'Modified Global Best',
+        ]), 'Linear0.1'],
+    })
+    if (c.err !== '') {
+        return Promise.reject(c.err)
     }
-    Ni = cint(Ni)
-
-    //Ns, Harmony Memory Size
-    let Ns = get(opt, 'Ns', '')
-    if (!ispint(Ns)) {
-        Ns = 20
-    }
-    Ns = cint(Ns)
+    dps = c.vs[0]
+    let {
+        Ni, Ns, NContiguous, NRepeat, NCore, ModeOutLimit, UseRepeat, UseImmigration, LocalSearchMethod,
+        funGetBetter, funGenerationBefore, funGenerationAfter,
+        hsHMCRStart, hsHMCREnd, hsHMCRDynamic,
+        hsPARStart, hsPAREnd, hsPARDynamic,
+        hsHMC, hsPA,
+    } = c.o
 
     //Nd, 設計變數總數
     let Nd = size(dps)
 
-    //NContiguous, 最大最佳解連續未更新次數
-    let NContiguous = get(opt, 'NContiguous', '')
-    if (!ispint(NContiguous)) {
-        NContiguous = 100
-    }
-    NContiguous = cint(NContiguous)
-
-    //NRepeat, 最大再搜尋次數
-    let NRepeat = get(opt, 'NRepeat', '')
-    if (!ispint(NRepeat)) {
-        NRepeat = 1
-    }
-    NRepeat = cint(NRepeat)
-
-    //NCore, 最大核心執行次數
-    let NCore = get(opt, 'NCore', '')
-    if (!ispint(NCore)) {
-        NCore = 1000000
-    }
-    NCore = cint(NCore)
-
-    //ModeOutLimit, 設計變數指標超過範圍之處理方式
-    let ModeOutLimit = get(opt, 'ModeOutLimit', '')
-    if (!arrHas(ModeOutLimit, ['Mapping', 'Limit', 'Random'])) {
-        ModeOutLimit = 'Mapping'
-    }
-
-    //UseRepeat, 是否使用再搜尋策略
-    let UseRepeat = get(opt, 'UseRepeat', '')
-    if (!isbol(UseRepeat)) {
-        UseRepeat = true
-    }
-
-    //UseImmigration, 是否使用移民策略
-    let UseImmigration = get(opt, 'UseImmigration', '')
-    if (!isbol(UseImmigration)) {
-        UseImmigration = true
-    }
-
-    //LocalSearchMethod, 局部搜尋方法 ('None' = 不做局部搜尋)
-    let LocalSearchMethod = get(opt, 'LocalSearchMethod', '')
-    if (!arrHas(LocalSearchMethod, ['None', 'Neighbor', 'TA', 'SA', 'OneGold', 'Gold', 'NelderMead'])) {
-        LocalSearchMethod = 'NelderMead'
-    }
-
-    //funGetBetter, 當有更優解出現時呼叫函數
-    let funGetBetter = get(opt, 'funGetBetter')
-
     //funGenerationBefore, 每代開頭之自適應接口(可覆寫本代要用的超參數)
     //收 { params }, 可回傳 { params: { ... 覆寫的 keys } } 或 undefined
     //params 預設為 _dynamicValue 算出來的 hsHMCR/hsPAR 加上 hsHMC / hsPA / ModeOutLimit / LocalSearchMethod
-    let funGenerationBefore = get(opt, 'funGenerationBefore')
 
     //funGenerationAfter, 每代結束後之自適應回饋接口
     //收 { params, childrenBestFitness }, 不需回傳
     //  params:              本代實際使用之超參數(已含 funGenerationBefore 之覆寫)
     //  childrenBestFitness: 本代所有 strategy(Immigration + LS, 每 Ns 代才跑)跑完後 memory[0].fitness
     //                       對齊 .bas history(i) 語意, 反映本代 params 全部影響(含 LS, 只在 strategy 代生效)
-    let funGenerationAfter = get(opt, 'funGenerationAfter')
-
-    //hsHMCRStart, 初始HMCR (Harmony Memory Consideration Rate)
-    let hsHMCRStart = get(opt, 'hsHMCRStart', '')
-    if (!isnum(hsHMCRStart)) {
-        hsHMCRStart = 0.9
-    }
-    hsHMCRStart = cdbl(hsHMCRStart)
-
-    //hsHMCREnd, 最終HMCR
-    let hsHMCREnd = get(opt, 'hsHMCREnd', '')
-    if (!isnum(hsHMCREnd)) {
-        hsHMCREnd = 0.9
-    }
-    hsHMCREnd = cdbl(hsHMCREnd)
-
-    //hsHMCRDynamic, 動態HMCR
-    let hsHMCRDynamic = get(opt, 'hsHMCRDynamic', '')
-    if (!isnum(hsHMCRDynamic)) {
-        hsHMCRDynamic = 0
-    }
-    hsHMCRDynamic = cdbl(hsHMCRDynamic)
-
-    //hsPARStart, 初始PAR (Pitch Adjustment Rate)
-    let hsPARStart = get(opt, 'hsPARStart', '')
-    if (!isnum(hsPARStart)) {
-        hsPARStart = 0.5
-    }
-    hsPARStart = cdbl(hsPARStart)
-
-    //hsPAREnd, 最終PAR
-    let hsPAREnd = get(opt, 'hsPAREnd', '')
-    if (!isnum(hsPAREnd)) {
-        hsPAREnd = 0.5
-    }
-    hsPAREnd = cdbl(hsPAREnd)
-
-    //hsPARDynamic, 動態PAR
-    let hsPARDynamic = get(opt, 'hsPARDynamic', '')
-    if (!isnum(hsPARDynamic)) {
-        hsPARDynamic = 0
-    }
-    hsPARDynamic = cdbl(hsPARDynamic)
-
-    //hsHMC, Harmony Memory Consideration運算子
-    let hsHMC = get(opt, 'hsHMC', '')
-    let hsHMCList = [
-        'Original',
-        '2M Consideration',
-        '2MB Consideration',
-        '3M Consideration',
-        '3MB Consideration',
-        '4M Consideration',
-        '4MB Consideration',
-    ]
-    if (!arrHas(hsHMC, hsHMCList)) {
-        hsHMC = 'Original'
-    }
-
-    //hsPA, Pitch Adjustment運算子
-    let hsPA = get(opt, 'hsPA', '')
-    let hsPAList = [
-        'Constant1',
-        'Constant2',
-        'Constant3',
-        'Linear0.1',
-        'Linear0.2',
-        'Linear0.3',
-        'Exponent0.1',
-        'Exponent0.2',
-        'Exponent0.3',
-        'Global Space',
-        'Available Space',
-        'Modified Global Best',
-    ]
-    if (!arrHas(hsPA, hsPAList)) {
-        hsPA = 'Linear0.1'
-    }
 
     //Ns最低需求檢查, 確保HMC內取memory index不會undefined
     //2M/2MB需2個不重複, 3M/3MB需3個, 4M/4MB需4個
@@ -194,7 +131,7 @@ async function omlHS(dps, funFit, opt = {}) {
         '4MB Consideration': 4,
     }
     if (Ns < hmcNsMin[hsHMC]) {
-        throw new Error(`Ns[${Ns}] is less than the minimum[${hmcNsMin[hsHMC]}] required by hsHMC[${hsHMC}]`)
+        return Promise.reject('invalid opt.Ns: must be at least the minimum required by opt.hsHMC')
     }
 
     let iRepeat = 0 //初始化再搜尋次數

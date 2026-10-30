@@ -1,11 +1,8 @@
-import get from 'lodash-es/get.js'
 import sortBy from 'lodash-es/sortBy.js'
-import isnum from 'wsemi/src/isnum.mjs'
-import ispint from 'wsemi/src/ispint.mjs'
-import cint from 'wsemi/src/cint.mjs'
-import cdbl from 'wsemi/src/cdbl.mjs'
 import randomIntRange from 'wsemi/src/randomIntRange.mjs'
-import arrHas from 'wsemi/src/arrHas.mjs'
+import { kNum, kPint, kEnum, kObj, kFit, chkParams } from './_checkParam.mjs'
+import { kModeOutLimit } from './_optDecl.mjs'
+import { kSchema } from './_validateDps.mjs'
 import _modifyParameter from './_modifyParameter.mjs'
 
 
@@ -32,48 +29,29 @@ import _modifyParameter from './_modifyParameter.mjs'
 //  feedback(params, fitness)    —用 fitness 更新 memory(若比最差好則替換)
 //  getMemory()                  —讀目前 memory (除錯/觀察用)
 //  getSchema()                  —讀目前 schema (除錯/觀察用)
+//
+//種類(dspec 輸入參數之檢測機制), 輸入無效時同步 throw Error(訊息格式 `invalid <名稱>: must be <種類描述>`, 不含輸入值):
+//  schema                 非空陣列, 元素為一般物件 { name, values }: name 為非空字串且不得重複, values 為非空陣列(候選值, 任意值)
+//  opt                    一般物件, undefined 或 null 視為未給; 各鍵給了而不符種類即無效, 不改用預設
+//  opt.Ns                 有效數字, 正整數(數字字串轉換後使用), 且不得小於 opt.hsHMC 所需之最小個數
+//  opt.hsHMCR, opt.hsPAR  有效數字(數字字串轉換後使用)
+//  opt.hsHMC, opt.hsPA, opt.ModeOutLimit   列舉字串
+//  feedback(params, fitness)  params 為一般物件; fitness 為適應函數值(數字或數字字串, 轉換後使用, 另收 +-Infinity 作為懲罰值)
 function _adapterHS(schema, opt = {}) {
 
-    //Ns
-    let Ns = get(opt, 'Ns', '')
-    if (!ispint(Ns)) {
-        Ns = 10
+    //check, 檢測之值即使用之值
+    let c = chkParams([[schema, 'schema', kSchema]], opt, {
+        Ns: [kPint, 10],
+        hsHMCR: [kNum, 0.9],
+        hsPAR: [kNum, 0.3],
+        hsHMC: [kEnum(['Original', '2M Consideration', '2MB Consideration', '3M Consideration', '3MB Consideration', '4M Consideration', '4MB Consideration']), 'Original'],
+        hsPA: [kEnum(['Constant1', 'Constant2', 'Constant3', 'Linear0.1', 'Linear0.2', 'Linear0.3', 'Exponent0.1', 'Exponent0.2', 'Exponent0.3', 'Global Space', 'Available Space', 'Modified Global Best']), 'Linear0.1'],
+        ModeOutLimit: [kModeOutLimit, 'Mapping'],
+    })
+    if (c.err !== '') {
+        throw new Error(c.err)
     }
-    Ns = cint(Ns)
-
-    //hsHMCR
-    let hsHMCR = get(opt, 'hsHMCR', '')
-    if (!isnum(hsHMCR)) {
-        hsHMCR = 0.9
-    }
-    hsHMCR = cdbl(hsHMCR)
-
-    //hsPAR
-    let hsPAR = get(opt, 'hsPAR', '')
-    if (!isnum(hsPAR)) {
-        hsPAR = 0.3
-    }
-    hsPAR = cdbl(hsPAR)
-
-    //hsHMC
-    let hsHMC = get(opt, 'hsHMC', '')
-    let hmcList = ['Original', '2M Consideration', '2MB Consideration', '3M Consideration', '3MB Consideration', '4M Consideration', '4MB Consideration']
-    if (!arrHas(hsHMC, hmcList)) {
-        hsHMC = 'Original'
-    }
-
-    //hsPA
-    let hsPA = get(opt, 'hsPA', '')
-    let paList = ['Constant1', 'Constant2', 'Constant3', 'Linear0.1', 'Linear0.2', 'Linear0.3', 'Exponent0.1', 'Exponent0.2', 'Exponent0.3', 'Global Space', 'Available Space', 'Modified Global Best']
-    if (!arrHas(hsPA, paList)) {
-        hsPA = 'Linear0.1'
-    }
-
-    //ModeOutLimit
-    let ModeOutLimit = get(opt, 'ModeOutLimit', '')
-    if (!arrHas(ModeOutLimit, ['Mapping', 'Limit', 'Random'])) {
-        ModeOutLimit = 'Mapping'
-    }
+    let { Ns, hsHMCR, hsPAR, hsHMC, hsPA, ModeOutLimit } = c.o
 
     //Ns 最低需求檢查(對齊 omlHS)
     let hmcNsMin = {
@@ -86,7 +64,7 @@ function _adapterHS(schema, opt = {}) {
         '4MB Consideration': 4,
     }
     if (Ns < hmcNsMin[hsHMC]) {
-        throw new Error(`Ns[${Ns}] is less than the minimum[${hmcNsMin[hsHMC]}] required by hsHMC[${hsHMC}]`)
+        throw new Error('invalid opt.Ns: must be at least the minimum required by opt.hsHMC')
     }
 
     //Nd = schema 維度數
@@ -284,6 +262,13 @@ function _adapterHS(schema, opt = {}) {
 
         //feedback: 階段 1 收集 init 個體填 memory; 階段 2 若新和聲比最差好則替換
         feedback(params, fitness) {
+
+            //check, 檢測之值即使用之值
+            let cf = chkParams([[params, 'params', kObj], [fitness, 'fitness', kFit]])
+            if (cf.err !== '') {
+                throw new Error(cf.err)
+            }
+            fitness = cf.vs[1]
 
             let inputInd = (proposedInd !== null) ? proposedInd : paramsToInd(params)
 

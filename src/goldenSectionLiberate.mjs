@@ -1,8 +1,7 @@
 import get from 'lodash-es/get.js'
 import isNumber from 'lodash-es/isNumber.js'
-import isnum from 'wsemi/src/isnum.mjs'
-import isfun from 'wsemi/src/isfun.mjs'
-import cdbl from 'wsemi/src/cdbl.mjs'
+import { kFun, kNum, chkParams } from './_checkParam.mjs'
+import { declSetpBracket, declGoldenSection } from './_optDecl.mjs'
 import setpBracket from './setpBracket.mjs'
 import goldenSection from './goldenSection.mjs'
 
@@ -14,11 +13,16 @@ import goldenSection from './goldenSection.mjs'
  *
  * Unit Test: {@link https://github.com/yuda-lyu/w-optimization/blob/master/test/goldenSectionLiberate.test.js Github}
  * @memberOf w-optimization
- * @param {Function} fun 輸入適應函數，將傳入變數x，需回傳適應函數值，以求解最小值所在起訖範圍為目標
- * @param {Object} [opt={}] 輸入設定物件，預設{}
- * @param {Number} [opt.minTolerance=1e-8] 輸入最小收斂門檻值數字，預設1e-8
- * @param {Number} [opt.maxIterations=100] 輸入最大迭代次數整數，預設100
- * @returns {Promise} 回傳Promise，resolve為求解後結果物件，含鍵值x,y，x為求解後變數組，y為最優適應函數值，reject為失敗訊息
+ * @param {Function} fun 輸入適應函數，將傳入變數x，需回傳適應函數值，以求解最小值所在起訖範圍為目標。種類：函數，必給
+ * @param {Number|String} x 輸入初始值數字或數字字串。種類：有效數字，必給，數字字串轉換後使用，'-'、'NP'、''等非數字字串與null、布林、NaN、Infinity皆為無效
+ * @param {Object} [opt={}] 輸入設定物件，預設{}。種類：一般物件，undefined或null視為未給，其餘非一般物件為無效；未宣告之鍵忽略；各鍵給了而不符種類即為無效，不改用預設
+ * @param {Number|String} [opt.min] 輸入搜尋範圍最小值，與opt.max皆給時直接作為求解範圍，否則由setpBracket求範圍並以給定者作為其搜尋界限。種類：有效數字
+ * @param {Number|String} [opt.max] 輸入搜尋範圍最大值，說明同opt.min。種類：有效數字
+ * @param {Number|String} [opt.delta=0.1] 轉傳setpBracket之步長，預設0.1。種類：有效數字，正數
+ * @param {Number|String} [opt.dxR=2] 轉傳setpBracket之步長增長比，預設2。種類：有效數字，正數，或列舉字串'speed'
+ * @param {Number|String} [opt.minTolerance=1e-8] 輸入最小收斂門檻值，預設1e-8。種類：有效數字，正數
+ * @param {Number|String} [opt.maxIterations=100] 輸入最大迭代次數，預設100。種類：有效數字，正整數
+ * @returns {Promise} 回傳Promise，resolve為求解後結果物件，含鍵值x,y，x為求解後變數組，y為最優適應函數值；輸入無效時reject字串，格式為`invalid <名稱>: must be <種類描述>`，不含輸入值
  * @example
  *
  * async function test() {
@@ -41,27 +45,21 @@ import goldenSection from './goldenSection.mjs'
  */
 async function goldenSectionLiberate(fun, x, opt = {}) {
 
-    //check fun
-    if (!isfun(fun)) {
-        return Promise.reject('invalid fun')
+    //check, 一般參數與opt先於任何適應函數呼叫檢測(含轉傳給setpBracket與goldenSection之鍵), 檢測之值即使用之值
+    let c = chkParams([[fun, 'fun', kFun], [x, 'x', kNum]], opt, {
+        ...declSetpBracket,
+        min: [kNum, undefined],
+        max: [kNum, undefined],
+        ...declGoldenSection,
+    })
+    if (c.err !== '') {
+        return Promise.reject(c.err)
     }
+    x = c.vs[1]
 
-    //check x
-    if (!isnum(x)) {
-        return Promise.reject('x is not a number')
-    }
-
-    //xMin
-    let xMin = get(opt, 'min')
-    if (isnum(xMin)) {
-        xMin = cdbl(xMin)
-    }
-
-    //xMax
-    let xMax = get(opt, 'max')
-    if (isnum(xMax)) {
-        xMax = cdbl(xMax)
-    }
+    //xMin, xMax, 兩者皆給則直接作為範圍, 否則由setpBracket求範圍
+    let xMin = c.o.min
+    let xMax = c.o.max
 
     //countCalc
     let countCalc = 0

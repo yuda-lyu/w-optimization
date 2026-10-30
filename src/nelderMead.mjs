@@ -1,10 +1,6 @@
-import get from 'lodash-es/get.js'
 import size from 'lodash-es/size.js'
-import isnum from 'wsemi/src/isnum.mjs'
-import isfun from 'wsemi/src/isfun.mjs'
-import isearr from 'wsemi/src/isearr.mjs'
 import ispm from 'wsemi/src/ispm.mjs'
-import cdbl from 'wsemi/src/cdbl.mjs'
+import { kFun, kNum, kPnum, kPint, kNumArr, chkParams } from './_checkParam.mjs'
 
 
 function weightedSum(ret, w1, v1, w2, v2) {
@@ -28,18 +24,19 @@ function sortOrder(a, b) {
  *
  * Unit Test: {@link https://github.com/yuda-lyu/w-optimization/blob/master/test/nelderMead.test.js Github}
  * @memberOf w-optimization
- * @param {Function} fun 輸入適應函數，將傳入變數組params，需回傳適應函數值，以求解最小值為目標
- * @param {Array} params 輸入初始變數組，若適應函數fun需輸入3參數，則就需輸入[a,b,c]陣列作為初始值
- * @param {Object} [opt={}] 輸入設定物件，預設{}
- * @param {Number} [opt.maxIterations=null] 輸入最大迭代次數整數，若無則預設為變數組長度*200
- * @param {Number} [opt.delta=0.001] 輸入步長數字，預設0.001
- * @param {Number} [opt.minErrorDelta=1e-6] 輸入最小誤差步長數字，預設1e-6
- * @param {Number} [opt.minTolerance=1e-5] 輸入最小收斂門檻值數字，預設1e-5
- * @param {Number} [opt.rho=1] 輸入上輪第1節點權重數字，預設1
- * @param {Number} [opt.chi=2] 輸入上輪第2節點權重數字，預設2
- * @param {Number} [opt.psi=-0.5] 輸入下輪第1節點權重數字，預設-0.5
- * @param {Number} [opt.sigma=0.5] 輸入下輪第2節點權重數字，預設0.5
- * @returns {Promise} 回傳Promise，resolve為求解後結果物件，含鍵值x,y，x為求解後變數組，y為最優適應函數值，reject為失敗訊息
+ * @param {Function} fun 輸入適應函數，將傳入變數組params，需回傳適應函數值，以求解最小值為目標。種類：函數，必給
+ * @param {Array} params 輸入初始變數組，若適應函數fun需輸入3參數，則就需輸入[a,b,c]陣列作為初始值。種類：資料陣列，必給，非空陣列，元素為有效數字：數字或數字字串(轉換後使用)，'-'、'NP'、''等非數字字串與null、布林、NaN、Infinity皆為無效，訊息帶元素索引；不改寫呼叫端之陣列
+ * @param {Object} [opt={}] 輸入設定物件，預設{}。種類：一般物件，undefined或null視為未給，其餘非一般物件為無效；未宣告之鍵忽略；各鍵給了而不符種類即為無效，不改用預設
+ * @param {Number|String} [opt.maxIterations] 輸入最大迭代次數，若無則預設為變數組長度*200。種類：有效數字，正整數
+ * @param {Number|String} [opt.nonZeroDelta=1.05] 輸入初始單純形各非零變數之放大倍率，預設1.05。種類：有效數字
+ * @param {Number|String} [opt.delta=0.001] 輸入步長(初始單純形中零值變數之位移)，預設0.001。種類：有效數字，正數
+ * @param {Number|String} [opt.minErrorDelta=1e-6] 輸入最小誤差步長，預設1e-6。種類：有效數字，正數
+ * @param {Number|String} [opt.minTolerance=1e-5] 輸入最小收斂門檻值，預設1e-5。種類：有效數字，正數
+ * @param {Number|String} [opt.rho=1] 輸入上輪第1節點權重，預設1。種類：有效數字
+ * @param {Number|String} [opt.chi=2] 輸入上輪第2節點權重，預設2。種類：有效數字
+ * @param {Number|String} [opt.psi=-0.5] 輸入下輪第1節點權重，預設-0.5。種類：有效數字
+ * @param {Number|String} [opt.sigma=0.5] 輸入下輪第2節點權重，預設0.5。種類：有效數字
+ * @returns {Promise} 回傳Promise，resolve為求解後結果物件，含鍵值x,y，x為求解後變數組，y為最優適應函數值；輸入無效時reject字串，格式為`invalid <名稱>: must be <種類描述>`，不含輸入值
  * @example
  *
  * async function test1() {
@@ -240,81 +237,40 @@ function sortOrder(a, b) {
  */
 async function nelderMead(fun, params, opt = {}) {
 
-    //check func
-    if (!isfun(fun)) {
-        return Promise.reject('invalid fun')
+    //check, 一般參數與opt先於任何適應函數呼叫檢測, 檢測之值即使用之值(params為轉換後之新陣列, 不改寫呼叫端之陣列)
+    let c = chkParams([[fun, 'fun', kFun], [params, 'params', kNumArr]], opt, {
+        maxIterations: [kPint, undefined], //未給則為變數組長度*200
+        nonZeroDelta: [kNum, 1.05],
+        delta: [kPnum, 0.001],
+        minErrorDelta: [kPnum, 1e-6],
+        minTolerance: [kPnum, 1e-5],
+        rho: [kNum, 1],
+        chi: [kNum, 2],
+        psi: [kNum, -0.5],
+        sigma: [kNum, 0.5],
+    })
+    if (c.err !== '') {
+        return Promise.reject(c.err)
     }
-
-    //check params
-    if (!isearr(params)) {
-        return Promise.reject('params is not an effective array')
-    }
+    params = c.vs[1]
 
     //n
     let n = size(params)
 
     //maxIterations
-    let maxIterations = get(opt, 'maxIterations')
-    if (!isnum(maxIterations)) {
+    let maxIterations = c.o.maxIterations
+    if (maxIterations === undefined) {
         maxIterations = n * 200
     }
-    maxIterations = cdbl(maxIterations)
 
-    //nonZeroDelta
-    let nonZeroDelta = get(opt, 'nonZeroDelta')
-    if (!isnum(nonZeroDelta)) {
-        nonZeroDelta = 1.05
-    }
-    nonZeroDelta = cdbl(nonZeroDelta)
-
-    //delta
-    let delta = get(opt, 'delta')
-    if (!isnum(delta)) {
-        delta = 0.001
-    }
-    delta = cdbl(delta)
-
-    //minErrorDelta
-    let minErrorDelta = get(opt, 'minErrorDelta')
-    if (!isnum(minErrorDelta)) {
-        minErrorDelta = 1e-6
-    }
-    minErrorDelta = cdbl(minErrorDelta)
-
-    //minTolerance
-    let minTolerance = get(opt, 'minTolerance')
-    if (!isnum(minTolerance)) {
-        minTolerance = 1e-5
-    }
-    minTolerance = cdbl(minTolerance)
-
-    //rho
-    let rho = get(opt, 'rho')
-    if (!isnum(rho)) {
-        rho = 1
-    }
-    rho = cdbl(rho)
-
-    //chi
-    let chi = get(opt, 'chi')
-    if (!isnum(chi)) {
-        chi = 2
-    }
-    chi = cdbl(chi)
-
-    //psi
-    let psi = get(opt, 'psi')
-    if (!isnum(psi)) {
-        psi = -0.5
-    }
-    psi = cdbl(psi)
-
-    //sigma
-    let sigma = get(opt, 'sigma')
-    if (!isnum(sigma)) {
-        sigma = 0.5
-    }
-    sigma = cdbl(sigma)
+    let nonZeroDelta = c.o.nonZeroDelta
+    let delta = c.o.delta
+    let minErrorDelta = c.o.minErrorDelta
+    let minTolerance = c.o.minTolerance
+    let rho = c.o.rho
+    let chi = c.o.chi
+    let psi = c.o.psi
+    let sigma = c.o.sigma
 
     //countCalc
     let countCalc = 0

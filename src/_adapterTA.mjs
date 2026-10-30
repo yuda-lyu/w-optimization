@@ -1,8 +1,7 @@
-import get from 'lodash-es/get.js'
-import isnum from 'wsemi/src/isnum.mjs'
-import cdbl from 'wsemi/src/cdbl.mjs'
 import randomIntRange from 'wsemi/src/randomIntRange.mjs'
-import arrHas from 'wsemi/src/arrHas.mjs'
+import { kNum, kObj, kFit, chkParams } from './_checkParam.mjs'
+import { kModeOutLimit } from './_optDecl.mjs'
+import { kSchema } from './_validateDps.mjs'
 import _modifyParameter from './_modifyParameter.mjs'
 
 
@@ -34,27 +33,25 @@ import _modifyParameter from './_modifyParameter.mjs'
 //  getBestEver()                —讀歷史最佳
 //  getThreshold()               —讀目前門檻值
 //  getSchema()                  —讀目前 schema
+//
+//種類(dspec 輸入參數之檢測機制), 輸入無效時同步 throw Error(訊息格式 `invalid <名稱>: must be <種類描述>`, 不含輸入值):
+//  schema                 非空陣列, 元素為一般物件 { name, values }: name 為非空字串且不得重複, values 為非空陣列(候選值, 任意值)
+//  opt                    一般物件, undefined 或 null 視為未給; 各鍵給了而不符種類即無效, 不改用預設
+//  opt.taThresholdInitial, opt.taThresholdRatio   有效數字(數字字串轉換後使用)
+//  opt.ModeOutLimit       列舉字串 'Mapping' / 'Limit' / 'Random'
+//  feedback(params, fitness)  params 為一般物件; fitness 為適應函數值(數字或數字字串, 轉換後使用, 另收 +-Infinity 作為懲罰值)
 function _adapterTA(schema, opt = {}) {
 
-    //taThresholdInitial
-    let taThresholdInitial = get(opt, 'taThresholdInitial', '')
-    if (!isnum(taThresholdInitial)) {
-        taThresholdInitial = 1
+    //check, 檢測之值即使用之值
+    let c = chkParams([[schema, 'schema', kSchema]], opt, {
+        taThresholdInitial: [kNum, 1],
+        taThresholdRatio: [kNum, 0.99],
+        ModeOutLimit: [kModeOutLimit, 'Mapping'],
+    })
+    if (c.err !== '') {
+        throw new Error(c.err)
     }
-    taThresholdInitial = cdbl(taThresholdInitial)
-
-    //taThresholdRatio
-    let taThresholdRatio = get(opt, 'taThresholdRatio', '')
-    if (!isnum(taThresholdRatio)) {
-        taThresholdRatio = 0.99
-    }
-    taThresholdRatio = cdbl(taThresholdRatio)
-
-    //ModeOutLimit
-    let ModeOutLimit = get(opt, 'ModeOutLimit', '')
-    if (!arrHas(ModeOutLimit, ['Mapping', 'Limit', 'Random'])) {
-        ModeOutLimit = 'Mapping'
-    }
+    let { taThresholdInitial, taThresholdRatio, ModeOutLimit } = c.o
 
     //Nd = schema 維度數
     let Nd = schema.length
@@ -102,6 +99,14 @@ function _adapterTA(schema, opt = {}) {
 
         //feedback: ΔF < threshold 接受, 否則拒絕; threshold 每次衰減 ratio
         feedback(params, fitness) {
+
+            //check, 檢測之值即使用之值
+            let cf = chkParams([[params, 'params', kObj], [fitness, 'fitness', kFit]])
+            if (cf.err !== '') {
+                throw new Error(cf.err)
+            }
+            fitness = cf.vs[1]
+
             if (proposed === null) {
                 //第 1 次: 設 current.fitness
                 current.fitness = fitness
