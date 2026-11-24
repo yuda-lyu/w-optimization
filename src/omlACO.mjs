@@ -5,7 +5,6 @@ import cloneDeep from 'lodash-es/cloneDeep.js'
 import isestr from 'wsemi/src/isestr.mjs'
 import isfun from 'wsemi/src/isfun.mjs'
 import ispm from 'wsemi/src/ispm.mjs'
-import randomIntRange from 'wsemi/src/randomIntRange.mjs'
 import { kNum, kPint, kBol, kFun, chkParams } from './_checkParam.mjs'
 import { kModeOutLimit, kLocalSearchMethod } from './_optDecl.mjs'
 import { kDps } from './_validateDps.mjs'
@@ -14,6 +13,7 @@ import _isSameSolution from './_isSameSolution.mjs'
 import _dynamicValue from './_dynamicValue.mjs'
 import _pickByWeights from './_pickByWeights.mjs'
 import _localSearch from './_localSearch.mjs'
+import { _makeRandom } from './_random.mjs'
 
 
 /**
@@ -47,6 +47,7 @@ import _localSearch from './_localSearch.mjs'
  * @param {Number|String} [opt.acoRoStart=0.1] 輸入初始區域費洛蒙更新係數，預設0.1。種類：有效數字
  * @param {Number|String} [opt.acoRoEnd=0.1] 輸入最終區域費洛蒙更新係數，預設0.1。種類：有效數字
  * @param {Number|String} [opt.acoRoDynamic=0] 輸入動態區域費洛蒙更新係數，預設0。種類：有效數字
+ * @param {Function} [opt.random] 輸入亂數產生函數，須回傳[0,1)之數字(同Math.random之約定，回傳值不檢測)。給了則該次呼叫之一切隨機取值(含初始族群、各螞蟻之選點、移民、再搜尋、強制探索、局部搜尋)皆只經它，同題同選項同序列即得同結果(含適應函數被呼叫之序列)，同一函數勿同時交給多個進行中之呼叫；未給(undefined或null)則用Math.random(取整數時用wsemi之randomIntRange)。種類：函數
  * @returns {Promise} 回傳Promise，resolve為結果物件，含鍵值bestSolution,hists,stopMode,stopNl,stopExecutions；輸入無效時reject字串，格式為`invalid <名稱>: must be <種類描述>`，不含輸入值
  */
 async function omlACO(dps, funFit, opt = {}) {
@@ -77,6 +78,7 @@ async function omlACO(dps, funFit, opt = {}) {
         acoRoStart: [kNum, 0.1], //初始區域費洛蒙更新係數
         acoRoEnd: [kNum, 0.1], //最終區域費洛蒙更新係數
         acoRoDynamic: [kNum, 0], //動態區域費洛蒙更新係數
+        random: [kFun, undefined], //亂數產生函數(給了則一切隨機取值只經它)
     })
     if (c.err !== '') {
         return Promise.reject(c.err)
@@ -88,7 +90,11 @@ async function omlACO(dps, funFit, opt = {}) {
         acoExploitationRateStart, acoExploitationRateEnd, acoExploitationRateDynamic,
         acoAlphaStart, acoAlphaEnd, acoAlphaDynamic,
         acoRoStart, acoRoEnd, acoRoDynamic,
+        random,
     } = c.o
+
+    //R, 隨機取值之統一出口(見 _random.mjs)
+    let R = _makeRandom(random)
 
     //Nd, 設計變數總數
     let Nd = size(dps)
@@ -158,7 +164,7 @@ async function omlACO(dps, funFit, opt = {}) {
     if (true) {
 
         for (let k = 0; k < Na; k++) {
-            let _s = _genSolution(dps)
+            let _s = _genSolution(dps, R)
             let s = await calcFitness(_s, 'init')
             ants.push(s)
             pheromoneUpdate(s, acoRoStart) //初始用acoRoStart當Local ratio
@@ -196,22 +202,22 @@ async function omlACO(dps, funFit, opt = {}) {
 
                 let j
 
-                if (Math.random() < acoExploitationRate) {
+                if (R.rand() < acoExploitationRate) {
                     //Exploitation 開發: 選有費洛蒙的節點(按權重)
                     if (noPheromoneN === pn) {
                         //全部都沒費洛蒙 → 隨機任一
-                        j = randomIntRange(0, pn - 1)
+                        j = R.randInt(0, pn - 1)
                     }
                     else {
                         //至少有1點有費洛蒙 → 按權重加權挑選
-                        j = _pickByWeights(pheromone[i], Math.random())
+                        j = _pickByWeights(pheromone[i], R.rand())
                     }
                 }
                 else {
                     //Exploration 探索: 選沒費洛蒙的節點
                     if (noPheromoneN === pn || noPheromoneN === 0) {
                         //全部沒/全部有費洛蒙 → 隨機任一
-                        j = randomIntRange(0, pn - 1)
+                        j = R.randInt(0, pn - 1)
                     }
                     else {
                         //收集沒費洛蒙的節點清單, 隨機選一
@@ -221,7 +227,7 @@ async function omlACO(dps, funFit, opt = {}) {
                                 excList.push(jj)
                             }
                         }
-                        j = excList[randomIntRange(0, excList.length - 1)]
+                        j = excList[R.randInt(0, excList.length - 1)]
                     }
                 }
 
@@ -287,7 +293,7 @@ async function omlACO(dps, funFit, opt = {}) {
             //由後往前處理, 不變更當前最佳螞蟻ants[0], 故k是從Na-1至1
             for (let k = Na - 1; k >= 1; k--) {
                 if (_isSameSolution(ants[k - 1], ants[k])) {
-                    let _s = _genSolution(dps)
+                    let _s = _genSolution(dps, R)
                     let s = await calcFitness(_s, 'strategyImmigration')
                     ants[k] = s
                     pheromoneUpdate(s, acoRo)
@@ -306,7 +312,7 @@ async function omlACO(dps, funFit, opt = {}) {
         let strategyLocalSearch = async () => {
 
             //依LocalSearchMethod分派局部搜尋
-            let s = await _localSearch(LocalSearchMethod, ants[0], dps, funFit, calcFitness, ModeOutLimit)
+            let s = await _localSearch(LocalSearchMethod, ants[0], dps, funFit, calcFitness, ModeOutLimit, { random })
 
             //check
             if (s.fitness >= ants[0].fitness) {
@@ -345,7 +351,7 @@ async function omlACO(dps, funFit, opt = {}) {
         if (UseRepeat && iContinue >= NContiguous && iRepeat < NRepeat) {
 
             for (let k = 1; k <= Na - 1; k++) {
-                let _s = _genSolution(dps)
+                let _s = _genSolution(dps, R)
                 let s = await calcFitness(_s, 'strategyRepeat')
                 ants[k] = s
                 pheromoneUpdate(s, acoRo)
@@ -360,7 +366,7 @@ async function omlACO(dps, funFit, opt = {}) {
             //強制重產後半族群作為探索, 不重置iContinue
             let kStart = Math.floor(Na / 2)
             for (let k = kStart; k <= Na - 1; k++) {
-                let _s = _genSolution(dps)
+                let _s = _genSolution(dps, R)
                 let s = await calcFitness(_s, 'strategyForcedExplore')
                 ants[k] = s
                 pheromoneUpdate(s, acoRo)

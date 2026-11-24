@@ -5,7 +5,6 @@ import cloneDeep from 'lodash-es/cloneDeep.js'
 import isestr from 'wsemi/src/isestr.mjs'
 import isfun from 'wsemi/src/isfun.mjs'
 import ispm from 'wsemi/src/ispm.mjs'
-import randomIntRange from 'wsemi/src/randomIntRange.mjs'
 import { kNum, kPint, kBol, kFun, kEnum, chkParams } from './_checkParam.mjs'
 import { kModeOutLimit, kLocalSearchMethod } from './_optDecl.mjs'
 import { kDps } from './_validateDps.mjs'
@@ -16,6 +15,7 @@ import _isSameSolution from './_isSameSolution.mjs'
 import _dynamicValue from './_dynamicValue.mjs'
 import _pickByWeights from './_pickByWeights.mjs'
 import _localSearch from './_localSearch.mjs'
+import { _makeRandom } from './_random.mjs'
 // import randomIntsNdpRange from 'wsemi/src/randomIntsNdpRange.mjs'
 
 
@@ -65,6 +65,7 @@ function arrStd(arr) {
  * @param {String} [opt.rgaCrossover='BLX-a Crossover'] 輸入交配運算子，預設'BLX-a Crossover'。種類：列舉字串，'Flat Crossover'、'BLX-a Crossover'、'Linear Crossover'、'Arithmetical Crossover'、'Chung Crossover'、'DE1 Crossover'、'3P Crossover'、'3PB Crossover'、'DE2 Crossover'、'4P Crossover'、'4PB Crossover'、'HS Crossover'、'Guiding Function'
  * @param {String} [opt.rgaMutation='Linear0.1'] 輸入突變運算子，預設'Linear0.1'。種類：列舉字串，'Constant1'、'Constant2'、'Constant3'、'Linear0.1'、'Linear0.2'、'Linear0.3'、'Exponent0.1'、'Exponent0.2'、'Exponent0.3'、'Global Space'
  * @param {String} [opt.rgaElitism='BestOne'] 輸入菁英策略，預設'BestOne'。種類：列舉字串，'None'、'BestOne'、'HalfPop'、'AllPop'
+ * @param {Function} [opt.random] 輸入亂數產生函數，須回傳[0,1)之數字(同Math.random之約定，回傳值不檢測)。給了則該次呼叫之一切隨機取值(含初始族群、選擇、交配、突變、移民、再搜尋、局部搜尋)皆只經它，同題同選項同序列即得同結果(含適應函數被呼叫之序列)，同一函數勿同時交給多個進行中之呼叫；未給(undefined或null)則用Math.random(取整數時用wsemi之randomIntRange)。種類：函數
  * @returns {Promise} 回傳Promise，resolve為結果物件，含鍵值bestSolution,hists,stopMode,stopNg,stopExecutions；輸入無效時reject字串，格式為`invalid <名稱>: must be <種類描述>`，不含輸入值
  */
 async function omlRGA(dps, funFit, opt = {}) {
@@ -126,6 +127,7 @@ async function omlRGA(dps, funFit, opt = {}) {
             'HalfPop',
             'AllPop',
         ]), 'BestOne'],
+        random: [kFun, undefined], //亂數產生函數(給了則一切隨機取值只經它)
     })
     if (c.err !== '') {
         return Promise.reject(c.err)
@@ -136,7 +138,11 @@ async function omlRGA(dps, funFit, opt = {}) {
         funGetBetter, funGenerationBefore, funGenerationAfter,
         rgaMutationRateStart, rgaMutationRateEnd, rgaMutationRateDynamic,
         rgaSelection, rgaCrossover, rgaMutation, rgaElitism,
+        random,
     } = c.o
+
+    //R, 隨機取值之統一出口(見 _random.mjs)
+    let R = _makeRandom(random)
 
     //Nd, 設計變數總數
     let Nd = size(dps)
@@ -206,7 +212,7 @@ async function omlRGA(dps, funFit, opt = {}) {
         for (let k = 0; k < Np; k++) {
 
             //_genSolution
-            let _s = _genSolution(dps)
+            let _s = _genSolution(dps, R)
 
             //calcFitness
             let s = await calcFitness(_s, 'init')
@@ -233,10 +239,10 @@ async function omlRGA(dps, funFit, opt = {}) {
 
         let excSet = new Set(excludes)
         let randomPickNonExc = () => {
-            let ia = randomIntRange(0, Np - 1)
+            let ia = R.randInt(0, Np - 1)
             let safety = 0
             while (excSet.has(ia)) {
-                ia = randomIntRange(0, Np - 1)
+                ia = R.randInt(0, Np - 1)
                 safety++
                 if (safety > Np * 10) {
                     //極端fallback, 應該不會發生(crossoverNpMin已確保有足夠候選)
@@ -270,7 +276,7 @@ async function omlRGA(dps, funFit, opt = {}) {
             }
 
             //加權挑選
-            return _pickByWeights(weights, Math.random())
+            return _pickByWeights(weights, R.rand())
 
         }
         else if (rgaSelection === 'Tournament Selection') {
@@ -282,7 +288,7 @@ async function omlRGA(dps, funFit, opt = {}) {
             let ib = ia
             let safety = 0
             while (ib === ia || excSet.has(ib)) {
-                ib = randomIntRange(0, Np - 1)
+                ib = R.randInt(0, Np - 1)
                 safety++
                 if (safety > Np * 10) {
                     break
@@ -309,7 +315,7 @@ async function omlRGA(dps, funFit, opt = {}) {
             }
 
             //加權挑選
-            return _pickByWeights(weights, Math.random())
+            return _pickByWeights(weights, R.rand())
 
         }
         else if (rgaSelection === 'Uniform Selection') {
@@ -346,7 +352,7 @@ async function omlRGA(dps, funFit, opt = {}) {
             indexLow = Math.max(indexLow, 0)
 
             //RandInt
-            let j = randomIntRange(indexLow, indexUp)
+            let j = R.randInt(indexLow, indexUp)
 
             //Parameter
             s.ps[i].ind = j
@@ -371,7 +377,7 @@ async function omlRGA(dps, funFit, opt = {}) {
             let j = Math.round(rRatioa * indexa + rRatiob * indexb)
 
             //Limit
-            j = _modifyParameter(j, dps[i].n - 1, ModeOutLimit)
+            j = _modifyParameter(j, dps[i].n - 1, ModeOutLimit, R)
 
             //Parameter
             s.ps[i].ind = j
@@ -390,7 +396,7 @@ async function omlRGA(dps, funFit, opt = {}) {
         let sB = _defSolution(dps)
 
         //隨機選一個變數做BLX-a
-        let iSplit = randomIntRange(0, Nd - 1)
+        let iSplit = R.randInt(0, Nd - 1)
 
         let indexa = parents[ia].ps[iSplit].ind
         let indexb = parents[ib].ps[iSplit].ind
@@ -401,7 +407,7 @@ async function omlRGA(dps, funFit, opt = {}) {
         indexLow = indexLow - indexAdd
         indexUp = Math.min(indexUp, dps[iSplit].n - 1)
         indexLow = Math.max(indexLow, 0)
-        let j = randomIntRange(indexLow, indexUp)
+        let j = R.randInt(indexLow, indexUp)
 
         //該變數兩子代都用相同的BLX-a結果
         sA.ps[iSplit].ind = j
@@ -440,7 +446,7 @@ async function omlRGA(dps, funFit, opt = {}) {
             let j = Math.round(rRatioa * indexa + rRatiob * indexb + rRatioc * indexc)
 
             //Limit
-            j = _modifyParameter(j, dps[i].n - 1, ModeOutLimit)
+            j = _modifyParameter(j, dps[i].n - 1, ModeOutLimit, R)
 
             s.ps[i].ind = j
             s.ps[i].value = dps[i].values[j]
@@ -465,7 +471,7 @@ async function omlRGA(dps, funFit, opt = {}) {
             let j = Math.round(rRatioa * indexa + rRatiob * indexb + rRatioc * indexc + rRatiod * indexd)
 
             //Limit
-            j = _modifyParameter(j, dps[i].n - 1, ModeOutLimit)
+            j = _modifyParameter(j, dps[i].n - 1, ModeOutLimit, R)
 
             s.ps[i].ind = j
             s.ps[i].value = dps[i].values[j]
@@ -507,7 +513,7 @@ async function omlRGA(dps, funFit, opt = {}) {
                     childs.push(crossover2pRatio(ia, ib, -0.5, 1.5))
                 }
                 else if (rgaCrossover === 'Arithmetical Crossover') {
-                    let rLanda = Math.random()
+                    let rLanda = R.rand()
                     childs.push(crossover2pRatio(ia, ib, rLanda, 1 - rLanda))
                     if (childs.length >= Np) break
                     childs.push(crossover2pRatio(ia, ib, 1 - rLanda, rLanda))
@@ -648,9 +654,9 @@ async function omlRGA(dps, funFit, opt = {}) {
 
             //各子代從rStd挑1個變數, 該變數從族群iGF用權重抽1個個體, 其餘變數承襲第k個親代
             for (let k = 0; k < Np; k++) {
-                let i = _pickByWeights(rStd, Math.random())
+                let i = _pickByWeights(rStd, R.rand())
                 let rIndex = iGF[i].map(v => v)
-                let n = _pickByWeights(rIndex, Math.random())
+                let n = _pickByWeights(rIndex, R.rand())
                 let s = cloneDeep(parents[k])
                 s.ps[i].ind = parents[n].ps[i].ind
                 s.ps[i].value = parents[n].ps[i].value
@@ -675,56 +681,56 @@ async function omlRGA(dps, funFit, opt = {}) {
         for (let k = 0; k < Np; k++) {
             for (let i = 0; i < Nd; i++) {
 
-                if (Math.random() < rgaMutationRate) {
+                if (R.rand() < rgaMutationRate) {
 
                     let j = childs[k].ps[i].ind
                     let n = dps[i].n
 
                     if (rgaMutation === 'Constant1') {
                         let indexAdd = 1
-                        j = (Math.random() < 0.5) ? j + indexAdd : j - indexAdd
+                        j = (R.rand() < 0.5) ? j + indexAdd : j - indexAdd
                     }
                     else if (rgaMutation === 'Constant2') {
-                        let indexAdd = randomIntRange(1, 2)
-                        j = (Math.random() < 0.5) ? j + indexAdd : j - indexAdd
+                        let indexAdd = R.randInt(1, 2)
+                        j = (R.rand() < 0.5) ? j + indexAdd : j - indexAdd
                     }
                     else if (rgaMutation === 'Constant3') {
-                        let indexAdd = randomIntRange(1, 3)
-                        j = (Math.random() < 0.5) ? j + indexAdd : j - indexAdd
+                        let indexAdd = R.randInt(1, 3)
+                        j = (R.rand() < 0.5) ? j + indexAdd : j - indexAdd
                     }
                     else if (rgaMutation === 'Linear0.1') {
-                        let indexAdd = randomIntRange(1, Math.round(0.1 * n) + 1)
-                        j = (Math.random() < 0.5) ? j + indexAdd : j - indexAdd
+                        let indexAdd = R.randInt(1, Math.round(0.1 * n) + 1)
+                        j = (R.rand() < 0.5) ? j + indexAdd : j - indexAdd
                     }
                     else if (rgaMutation === 'Linear0.2') {
-                        let indexAdd = randomIntRange(1, Math.round(0.2 * n) + 1)
-                        j = (Math.random() < 0.5) ? j + indexAdd : j - indexAdd
+                        let indexAdd = R.randInt(1, Math.round(0.2 * n) + 1)
+                        j = (R.rand() < 0.5) ? j + indexAdd : j - indexAdd
                     }
                     else if (rgaMutation === 'Linear0.3') {
-                        let indexAdd = randomIntRange(1, Math.round(0.3 * n) + 1)
-                        j = (Math.random() < 0.5) ? j + indexAdd : j - indexAdd
+                        let indexAdd = R.randInt(1, Math.round(0.3 * n) + 1)
+                        j = (R.rand() < 0.5) ? j + indexAdd : j - indexAdd
                     }
                     else if (rgaMutation === 'Exponent0.1') {
-                        let indexAdd = Math.floor(Math.pow(0.1 * n + 1, Math.random()))
-                        j = (Math.random() < 0.5) ? j + indexAdd : j - indexAdd
+                        let indexAdd = Math.floor(Math.pow(0.1 * n + 1, R.rand()))
+                        j = (R.rand() < 0.5) ? j + indexAdd : j - indexAdd
                     }
                     else if (rgaMutation === 'Exponent0.2') {
-                        let indexAdd = Math.floor(Math.pow(0.2 * n + 1, Math.random()))
-                        j = (Math.random() < 0.5) ? j + indexAdd : j - indexAdd
+                        let indexAdd = Math.floor(Math.pow(0.2 * n + 1, R.rand()))
+                        j = (R.rand() < 0.5) ? j + indexAdd : j - indexAdd
                     }
                     else if (rgaMutation === 'Exponent0.3') {
-                        let indexAdd = Math.floor(Math.pow(0.3 * n + 1, Math.random()))
-                        j = (Math.random() < 0.5) ? j + indexAdd : j - indexAdd
+                        let indexAdd = Math.floor(Math.pow(0.3 * n + 1, R.rand()))
+                        j = (R.rand() < 0.5) ? j + indexAdd : j - indexAdd
                     }
                     else if (rgaMutation === 'Global Space') {
-                        j = randomIntRange(0, n - 1)
+                        j = R.randInt(0, n - 1)
                     }
                     else {
                         throw new Error(`invalid rgaMutation[${rgaMutation}]`)
                     }
 
                     //Limit
-                    j = _modifyParameter(j, n - 1, ModeOutLimit)
+                    j = _modifyParameter(j, n - 1, ModeOutLimit, R)
 
                     //update
                     childs[k].ps[i].ind = j
@@ -836,7 +842,7 @@ async function omlRGA(dps, funFit, opt = {}) {
                 if (_isSameSolution(children[k - 1], children[k])) {
 
                     //_genSolution
-                    let _s = _genSolution(dps)
+                    let _s = _genSolution(dps, R)
 
                     //calcFitness
                     let s = await calcFitness(_s, 'strategyImmigration')
@@ -859,7 +865,7 @@ async function omlRGA(dps, funFit, opt = {}) {
         let strategyLocalSearch = async () => {
 
             //依LocalSearchMethod分派局部搜尋
-            let s = await _localSearch(LocalSearchMethod, children[0], dps, funFit, calcFitness, ModeOutLimit)
+            let s = await _localSearch(LocalSearchMethod, children[0], dps, funFit, calcFitness, ModeOutLimit, { random })
 
             //check
             if (s.fitness >= children[0].fitness) {
@@ -899,7 +905,7 @@ async function omlRGA(dps, funFit, opt = {}) {
             for (let k = 1; k <= Np - 1; k++) {
 
                 //_genSolution
-                let _s = _genSolution(dps)
+                let _s = _genSolution(dps, R)
 
                 //calcFitness
                 let s = await calcFitness(_s, 'strategyRepeat')

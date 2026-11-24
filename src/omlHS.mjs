@@ -5,7 +5,6 @@ import cloneDeep from 'lodash-es/cloneDeep.js'
 import isestr from 'wsemi/src/isestr.mjs'
 import isfun from 'wsemi/src/isfun.mjs'
 import ispm from 'wsemi/src/ispm.mjs'
-import randomIntRange from 'wsemi/src/randomIntRange.mjs'
 import { kNum, kPint, kBol, kFun, kEnum, chkParams } from './_checkParam.mjs'
 import { kModeOutLimit, kLocalSearchMethod } from './_optDecl.mjs'
 import { kDps } from './_validateDps.mjs'
@@ -15,6 +14,7 @@ import _modifyParameter from './_modifyParameter.mjs'
 import _isSameSolution from './_isSameSolution.mjs'
 import _dynamicValue from './_dynamicValue.mjs'
 import _localSearch from './_localSearch.mjs'
+import { _makeRandom } from './_random.mjs'
 
 
 /**
@@ -45,6 +45,7 @@ import _localSearch from './_localSearch.mjs'
  * @param {Number|String} [opt.hsPARDynamic=0] 輸入動態PAR，預設0。種類：有效數字
  * @param {String} [opt.hsHMC='Original'] 輸入Harmony Memory Consideration運算子，預設'Original'。種類：列舉字串，'Original'、'2M Consideration'、'2MB Consideration'、'3M Consideration'、'3MB Consideration'、'4M Consideration'、'4MB Consideration'
  * @param {String} [opt.hsPA='Linear0.1'] 輸入Pitch Adjustment運算子，預設'Linear0.1'。種類：列舉字串，'Constant1'、'Constant2'、'Constant3'、'Linear0.1'、'Linear0.2'、'Linear0.3'、'Exponent0.1'、'Exponent0.2'、'Exponent0.3'、'Global Space'、'Available Space'、'Modified Global Best'
+ * @param {Function} [opt.random] 輸入亂數產生函數，須回傳[0,1)之數字(同Math.random之約定，回傳值不檢測)。給了則該次呼叫之一切隨機取值(含初始和聲記憶、即興、音高調整、移民、再搜尋、局部搜尋)皆只經它，同題同選項同序列即得同結果(含適應函數被呼叫之序列)，同一函數勿同時交給多個進行中之呼叫；未給(undefined或null)則用Math.random(取整數時用wsemi之randomIntRange)。種類：函數
  * @returns {Promise} 回傳Promise，resolve為結果物件，含鍵值bestSolution,hists,stopMode,stopNi,stopExecutions；輸入無效時reject字串，格式為`invalid <名稱>: must be <種類描述>`，不含輸入值
  */
 async function omlHS(dps, funFit, opt = {}) {
@@ -93,6 +94,7 @@ async function omlHS(dps, funFit, opt = {}) {
             'Available Space',
             'Modified Global Best',
         ]), 'Linear0.1'],
+        random: [kFun, undefined], //亂數產生函數(給了則一切隨機取值只經它)
     })
     if (c.err !== '') {
         return Promise.reject(c.err)
@@ -104,7 +106,11 @@ async function omlHS(dps, funFit, opt = {}) {
         hsHMCRStart, hsHMCREnd, hsHMCRDynamic,
         hsPARStart, hsPAREnd, hsPARDynamic,
         hsHMC, hsPA,
+        random,
     } = c.o
+
+    //R, 隨機取值之統一出口(見 _random.mjs)
+    let R = _makeRandom(random)
 
     //Nd, 設計變數總數
     let Nd = size(dps)
@@ -167,7 +173,7 @@ async function omlHS(dps, funFit, opt = {}) {
         for (let k = 0; k < Ns; k++) {
 
             //_genSolution
-            let _s = _genSolution(dps)
+            let _s = _genSolution(dps, R)
 
             //calcFitness
             let s = await calcFitness(_s, 'init')
@@ -191,10 +197,10 @@ async function omlHS(dps, funFit, opt = {}) {
     //pickMemoryIdxDiff, 從memory抽一個不在excludes內之idx
     let pickMemoryIdxDiff = (excludes = []) => {
         let excSet = new Set(excludes)
-        let ia = randomIntRange(0, Ns - 1)
+        let ia = R.randInt(0, Ns - 1)
         let safety = 0
         while (excSet.has(ia)) {
-            ia = randomIntRange(0, Ns - 1)
+            ia = R.randInt(0, Ns - 1)
             safety++
             if (safety > Ns * 10) {
                 //極端fallback, hmcNsMin已確保有足夠候選
@@ -215,16 +221,16 @@ async function omlHS(dps, funFit, opt = {}) {
             let n = dps[i].n
 
             //HMCR
-            if (Math.random() < hsHMCR) {
+            if (R.rand() < hsHMCR) {
 
                 //從memory取ind, 依HMC模式
                 if (hsHMC === 'Original') {
                     //隨機抽一個memory個體, 直接複製ind
-                    let k = randomIntRange(0, Ns - 1)
+                    let k = R.randInt(0, Ns - 1)
                     j = memory[k].ps[i].ind
                 }
                 else if (hsHMC === '2M Consideration') {
-                    let ia = randomIntRange(0, Ns - 1)
+                    let ia = R.randInt(0, Ns - 1)
                     let ib = pickMemoryIdxDiff([ia])
                     let indexa = memory[ia].ps[i].ind
                     let indexb = memory[ib].ps[i].ind
@@ -238,7 +244,7 @@ async function omlHS(dps, funFit, opt = {}) {
                     j = Math.round(0.6 * indexa + 0.6 * indexb)
                 }
                 else if (hsHMC === '3M Consideration') {
-                    let ia = randomIntRange(0, Ns - 1)
+                    let ia = R.randInt(0, Ns - 1)
                     let ib = pickMemoryIdxDiff([ia])
                     let ic = pickMemoryIdxDiff([ia, ib])
                     let indexa = memory[ia].ps[i].ind
@@ -257,7 +263,7 @@ async function omlHS(dps, funFit, opt = {}) {
                     j = Math.round(-0.4 * indexa + 0.5 * indexb + 0.7 * indexc)
                 }
                 else if (hsHMC === '4M Consideration') {
-                    let ia = randomIntRange(0, Ns - 1)
+                    let ia = R.randInt(0, Ns - 1)
                     let ib = pickMemoryIdxDiff([ia])
                     let ic = pickMemoryIdxDiff([ia, ib])
                     let id = pickMemoryIdxDiff([ia, ib, ic])
@@ -283,46 +289,46 @@ async function omlHS(dps, funFit, opt = {}) {
                 }
 
                 //PAR, Pitch Adjustment
-                if (Math.random() < hsPAR) {
+                if (R.rand() < hsPAR) {
 
                     if (hsPA === 'Constant1') {
                         let im = 1
-                        j = (Math.random() < 0.5) ? j + im : j - im
+                        j = (R.rand() < 0.5) ? j + im : j - im
                     }
                     else if (hsPA === 'Constant2') {
-                        let im = randomIntRange(1, 2)
-                        j = (Math.random() < 0.5) ? j + im : j - im
+                        let im = R.randInt(1, 2)
+                        j = (R.rand() < 0.5) ? j + im : j - im
                     }
                     else if (hsPA === 'Constant3') {
-                        let im = randomIntRange(1, 3)
-                        j = (Math.random() < 0.5) ? j + im : j - im
+                        let im = R.randInt(1, 3)
+                        j = (R.rand() < 0.5) ? j + im : j - im
                     }
                     else if (hsPA === 'Linear0.1') {
-                        let im = randomIntRange(1, Math.round(0.1 * n) + 1)
-                        j = (Math.random() < 0.5) ? j + im : j - im
+                        let im = R.randInt(1, Math.round(0.1 * n) + 1)
+                        j = (R.rand() < 0.5) ? j + im : j - im
                     }
                     else if (hsPA === 'Linear0.2') {
-                        let im = randomIntRange(1, Math.round(0.2 * n) + 1)
-                        j = (Math.random() < 0.5) ? j + im : j - im
+                        let im = R.randInt(1, Math.round(0.2 * n) + 1)
+                        j = (R.rand() < 0.5) ? j + im : j - im
                     }
                     else if (hsPA === 'Linear0.3') {
-                        let im = randomIntRange(1, Math.round(0.3 * n) + 1)
-                        j = (Math.random() < 0.5) ? j + im : j - im
+                        let im = R.randInt(1, Math.round(0.3 * n) + 1)
+                        j = (R.rand() < 0.5) ? j + im : j - im
                     }
                     else if (hsPA === 'Exponent0.1') {
-                        let im = Math.floor(Math.pow(0.1 * n + 1, Math.random()))
-                        j = (Math.random() < 0.5) ? j + im : j - im
+                        let im = Math.floor(Math.pow(0.1 * n + 1, R.rand()))
+                        j = (R.rand() < 0.5) ? j + im : j - im
                     }
                     else if (hsPA === 'Exponent0.2') {
-                        let im = Math.floor(Math.pow(0.2 * n + 1, Math.random()))
-                        j = (Math.random() < 0.5) ? j + im : j - im
+                        let im = Math.floor(Math.pow(0.2 * n + 1, R.rand()))
+                        j = (R.rand() < 0.5) ? j + im : j - im
                     }
                     else if (hsPA === 'Exponent0.3') {
-                        let im = Math.floor(Math.pow(0.3 * n + 1, Math.random()))
-                        j = (Math.random() < 0.5) ? j + im : j - im
+                        let im = Math.floor(Math.pow(0.3 * n + 1, R.rand()))
+                        j = (R.rand() < 0.5) ? j + im : j - im
                     }
                     else if (hsPA === 'Global Space') {
-                        j = randomIntRange(0, n - 1)
+                        j = R.randInt(0, n - 1)
                     }
                     else if (hsPA === 'Available Space') {
                         //從memory該變數ind的[min, max]範圍內隨機
@@ -333,15 +339,15 @@ async function omlHS(dps, funFit, opt = {}) {
                             if (iMin > memory[k].ps[i].ind) iMin = memory[k].ps[i].ind
                         }
                         //VB原碼假設j∈[iMin,iMax], 但HMC加權計算後j可能跑出範圍, 此處加swap防呆
-                        if (Math.random() < 0.5) {
+                        if (R.rand() < 0.5) {
                             let lo = Math.min(j, iMax)
                             let hi = Math.max(j, iMax)
-                            j = randomIntRange(lo, hi)
+                            j = R.randInt(lo, hi)
                         }
                         else {
                             let lo = Math.min(j, iMin)
                             let hi = Math.max(j, iMin)
-                            j = randomIntRange(lo, hi)
+                            j = R.randInt(lo, hi)
                         }
                     }
                     else if (hsPA === 'Modified Global Best') {
@@ -355,11 +361,11 @@ async function omlHS(dps, funFit, opt = {}) {
             }
             else {
                 //1-HMCR: 完全隨機
-                j = randomIntRange(0, n - 1)
+                j = R.randInt(0, n - 1)
             }
 
             //Limit
-            j = _modifyParameter(j, n - 1, ModeOutLimit)
+            j = _modifyParameter(j, n - 1, ModeOutLimit, R)
 
             //update
             s.ps[i].ind = j
@@ -423,7 +429,7 @@ async function omlHS(dps, funFit, opt = {}) {
                 if (_isSameSolution(memory[k - 1], memory[k])) {
 
                     //_genSolution
-                    let _s = _genSolution(dps)
+                    let _s = _genSolution(dps, R)
 
                     //calcFitness
                     let s = await calcFitness(_s, 'strategyImmigration')
@@ -443,7 +449,7 @@ async function omlHS(dps, funFit, opt = {}) {
         let strategyLocalSearch = async () => {
 
             //依LocalSearchMethod分派局部搜尋
-            let s = await _localSearch(LocalSearchMethod, memory[0], dps, funFit, calcFitness, ModeOutLimit)
+            let s = await _localSearch(LocalSearchMethod, memory[0], dps, funFit, calcFitness, ModeOutLimit, { random })
 
             //check
             if (s.fitness >= memory[0].fitness) {
@@ -490,7 +496,7 @@ async function omlHS(dps, funFit, opt = {}) {
             for (let k = 1; k <= Ns - 1; k++) {
 
                 //_genSolution
-                let _s = _genSolution(dps)
+                let _s = _genSolution(dps, R)
 
                 //calcFitness
                 let s = await calcFitness(_s, 'strategyRepeat')

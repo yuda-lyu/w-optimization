@@ -6,4 +6,5 @@
 
 | 類型 | 檔 | 內容 |
 |---|---|---|
-| R-PARAM 輸入參數之檢測 | `sgud/rule/rulebook_param.md` | 全部入口(17 個匯出函數與 4 個 adapter 工廠)之一般參數與 opt 之種類、失敗通道、訊息、轉換、站點全集與測試矩陣;上位規格 `C:\opensrcOper\dspec\輸入參數之檢測機制.md` |
+| R-PARAM 輸入參數之檢測 | `sgud/rule/rulebook_param.md` | 全部入口(17 個匯出函數與 4 個 adapter 工廠)之一般參數與 opt 之種類、失敗通道、訊息、轉換、站點全集與測試矩陣;上位規格 跨套件規格〈輸入參數之檢測機制〉 |
+| R-RANDOM 隨機來源可指定(`opt.random`) | `sgud/rule/rulebook_random.md` | oml 系列(omlSA、omlTA、omlDE、omlRGA、omlHS、omlPSO、omlACO)與局部搜尋用之 sdm:一次呼叫之一切隨機取值只經呼叫端給定之函數(結果可重現);未給時行為不變;各取值點與轉傳點之全集、測試對應、已知限制 |

@@ -18,6 +18,7 @@ import sdm from './sdm.mjs'
 //  'NelderMead' (預設): Nelder-Mead simplex法, 對連續變數效果好
 //
 //currentBest: 當前最佳解 { ps, fitness }
+//opt.random: 呼叫端之 opt.random(函數或 undefined), 原樣轉給 sdm / omlSA / omlTA, 使局部搜尋之隨機取值亦只經它
 //回傳: 改善後的解(若無改善或 method='None' 則回傳原解 currentBest)
 async function _localSearch(method, currentBest, dps, funFit, calcFitness, ModeOutLimit, opt = {}) {
 
@@ -50,6 +51,7 @@ async function _localSearch(method, currentBest, dps, funFit, calcFitness, ModeO
             ModeOutLimit,
             initSolution: currentBest,
             calcFitness,
+            random: opt.random,
         })
         return r.bestSolution
     }
@@ -65,6 +67,7 @@ async function _localSearch(method, currentBest, dps, funFit, calcFitness, ModeO
             saInitialTemperature: Math.max(currentBest.fitness * 0.05, 1),
             saAlpha: 0.9,
             UseHists: false,
+            random: opt.random,
         })
         return r.bestSolution
     }
@@ -80,6 +83,7 @@ async function _localSearch(method, currentBest, dps, funFit, calcFitness, ModeO
             taThresholdType: 'Geometric Series',
             taThresholdInitial: Math.max(currentBest.fitness * 0.05, 1),
             UseHists: false,
+            random: opt.random,
         })
         return r.bestSolution
     }

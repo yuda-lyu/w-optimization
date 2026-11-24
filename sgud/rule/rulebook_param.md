@@ -1,6 +1,6 @@
 # 規則帳本:R-PARAM 輸入參數之檢測
 
-上位規格:`C:\opensrcOper\dspec\輸入參數之檢測機制.md`(跨套件規格,草案,2026-10-31 改寫).本節只記本套件**程式碼須長成什麼樣**、站點全集與判準;種類之定義、格式、訊息格式以規格為準,不在此重抄.
+上位規格:跨套件規格〈輸入參數之檢測機制〉(跨套件規格,草案,2026-10-31 改寫).本節只記本套件**程式碼須長成什麼樣**、站點全集與判準;種類之定義、格式、訊息格式以規格為準,不在此重抄.
 
 本輪(2026-10-31,opt 修正輪)只適用規格中已確定之部分:N2 有效數字與範圍子型、B1 布林、K3~K6、§6 訊息(一律不帶值);§11 之待確認(Q1、Q2)與本套件無關.
 
@@ -62,7 +62,7 @@ git grep -c "chkParams(" -- src
 # 舊式判定殘留(預期: 僅 _modifyParameter.mjs 之 cint(內部, 已檢測值)與 nelderMead.mjs JSDoc 範例內之 w.isnum/w.cdbl; 入口檢測不得再出現 isnum/ispint/isbol/arrHas/cdbl/cint/isearr)
 git grep -n -E "isnum\(|ispint\(|isbol\(|arrHas\(|cdbl\(|cint\(|isearr\(" -- src
 # 測試(全套, 鎖由 quiet-run 取得)
-node C:/opensrcOper/tools/quiet-run.mjs --lock --name opt -- npm test
+npm test
 # 僅參數檢測
 node node_modules/mocha/bin/mocha.js --no-parallel test/unit-param-*.test.mjs --timeout 180000
 ```
@@ -70,7 +70,7 @@ node node_modules/mocha/bin/mocha.js --no-parallel test/unit-param-*.test.mjs --
 ## 判準
 
 - **已套**:入口以 `chkParams` 宣告該參數/鍵,且有對應之測試(`test/unit-param-*.test.mjs`,表驅動,矩陣見下).
-- **刻意不套**:內部輔助(`_genSolution`、`_defSolution`、`_discreteValue`、`_dynamicValue`、`_modifyParameter`、`_isSameSolution`、`_pickByWeights`、`_randPickNeighbor`、`_localSearch`;規格 §5.2「未匯出之內部函數」),其輸入皆來自已檢測之值.
+- **刻意不套**:內部輔助(`_genSolution`、`_defSolution`、`_discreteValue`、`_dynamicValue`、`_modifyParameter`、`_isSameSolution`、`_pickByWeights`、`_randPickNeighbor`、`_localSearch`、`_random`;規格 §5.2「未匯出之內部函數」),其輸入皆來自已檢測之值.
 - **未套**:無(下列已知不修除外).
 
 ### 已知不修(有理由)
@@ -98,7 +98,7 @@ node node_modules/mocha/bin/mocha.js --no-parallel test/unit-param-*.test.mjs --
 
 ## 站點全集(函數 × 參數 × 種類 × 狀態)
 
-逐格之「改前處置/改後處置」全表見修正報告(`C:\opensrcOper\dnow\20261031010508\agent-out\opt-修正報告.md`);下表為站點全集與狀態,可由 `chkParams(` 之宣告表重跑對照.
+逐格之「改前處置/改後處置」全表見修正報告(主控端之任務紀錄);下表為站點全集與狀態,可由 `chkParams(` 之宣告表重跑對照.
 
 | 函數 | 參數 | 種類 | 狀態 |
 |---|---|---|---|
@@ -169,6 +169,7 @@ node node_modules/mocha/bin/mocha.js --no-parallel test/unit-param-*.test.mjs --
 | sdm | opt.ModeOutLimit | S3 列舉字串 | 已套 |
 | sdm | opt.calcFitness | F1 函數 | 已套 |
 | sdm | opt.initSolution | O1 一般物件(ps 非空陣列, fitness 適應函數值) | 已套 |
+| sdm | opt.random | F1 函數(亂數產生函數, 見 `rulebook_random.md`) | 已套 |
 | omlSA | dps | A2 設計變數陣列 | 已套 |
 | omlSA | funFit | F1 函數 | 已套 |
 | omlSA | opt | O1 一般物件 | 已套 |
@@ -183,6 +184,7 @@ node node_modules/mocha/bin/mocha.js --no-parallel test/unit-param-*.test.mjs --
 | omlSA | opt.funEndLoop | F1 函數 | 已套 |
 | omlSA | opt.calcFitness | F1 函數 | 已套 |
 | omlSA | opt.initSolution | O1 一般物件(ps 非空陣列, fitness 適應函數值) | 已套 |
+| omlSA | opt.random | F1 函數(亂數產生函數, 見 `rulebook_random.md`) | 已套 |
 | omlTA | dps | A2 設計變數陣列 | 已套 |
 | omlTA | funFit | F1 函數 | 已套 |
 | omlTA | opt | O1 一般物件 | 已套 |
@@ -197,6 +199,7 @@ node node_modules/mocha/bin/mocha.js --no-parallel test/unit-param-*.test.mjs --
 | omlTA | opt.funEndLoop | F1 函數 | 已套 |
 | omlTA | opt.calcFitness | F1 函數 | 已套 |
 | omlTA | opt.initSolution | O1 一般物件(ps 非空陣列, fitness 適應函數值) | 已套 |
+| omlTA | opt.random | F1 函數(亂數產生函數, 見 `rulebook_random.md`) | 已套 |
 | omlDE | dps | A2 設計變數陣列 | 已套 |
 | omlDE | funFit | F1 函數 | 已套 |
 | omlDE | opt | O1 一般物件 | 已套 |
@@ -223,6 +226,7 @@ node node_modules/mocha/bin/mocha.js --no-parallel test/unit-param-*.test.mjs --
 | omlDE | opt.deLandaEnd | N2 有效數字 | 已套 |
 | omlDE | opt.deLandaDynamic | N2 有效數字 | 已套 |
 | omlDE | opt.deMutation | S3 列舉字串 | 已套 |
+| omlDE | opt.random | F1 函數(亂數產生函數, 見 `rulebook_random.md`) | 已套 |
 | omlRGA | dps | A2 設計變數陣列 | 已套 |
 | omlRGA | funFit | F1 函數 | 已套 |
 | omlRGA | opt | O1 一般物件 | 已套 |
@@ -246,6 +250,7 @@ node node_modules/mocha/bin/mocha.js --no-parallel test/unit-param-*.test.mjs --
 | omlRGA | opt.rgaCrossover | S3 列舉字串 | 已套 |
 | omlRGA | opt.rgaMutation | S3 列舉字串 | 已套 |
 | omlRGA | opt.rgaElitism | S3 列舉字串 | 已套 |
+| omlRGA | opt.random | F1 函數(亂數產生函數, 見 `rulebook_random.md`) | 已套 |
 | omlHS | dps | A2 設計變數陣列 | 已套 |
 | omlHS | funFit | F1 函數 | 已套 |
 | omlHS | opt | O1 一般物件 | 已套 |
@@ -270,6 +275,7 @@ node node_modules/mocha/bin/mocha.js --no-parallel test/unit-param-*.test.mjs --
 | omlHS | opt.hsPARDynamic | N2 有效數字 | 已套 |
 | omlHS | opt.hsHMC | S3 列舉字串 | 已套 |
 | omlHS | opt.hsPA | S3 列舉字串 | 已套 |
+| omlHS | opt.random | F1 函數(亂數產生函數, 見 `rulebook_random.md`) | 已套 |
 | omlPSO | dps | A2 設計變數陣列 | 已套 |
 | omlPSO | funFit | F1 函數 | 已套 |
 | omlPSO | opt | O1 一般物件 | 已套 |
@@ -295,6 +301,7 @@ node node_modules/mocha/bin/mocha.js --no-parallel test/unit-param-*.test.mjs --
 | omlPSO | opt.psoBeta | N2 有效數字 | 已套 |
 | omlPSO | opt.psoGamma | N2 有效數字 | 已套 |
 | omlPSO | opt.psoInertiaMin | N2 有效數字 | 已套 |
+| omlPSO | opt.random | F1 函數(亂數產生函數, 見 `rulebook_random.md`) | 已套 |
 | omlACO | dps | A2 設計變數陣列 | 已套 |
 | omlACO | funFit | F1 函數 | 已套 |
 | omlACO | opt | O1 一般物件 | 已套 |
@@ -321,6 +328,7 @@ node node_modules/mocha/bin/mocha.js --no-parallel test/unit-param-*.test.mjs --
 | omlACO | opt.acoRoStart | N2 有效數字 | 已套 |
 | omlACO | opt.acoRoEnd | N2 有效數字 | 已套 |
 | omlACO | opt.acoRoDynamic | N2 有效數字 | 已套 |
+| omlACO | opt.random | F1 函數(亂數產生函數, 見 `rulebook_random.md`) | 已套 |
 | _adapterACO | schema | A2 [{name, values}] | 已套 |
 | _adapterACO | opt | O1 一般物件 | 已套 |
 | _adapterACO | opt.acoExploitationRate | N2 有效數字 | 已套 |
@@ -353,5 +361,5 @@ node node_modules/mocha/bin/mocha.js --no-parallel test/unit-param-*.test.mjs --
 | _adapterHS.feedback | params | O1 一般物件 | 已套 |
 | _adapterHS.feedback | fitness | 適應函數值(N2 另收 ±Infinity) | 已套 |
 
-內部輔助(刻意不套): _validateDps、_localSearch、_genSolution、_defSolution、_discreteValue、_dynamicValue、_modifyParameter、_isSameSolution、_pickByWeights、_randPickNeighbor、_class、WOptimization
+內部輔助(刻意不套): _validateDps、_localSearch、_genSolution、_defSolution、_discreteValue、_dynamicValue、_modifyParameter、_isSameSolution、_pickByWeights、_randPickNeighbor、_random、_class、WOptimization
 

@@ -53,8 +53,6 @@ import cloneDeep from 'lodash-es/cloneDeep.js'
 import isestr from 'wsemi/src/isestr.mjs'
 import isfun from 'wsemi/src/isfun.mjs'
 import ispm from 'wsemi/src/ispm.mjs'
-import randomIntsNdpRange from 'wsemi/src/randomIntsNdpRange.mjs'
-import randomIntRange from 'wsemi/src/randomIntRange.mjs'
 import { kNum, kPint, kBol, kFun, kEnum, chkParams } from './_checkParam.mjs'
 import { kModeOutLimit, kLocalSearchMethod } from './_optDecl.mjs'
 import { kDps } from './_validateDps.mjs'
@@ -64,6 +62,7 @@ import _modifyParameter from './_modifyParameter.mjs'
 import _isSameSolution from './_isSameSolution.mjs'
 import _dynamicValue from './_dynamicValue.mjs'
 import _localSearch from './_localSearch.mjs'
+import { _makeRandom } from './_random.mjs'
 
 
 /**
@@ -96,6 +95,7 @@ import _localSearch from './_localSearch.mjs'
  * @param {Number|String} [opt.deLandaEnd=0] 輸入最終縮放因子Landa，預設0。種類：有效數字
  * @param {Number|String} [opt.deLandaDynamic=0] 輸入動態縮放因子Landa，預設0。種類：有效數字
  * @param {String} [opt.deMutation='1B2RR'] 輸入突變運算子，預設'1B2RR'。種類：列舉字串，'1R2RR'、'1B2RR'、'1R2BR'、'1R4RRRR'、'1B4RRRR'、'1R4BRRR'、'1S4BSRR'
+ * @param {Function} [opt.random] 輸入亂數產生函數，須回傳[0,1)之數字(同Math.random之約定，回傳值不檢測)。給了則該次呼叫之一切隨機取值(含初始族群、親代挑選、交配、移民、再搜尋、局部搜尋)皆只經它，同題同選項同序列即得同結果(含適應函數被呼叫之序列)，同一函數勿同時交給多個進行中之呼叫；未給(undefined或null)則用Math.random(取整數時用wsemi之randomIntRange與randomIntsNdpRange)。種類：函數
  * @returns {Promise} 回傳Promise，resolve為結果物件，含鍵值bestSolution,hists,stopMode,stopNg,stopExecutions；輸入無效時reject字串，格式為`invalid &lt;名稱>: must be &lt;種類描述>`，不含輸入值
  */
 async function omlDE(dps, funFit, opt = {}) {
@@ -125,6 +125,7 @@ async function omlDE(dps, funFit, opt = {}) {
         deLandaEnd: [kNum, 0], //最終縮放因子Landa
         deLandaDynamic: [kNum, 0], //動態縮放因子Landa
         deMutation: [kEnum(['1R2RR', '1B2RR', '1R2BR', '1R4RRRR', '1B4RRRR', '1R4BRRR', '1S4BSRR']), '1B2RR'], //突變運算子
+        random: [kFun, undefined], //亂數產生函數(給了則一切隨機取值只經它)
     })
     if (c.err !== '') {
         return Promise.reject(c.err)
@@ -137,7 +138,11 @@ async function omlDE(dps, funFit, opt = {}) {
         deFStart, deFEnd, deFDynamic,
         deLandaStart, deLandaEnd, deLandaDynamic,
         deMutation,
+        random,
     } = c.o
+
+    //R, 隨機取值之統一出口(見 _random.mjs)
+    let R = _makeRandom(random)
 
     //Nd, 設計變數總數
     let Nd = size(dps)
@@ -201,7 +206,7 @@ async function omlDE(dps, funFit, opt = {}) {
         for (let k = 0; k &lt; Np; k++) {
 
             //_genSolution
-            let _s = _genSolution(dps)
+            let _s = _genSolution(dps, R)
 
             //calcFitness
             let s = await calcFitness(_s, 'init')
@@ -241,7 +246,7 @@ async function omlDE(dps, funFit, opt = {}) {
         let s = _defSolution(dps)
 
         //inds
-        let inds = randomIntsNdpRange(0, Np - 1, Np)
+        let inds = R.randIntsNdp(0, Np - 1, Np)
 
         if (deMutation === '1R2RR') {
             ir1 = inds[0]
@@ -297,13 +302,13 @@ async function omlDE(dps, funFit, opt = {}) {
         }
 
         //ind
-        let ind = randomIntRange(0, Nd - 1)
+        let ind = R.randInt(0, Nd - 1)
 
         //各設計變數
         for (let i = 0; i &lt; Nd; i++) {
 
             //crossover
-            if (Math.random() &lt; deCrossoverFactor || i === ind) {
+            if (R.rand() &lt; deCrossoverFactor || i === ind) {
 
                 //mutation j
                 let j = null
@@ -322,7 +327,7 @@ async function omlDE(dps, funFit, opt = {}) {
                 }
 
                 //_modifyParameter
-                j = _modifyParameter(j, dps[i].n - 1, ModeOutLimit)
+                j = _modifyParameter(j, dps[i].n - 1, ModeOutLimit, R)
 
                 //update
                 s.ps[i].ind = j
@@ -397,7 +402,7 @@ async function omlDE(dps, funFit, opt = {}) {
                 if (_isSameSolution(children[k - 1], children[k])) {
 
                     //_genSolution
-                    let _s = _genSolution(dps)
+                    let _s = _genSolution(dps, R)
 
                     //calcFitness
                     let s = await calcFitness(_s, 'strategyImmigration')
@@ -421,7 +426,7 @@ async function omlDE(dps, funFit, opt = {}) {
         let strategyLocalSearch = async () => {
 
             //依LocalSearchMethod分派局部搜尋(用本代params, 可被funGenerationBefore覆寫)
-            let s = await _localSearch(params.LocalSearchMethod, children[0], dps, funFit, calcFitness, params.ModeOutLimit)
+            let s = await _localSearch(params.LocalSearchMethod, children[0], dps, funFit, calcFitness, params.ModeOutLimit, { random })
 
             //check
             if (s.fitness >= children[0].fitness) {
@@ -461,7 +466,7 @@ async function omlDE(dps, funFit, opt = {}) {
             for (let k = 1; k &lt;= Np - 1; k++) {
 
                 //_genSolution
-                let _s = _genSolution(dps)
+                let _s = _genSolution(dps, R)
 
                 //calcFitness
                 let s = await calcFitness(_s, 'strategyRepeat')
@@ -546,7 +551,7 @@ export default omlDE
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.5</a> on Tue Nov 24 2026 12:02:27 GMT+0800 (台北標準時間) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.5</a> on Tue Nov 24 2026 19:05:38 GMT+0800 (台北標準時間) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>

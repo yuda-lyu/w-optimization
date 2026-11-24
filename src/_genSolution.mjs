@@ -1,10 +1,11 @@
 import get from 'lodash-es/get.js'
 import size from 'lodash-es/size.js'
 import map from 'lodash-es/map.js'
-import randomIntRange from 'wsemi/src/randomIntRange.mjs'
+import { _defaultRandom } from './_random.mjs'
 
 
-function _genSolution(dps) {
+//R, 隨機取值之統一出口(見 _random.mjs), 未給用預設(同未有 opt.random 之前)
+function _genSolution(dps, R = _defaultRandom) {
 
     //check
     if (size(dps) === 0) {
@@ -35,7 +36,7 @@ function _genSolution(dps) {
         }
 
         //ind
-        let ind = randomIntRange(0, n - 1)
+        let ind = R.randInt(0, n - 1)
 
         //value
         let value = values[ind]

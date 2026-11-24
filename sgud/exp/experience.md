@@ -20,7 +20,7 @@
 
 ### 測試之作法與陷阱
 
-- **隨機演算法不能以種子逐值比對**:wsemi `random.mjs` 於模組載入時以時間為種子建立自有偽隨機(`fr`),不經 `Math.random`,測試無法重設;lodash-es 之 `baseRandom` 亦於載入時捕捉 `Math.random`.改以**退化之設計變數**(各變數僅一值,`n=1`)使搜尋確定化,再比對 `bestSolution`、`hists` 長度、停止資訊(投影排除 PSO 之 `inertia` 等隨機欄位).
+- **隨機演算法不能以種子逐值比對**:wsemi `random.mjs` 於模組載入時以時間為種子建立自有偽隨機(`fr`),不經 `Math.random`,測試無法重設;lodash-es 之 `baseRandom` 亦於載入時捕捉 `Math.random`.改以**退化之設計變數**(各變數僅一值,`n=1`)使搜尋確定化,再比對 `bestSolution`、`hists` 長度、停止資訊(投影排除 PSO 之 `inertia` 等隨機欄位).(2026-11-24 起 oml 系列與 `sdm` 可由 `opt.random` 確定化,見〈隨機來源可指定〉一節;未給時仍適用本條.)
 - **adapter 之投影會操作其狀態**(以 `feedback` 腳本化後讀溫度、費洛蒙、memory):同一結果投影兩次會累加,表驅動輔助以 `WeakMap` 快取每個結果之投影.
 - **limitBFGS 不收斂於二次函數**:前向差分梯度對二次函數之誤差約等於 `delta`(1e-5),大於預設收斂門檻 1e-6,恆 `iterator > maxIterations`;測試改用既有範例之 `sin` 函數由 `[87]` 起算.
 - **修前紅**:以 `git archive HEAD src | tar -x -C ./tmp/opt/old/` 取舊版 src,連同新測試複製到 `./tmp/opt/old/test/` 執行(裸套件如 `wsemi`、`lodash-es` 由 `./tmp` 之上層 `node_modules` 解析,不需連結 `node_modules`).本輪舊碼:293 項失敗、221 項通過(同批 5 檔 514 項;通過者多為舊碼已具備之行為,如 `fun` 非函數之 reject、`opt` 取預設).
@@ -36,3 +36,25 @@
 - **`arrBinarySearch(Closest)` 之 `arr` 取 N1**(非 N2):試驗數據陣列常含 `'-'`、`'NP'` 標記,舊碼即略過非數字(`filter(isnum)`),N1 保留此語意並修正 `ind` 為原索引;`null`、布林、NaN、Infinity 等改為報錯.若主控裁為 N2,只須把 `kNumArrN1` 換 `kNumArr` 並改測試.
 - **跨鍵下限訊息不帶數值**(`invalid opt.Np: must be at least the minimum required by opt.deMutation`),最小值改載於 JSDoc.
 - **回呼回傳值不檢**(`funFit` 輸出、`funGenerationBefore` 回傳之 `{ params }`):非入口參數,另案.
+
+## 隨機來源可指定(2026-11-24,`opt.random` 修正輪)
+
+### 取亂數之來源有三個,暫代 `Math.random` 只擋得住其中一個
+
+- 舊碼之隨機取值經三處:`Math.random`(直接用)、wsemi 之 `randomIntRange`(其 `random.mjs` 於載入時以時間為種子建立自有偽隨機,**不經 `Math.random`**,測試無法重設)、wsemi 之 `randomIntsNdpRange`(經 lodash `sampleSize` 之 `baseRandom`,於載入時捕捉當時之 `Math.random`,事後暫代無效).故「暫代 `Math.random`」固定不了路徑,也數不到後兩者之呼叫;`opt.random` 給了時,整數與不重複整數皆改由同一產生器導出(`src/_random.mjs`,公式同 `randomIntRange`),才使一切取值只經呼叫端之函數.
+- 未給時維持舊來源(整數仍經 wsemi),以不改變各處取值之分佈與範圍;因此未給時只有 `rand()` 之取值能被暫代之 `Math.random` 數到.
+
+### 作法與陷阱
+
+- **單一出口物件 `R` 套到多個呼叫點**:每個取值點(`R.rand()`、`R.randInt(`、`R.randIntsNdp(`)與每個轉傳點(輔助之最後引數 `R`、`_localSearch` 之 `{ random }`)都可能漏接,漏接時預設值會靜默退回舊來源,結果看似正常.故以逐點變異驗證:將每一處改回 `Math.random()`、`randomIntRange(`、`randomIntsNdpRange(` 或刪去轉傳引數(補回原 import,使變異體等同 1.0.73,而非因 `ReferenceError` 假性轉紅),須有測試轉紅;另以靜態守門(`unit-random-coverage`)擋「新增一處直接用 `Math.random`」.
+- **變異體數須固定**:變異點之枚舉數須與獨立之 `Grep` 計數相符(`R.rand()` 41、`R.randInt(` 35、`R.randIntsNdp(` 1、`, R)` 29、`{ random }` 5、`random: opt.random` 3),枚舉數不符即失敗;錨點(第 k 個出現處)不存在或不唯一、變異後全文不變也失敗,不得靜默略過.mocha 無摘要行(通過數加失敗數為 0)判為未定,不判殺死.
+- **預設參數、邊界與「次數」類變異體易存活**:輔助之預設參數(`R = _defaultRandom`)被改為常數產生器時,只驗「索引合法」之測試仍綠——須另斷言預設來源確實隨機(多次呼叫之相異結果數達下限,機率上可忽略誤報);部分 Fisher–Yates 之「迴圈少一次」在 `n` 等於範圍個數時為等價,方法層級測不到,須於輔助層以 `n` 小於範圍加腳本化產生器,斷言精確輸出與抽取次數;`lo === hi`(單一可用值)須有案.
+- **後備分支走不到時,先簡化結構,不留存活變異體**:`_pickByWeights` 於全無正權重時原另取一個隨機整數,該分支於有限適應值下走不到(輪盤權重恆有正值、費洛蒙非零處恆正),使「把 `R` 轉給它」之變異體無從被殺;改為由已取得之 `rnd` 換算(分佈相同)後,轉傳點與後備分支一併消失.
+- **走不到之分支要找走得到之輸入**:`omlACO` 之「全部節點皆無費洛蒙」分支(`noPheromoneN === pn`)在適應值有限時走不到(初始化即已更新費洛蒙),但適應值恆為 `Infinity`(全部個體不可行之懲罰值)時費洛蒙恆為 0,即走到;以此輸入補測.
+- **各取值點須由涵蓋設定走到**:operator 軸(`rgaCrossover` 13 種、`rgaMutation` 10 種、`hsPA` 12 種、`hsHMC` 7 種、`deMutation` 7 種、局部搜尋 7 種、`ModeOutLimit` 3 種)逐軸輪替使每個取值至少出現一次;並需與 `ModeOutLimit: 'Random'`、局部搜尋交叉(越界重產與局部搜尋內之 `sdm`/`omlSA`/`omlTA` 只在該組合走到),及極小設計空間(族群出現重複個體才觸發移民).
+- **暫代 `Math.random` 之計數窗**:適應函數為同步或回傳已解決之 Promise 時,整個呼叫只經微任務,不讓出給其他巨任務,計數不會混入 mocha 或其他碼之呼叫;函數結束即還原(`finally`).
+- **`sdm` 之 `Gold`/`OneGold`** 固定以 `'Limit'` 處理越界,不取亂數;`sdm` 之 `Neighbor` 於下界越界且 `ModeOutLimit` 為 `'Random'` 時才重產(以 `initSolution` 置於下界測之).
+- **編輯與換行**:此套件各檔之換行混用 CRLF 與 LF(`_genSolution.mjs`、`README.md` 為 CRLF,多數 `src`/`test`/`sgud` 為 LF);編輯工具會保留各檔原有形式,新檔用 LF.判定換行請用位元組檢查(如 node 之 `Buffer.indexOf('\r\n')`).
+- **套用差異檔與換行**:差異檔只含 LF,`git -c core.autocrlf=false apply` 套到 CRLF 之檔時會把新增行轉為該檔之 CRLF(各檔仍為單一換行形);GNU `patch --binary` 則視換行不同而拒絕整檔.交叉驗證時,鏡像之改前檔須還原為改前工作樹之換行形(`git archive` 於 `core.autocrlf=true` 會把全部轉 CRLF,須以 `git -c core.autocrlf=false show` 取 blob 後自行轉換),再以兩種工具套用並逐檔比 sha.
+- **盤點指令須先實跑**:以 `Math.random` 等字樣為 `git grep` 之判準時,JSDoc 與行註解之說明文字也會命中,須以 `grep -v` 略去註解列;新檔尚未入版控時 `git grep` 看不到,須加 `--untracked`.
+- **「未給時行為不變」以前後對拍驗證**:兩份 `src`(改前、改後)之隨機來源皆改指同一個固定種子之來源(wsemi 之隨機函數 import 改指本地 shim、`Math.random` 以固定種子之產生器替換),逐設定比對適應函數呼叫序列、回傳與取亂數次數之雜湊;工具先以「多一次取亂數」「少一次」「改一個數字」三種變異驗過,各變異須用獨立之副本目錄載入(傳遞載入之模組會被模組快取,只以 query 區分頂層檔不足以載入被變異之輔助檔).

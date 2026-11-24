@@ -5,7 +5,7 @@ import { invalidNums, SECRET } from './tools/paramMatrix.mjs'
 
 
 //共用檢測輔助(src/_checkParam.mjs)之種類判定與轉換; wsemi 共用檢測函數發布後改用之
-//規格: C:\opensrcOper\dspec\輸入參數之檢測機制.md §3.1(數字字串格式)、§3.2(N1/N2/範圍子型)、§3.3(B1)、§3.4(S1/S3)、§4(opt)、§6(訊息)
+//規格: 跨套件規格〈輸入參數之檢測機制〉 §3.1(數字字串格式)、§3.2(N1/N2/範圍子型)、§3.3(B1)、§3.4(S1/S3)、§4(opt)、§6(訊息)
 
 
 describe('_checkParam toNum (dspec §3.1 數字字串之格式)', function() {

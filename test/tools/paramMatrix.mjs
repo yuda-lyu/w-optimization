@@ -2,7 +2,7 @@
 import assert from 'assert'
 
 
-//paramMatrix, 輸入參數檢測之表驅動測試輔助(對應 C:\opensrcOper\dspec\輸入參數之檢測機制.md §8 測試矩陣)
+//paramMatrix, 輸入參數檢測之表驅動測試輔助(對應 跨套件規格〈輸入參數之檢測機制〉 §8 測試矩陣)
 //
 //spec 欄位:
 //  name      函數名

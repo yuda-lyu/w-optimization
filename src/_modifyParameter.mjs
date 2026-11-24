@@ -1,10 +1,11 @@
 import isint from 'wsemi/src/isint.mjs'
 import isp0int from 'wsemi/src/isp0int.mjs'
 import cint from 'wsemi/src/cint.mjs'
-import randomIntRange from 'wsemi/src/randomIntRange.mjs'
+import { _defaultRandom } from './_random.mjs'
 
 
-function _modifyParameter(ind, iUp, mode = 'Mapping') {
+//R, 隨機取值之統一出口(見 _random.mjs), 僅 mode 為 'Random' 時用到, 未給用預設(同未有 opt.random 之前)
+function _modifyParameter(ind, iUp, mode = 'Mapping', R = _defaultRandom) {
 
     //check ind
     if (!isint(ind)) {
@@ -36,7 +37,7 @@ function _modifyParameter(ind, iUp, mode = 'Mapping') {
     else if (mode === 'Random') {
         //指標低於0或超過iUp, 則隨機重產
         if (ind < 0 || ind > iUp) {
-            ind = randomIntRange(0, iUp)
+            ind = R.randInt(0, iUp)
         }
     }
     else {

@@ -7,11 +7,13 @@ import { kModeOutLimit } from './_optDecl.mjs'
 import { kDps, kInitSolution } from './_validateDps.mjs'
 import _genSolution from './_genSolution.mjs'
 import _modifyParameter from './_modifyParameter.mjs'
+import { _makeRandom } from './_random.mjs'
 
 
 //sdmNeighbor, 對每變數試 ±1, 選最大改善方向作為下一步, 對應VB之AE_SDM_Neighbor
 //回傳: { ps, fitness, level, dir } — level/dir記住來源方向(下次跳過避免回頭)
-async function sdmNeighbor(sCurrent, dps, ModeOutLimit, calcFitness, lastLevel, lastDir) {
+//R, 隨機取值之統一出口(見 _random.mjs), 僅 ModeOutLimit 為 'Random' 時用到
+async function sdmNeighbor(sCurrent, dps, ModeOutLimit, calcFitness, lastLevel, lastDir, R) {
 
     let Nd = dps.length
     let sMove = cloneDeep(sCurrent)
@@ -30,7 +32,7 @@ async function sdmNeighbor(sCurrent, dps, ModeOutLimit, calcFitness, lastLevel, 
             //新ind
             let oldInd = sCurrent.ps[i].ind
             let j = oldInd + k
-            j = _modifyParameter(j, dps[i].n - 1, ModeOutLimit)
+            j = _modifyParameter(j, dps[i].n - 1, ModeOutLimit, R)
 
             //ind真的有變才算fitness
             if (j !== oldInd) {
@@ -295,6 +297,7 @@ async function sdmGold(sOriginal, dps, calcFitness) {
  * @param {String} [opt.ModeOutLimit='Mapping'] 輸入設計變數指標超過範圍之處理方式，預設'Mapping'。種類：列舉字串，'Mapping'、'Limit'、'Random'
  * @param {Function} [opt.calcFitness] 輸入計算適應度之函數，供LocalSearch模式共享呼叫次數計數，將傳入(解物件,來源字串)，需回傳{ ps, fitness }。種類：函數
  * @param {Object} [opt.initSolution] 輸入初始解(LocalSearch模式)，不給則隨機初始化。種類：一般物件，ps為非空陣列(元素為本套件內部結構，不逐一檢測)，fitness為適應函數值(數字或數字字串，轉換後使用，另收+-Infinity作為懲罰值)
+ * @param {Function} [opt.random] 輸入亂數產生函數，須回傳[0,1)之數字(同Math.random之約定，回傳值不檢測)。給了則該次呼叫之一切隨機取值(不給opt.initSolution時之初始解、opt.ModeOutLimit為'Random'時之重產指標)皆只經它，未給則用Math.random與wsemi之隨機整數函數。種類：函數
  * @returns {Promise} 回傳Promise，resolve為結果物件，含鍵值bestSolution,stopExecutions；輸入無效時reject字串，格式為`invalid <名稱>: must be <種類描述>`，不含輸入值
  */
 async function sdm(dps, funFit, opt = {}) {
@@ -312,11 +315,15 @@ async function sdm(dps, funFit, opt = {}) {
         ModeOutLimit: [kModeOutLimit, 'Mapping'],
         calcFitness: [kFun, undefined],
         initSolution: [kInitSolution, undefined],
+        random: [kFun, undefined], //亂數產生函數(給了則一切隨機取值只經它)
     })
     if (c.err !== '') {
         return Promise.reject(c.err)
     }
     dps = c.vs[0]
+
+    //R, 隨機取值之統一出口(見 _random.mjs)
+    let R = _makeRandom(c.o.random)
 
     //sdmMode
     let sdmMode = c.o.sdmMode
@@ -351,7 +358,7 @@ async function sdm(dps, funFit, opt = {}) {
         s = cloneDeep(initSolution)
     }
     else {
-        let _s = _genSolution(dps)
+        let _s = _genSolution(dps, R)
         s = await calcFitness(_s, 'init')
     }
 
@@ -362,7 +369,7 @@ async function sdm(dps, funFit, opt = {}) {
         let lastLevel = -1
         let lastDir = 0
         while (true) {
-            let r = await sdmNeighbor(s, dps, ModeOutLimit, calcFitness, lastLevel, lastDir)
+            let r = await sdmNeighbor(s, dps, ModeOutLimit, calcFitness, lastLevel, lastDir, R)
             if (s.fitness === r.sMove.fitness) {
                 break
             }

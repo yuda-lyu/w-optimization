@@ -1,4 +1,4 @@
-//_checkParam, 輸入參數檢測之共用輔助(依 C:\opensrcOper\dspec\輸入參數之檢測機制.md)
+//_checkParam, 輸入參數檢測之共用輔助(依 跨套件規格〈輸入參數之檢測機制〉)
 //
 //wsemi 共用檢測函數(dspec §7)發布後改用之, 屆時本檔刪除; 在此之前全套件之入口只經本檔判定與轉換, 不另寫等價實作
 //不用 wsemi 之 isnum / cdbl / cint / isbol 作判定: isnum 收 '0x10' 與 'Infinity', cdbl / cint 對非數字回0, isbol 無效即靜默改預設

@@ -32,7 +32,7 @@ Calls that change from silent to error:
 | `{ minTolerance: 'abc' }`, `{ maxIterations: 0 }`, `{ Nl: -1 }`, `{ Np: 1.5 }`, `{ delta: 0 }` ... | default used | rejects `invalid opt.<key>: must be a positive number` / `a positive integer` / `a valid number` |
 | `{ UseRepeat: 'n' }`, `{ UseHists: 'false' }`, `{ sorted: 1 }` ... | default used (`'n'` still behaved as `true`) | rejects `invalid opt.<key>: must be a boolean` |
 | `{ ModeOutLimit: 'limit' }`, `{ LocalSearchMethod: ['None'] }`, `{ rgaCrossover: 'xxx' }` ... | default used | rejects `invalid opt.<key>: must be one of ...` |
-| `{ funGetBetter: 5 }`, `{ calcFitness: 'x' }` ... | ignored | rejects `invalid opt.<key>: must be a function` |
+| `{ funGetBetter: 5 }`, `{ calcFitness: 'x' }`, `{ random: 'x' }` (`opt.random` is new, see `oml*` below) ... | ignored | rejects `invalid opt.<key>: must be a function` |
 | `opt` that is not a plain object (`'abc'`, `5`, `[]`) | ignored | `invalid opt: must be a plain object` |
 | `{ initSolution: ... }` of the wrong shape | ignored (random start) | rejects `invalid opt.initSolution...` |
 | `omlDE` / `omlHS` / `omlRGA` / `_adapterHS` with a too small `Np` / `Ns` for the chosen operator | error text contained the values | `invalid opt.Np: must be at least the minimum required by opt.deMutation` (and the like), no values |
@@ -64,7 +64,84 @@ npm i w-optimization
 * goldenSectionLiberate [[1p](https://github.com/yuda-lyu/w-optimization/blob/master/g1.goldenSectionLiberate.mjs)]
 * limitBFGS [[1p](https://github.com/yuda-lyu/w-optimization/blob/master/g1.limitBFGS.mjs)], [[2p](https://github.com/yuda-lyu/w-optimization/blob/master/g2.limitBFGS.mjs)], [[3p](https://github.com/yuda-lyu/w-optimization/blob/master/g3.limitBFGS.mjs)]
 * nelderMead [[1p](https://github.com/yuda-lyu/w-optimization/blob/master/g1.nelderMead.mjs)], [[2p](https://github.com/yuda-lyu/w-optimization/blob/master/g2.nelderMead.mjs)], [[3p](https://github.com/yuda-lyu/w-optimization/blob/master/g3.nelderMead.mjs)]
+* omlACO [[4p](https://github.com/yuda-lyu/w-optimization/blob/master/g4.omlACO.mjs)] (random multi-point, see `oml*` below)
+* omlDE [[4p](https://github.com/yuda-lyu/w-optimization/blob/master/g4.omlDE.mjs)] (random multi-point, see `oml*` below)
+* omlHS [[4p](https://github.com/yuda-lyu/w-optimization/blob/master/g4.omlHS.mjs)] (random multi-point, see `oml*` below)
+* omlPSO [[4p](https://github.com/yuda-lyu/w-optimization/blob/master/g4.omlPSO.mjs)] (random multi-point, see `oml*` below)
+* omlRGA [[4p](https://github.com/yuda-lyu/w-optimization/blob/master/g4.omlRGA.mjs)] (random multi-point, see `oml*` below)
+* omlSA [[2p](https://github.com/yuda-lyu/w-optimization/blob/master/g2.omlSA.mjs)] (random multi-point, see `oml*` below)
+* omlTA [[2p](https://github.com/yuda-lyu/w-optimization/blob/master/g2.omlTA.mjs)] (random multi-point, see `oml*` below)
+* sdm [[2p](https://github.com/yuda-lyu/w-optimization/blob/master/g2.sdm.mjs)]
 * setpBracket [[1p](https://github.com/yuda-lyu/w-optimization/blob/master/g1.setpBracket.mjs)]
+
+### oml* (random multi-point optimization) and the reproducible `opt.random`
+`omlPSO`, `omlRGA`, `omlDE`, `omlHS`, `omlACO`, `omlSA` and `omlTA` minimize a function over a discrete space: every design variable is given as the list of its available values, and the search moves on the **indices** of those lists. They are random algorithms, so by default two runs on the same problem follow different paths. Pass `opt.random` to make a run reproducible.
+
+* **Call**: `await omlPSO(dps, funFit, opt)`; the others are called the same way.
+* **`dps`** (required): a non-empty array, one element per design variable, each `{ values: [...available values], n: values.length }`. `n` must equal the length of `values`. The search works on the indices and only hands the values to `funFit`, but the default local search `'NelderMead'` needs numeric values (set `LocalSearchMethod` to another method for values of other kinds).
+* **`funFit`** (required): a function that receives the array of the chosen values (one per design variable, in the order of `dps`) and returns the fitness; the search **minimizes** it. It may return a Promise.
+* **Result** (a Promise resolving an object): `bestSolution` (`{ ps: [{ ind, value }, ...], fitness }`), `hists` (the history, one entry per loop), `stopMode` (why it stopped), `stopNl` / `stopNg` / `stopNi` (the loop count; `omlPSO`, `omlACO`, `omlSA`, `omlTA` use `stopNl`, `omlDE`, `omlRGA` use `stopNg`, `omlHS` uses `stopNi`), `stopExecutions` (the number of fitness evaluations). Invalid input rejects with a string such as `invalid opt.random: must be a function` (see Breaking changes).
+* **Common options** (all optional): the loop limit (`Nl`; `Ng` for `omlDE` and `omlRGA`; `Ni` for `omlHS`), the population size (`Np`; `Na` for `omlACO`; `Ns` for `omlHS`), `NContiguous` (stop after that many loops without a better solution), `NRepeat` and `UseRepeat` (restart the population), `UseImmigration` (replace duplicated individuals), `NCore` (limit of `funFit` calls), `ModeOutLimit` (`'Mapping'`, `'Limit'` or `'Random'`: how an index that leaves its list is handled), `LocalSearchMethod` (`'None'`, `'Neighbor'`, `'TA'`, `'SA'`, `'OneGold'`, `'Gold'`, `'NelderMead'`; default `'NelderMead'`), the callbacks `funGetBetter` and `funEndLoop`, and the operator options of each algorithm. Not every option exists in every function; all options are listed in the documentation of each function.
+* **`opt.random`** (optional): a function that returns a number in `[0, 1)` and is called without arguments, the same contract as `Math.random` (the returned value is not checked). When it is given, **every** random value of that call, the initial population, the operators of the algorithm, immigration, restart, the local search (including the `'TA'`, `'SA'` and `'Neighbor'` local searches) and the picking by weights, is drawn only through it; `Math.random` is not called. The same problem, the same options and the same sequence of numbers from `opt.random` therefore give the same result, and `funFit` is called with the same values in the same order. To get that, `funFit` itself must be deterministic, and one generator must not be handed to several calls that run at the same time. When `opt.random` is not given (`undefined` or `null`) nothing changes: `Math.random` is used, and integers are drawn by the `randomIntRange` and `randomIntsNdpRange` functions of `wsemi` as before. A value that is given but is not a function rejects with `invalid opt.random: must be a function`. There is no `opt.seed`: write or import the pseudo random generator you prefer (the example below uses mulberry32).
+
+```alias
+import omlPSO from 'w-optimization/src/omlPSO.mjs'
+
+//a small seeded generator (mulberry32); any function that returns a number in [0, 1) works
+function mulberry32(seed) {
+    let a = seed >>> 0
+    return () => {
+        a = (a + 0x6D2B79F5) >>> 0
+        let t = a
+        t = Math.imul(t ^ (t >>> 15), t | 1)
+        t ^= t + Math.imul(t ^ (t >>> 7), t | 61)
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+    }
+}
+
+async function test() {
+
+    //two design variables, each given as the list of its available values
+    let dps = [
+        { values: [-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6], n: 11 },
+        { values: [0, 0.5, 1, 1.5, 2, 2.5, 3], n: 7 },
+    ]
+
+    //fitness function to be minimized, it receives the chosen values, e.g. [2, 1.5]
+    function funFit(params) {
+        let x = params[0]
+        let y = params[1]
+        return (x - 2) * (x - 2) + (y - 1.5) * (y - 1.5) + 0.5 * Math.sin(3 * x * y)
+    }
+
+    let opt = { Nl: 30, Np: 10, NContiguous: 5, LocalSearchMethod: 'None' }
+
+    let r1 = await omlPSO(dps, funFit, { ...opt, random: mulberry32(1) })
+    console.log(r1.bestSolution, r1.stopMode, r1.stopExecutions)
+    // => {
+    //   ps: [ { ind: 6, value: 2 }, { ind: 4, value: 2 } ],
+    //   fitness: -0.01828645900021747
+    // } stop by iContinue[5] >= NContiguous[5] 188
+
+    //the same seed gives the same result, and funFit is called in the same order
+    let r2 = await omlPSO(dps, funFit, { ...opt, random: mulberry32(1) })
+    console.log(r2.stopExecutions)
+    // => 188
+
+    //another seed gives another path (here 181 calls of funFit)
+    let r3 = await omlPSO(dps, funFit, { ...opt, random: mulberry32(2) })
+    console.log(r3.stopExecutions)
+    // => 181
+
+}
+
+test()
+    .catch((err) => {
+        console.log(err)
+    })
+
+```
+`sdm`, which the local search uses, takes `opt.random` as well. The adapter factories (`_adapterACO`, `_adapterHS`, `_adapterSA`, `_adapterTA`) do not take `opt.random` and keep using `Math.random`.
 
 ### nelderMead for x1
 ```alias

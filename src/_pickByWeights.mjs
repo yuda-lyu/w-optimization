@@ -1,9 +1,7 @@
-import randomIntRange from 'wsemi/src/randomIntRange.mjs'
-
-
 //_pickByWeights, 加權挑選, 對應f90之ME_NonUniformPick
 //僅累計weight>0之位置(負/零權重一律跳過, 對齊f90); 全無正權重時silent退到均勻隨機
 //用於Roulette Selection / Ranking Selection / Guiding Function / ACO Exploitation等加權抽樣場景
+//rnd為呼叫端已取得之[0,1)隨機數(oml系列由 opt.random 之產生器取得, 見 _random.mjs); 本函數自身不另取亂數, 全無正權重之均勻隨機亦由rnd換算(各index機率相同, 與原先另取一個隨機整數之分佈相同)
 function _pickByWeights(weights, rnd) {
 
     //對齊f90: 僅累計正權重
@@ -16,7 +14,7 @@ function _pickByWeights(weights, rnd) {
 
     //全為非正權重之silent fallback(f90是回-1錯誤訊號, JS取silent較不會中斷演化)
     if (total <= 0) {
-        return randomIntRange(0, weights.length - 1)
+        return Math.min(Math.floor(rnd * weights.length), weights.length - 1)
     }
 
     //累進inverse-CDF比對, 等同f90之半開區間[cum[j], cum[j+1])
